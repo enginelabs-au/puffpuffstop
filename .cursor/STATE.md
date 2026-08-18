@@ -2,19 +2,20 @@
 
 ## Current Objective
 
-- Phase 7 accessibility and destructive-action safety is implemented and locally verified. Remaining work is owner-only checklist actions.
+- Phase 8 local reminders are implemented. Commit phases 8–9 and the icon cutout, merge onto `main`, and push.
 
 ## Current Status
 
-- Phase 7 verified. Final checklist is open for store, legal, and credential work. Do not publish.
+- Phases 0–9 verified locally. Final checklist remains open for store, legal, and credential work. Do not publish the app.
 
 ## Project Phase
 
-- Phase 7 — Accessibility and destructive-action safety (verified). Phases 0–6 verified. No phase 8 unless the owner asks.
+- Phase 8 — Opt-in local daily reminders (verified). Phase 9 verified. No phase 10 unless the owner asks.
 
 ## Active Plan
 
-- `docs/plans/phase_7_accessibility-safety_plan.md` (status: verified)
+- `docs/plans/phase_8_local-reminders_plan.md` (status: verified)
+- `docs/plans/phase_9_app-identity-journey_plan.md` (status: verified)
 - Closure: `docs/plans/final_implementation_checklist.md` (status: open)
 
 ## Active Workstream
@@ -24,8 +25,8 @@
 
 ## Active Role and Gate
 
-- Parent-led phase 7 complete. Current gate: owner checklist (store/legal/credentials).
-- Last integrated validation: `npm run lint` 0; `npm test` 47/47; `npm run typecheck` 0.
+- Parent-led phases 8–9 complete. Current gate: owner checklist (store/legal/credentials).
+- Last integrated validation: `npm run lint` 0; `npm test` 58/58; `npm run typecheck` 0.
 
 ## Predecessor Handoff
 
@@ -37,7 +38,7 @@
 
 ## Owner Decision
 
-- Owner asked to commit phase 6 and proceed with phase 7.
+- Owner asked to finish phase 8, commit, merge all branches into `main`, check out `main`, and push.
 - Production, store publish, ads, secrets, cards, and remote DB mutation remain unauthorized.
 
 ## Active Instructions
@@ -48,9 +49,9 @@
 
 ## Active Items
 
-- Working branch: `cursor/puffpuffstop-phase-0-foundations-1685`
-- Phase 6 commit: `29bc181`. Phase 7 is local until the owner asks to commit.
-- Do not push to `main`. Do not publish the app.
+- Working branch: `cursor/puffpuffstop-phase-0-foundations-1685` until the merge lands on `main`.
+- Phase 7 commit: `dec05c3`.
+- Do not publish the app.
 
 ## Files in Active Use
 
@@ -62,7 +63,7 @@
 - `/TOOLS.md`
 - `/memory/MEMORY.md`
 - `/memory/memories/2026-08-18-continuation.md`
-- `docs/plans/phase_7_accessibility-safety_plan.md`
+- `docs/plans/phase_8_local-reminders_plan.md`
 - `docs/plans/final_implementation_checklist.md`
 - `app/`, `src/`
 
@@ -72,24 +73,24 @@
 
 ## Attempts Performed
 
-- Phase 6 committed. Phase 7 Dynamic Type, delete confirm, and shareable export implemented.
+- Reversed the phase-8 skip with opt-in local 19:00 reminders. SQLite rewrite stays deferred.
 
 ## Decisions and Assumptions
 
-- Dynamic Type is allowed and capped at 1.4× so the Log target stays usable.
-- Delete uses `Alert.alert` before wiping local data.
-- Export prefers the system share sheet and falls back to on-screen JSON.
+- Bundle ID `au.com.enginelabs.puffpuffstop` is local identity only, not a store listing.
+- JSON snapshot remains persist; notifications are local-only with remote push off.
+- 19:00 local is the reversible reminder default.
 
 ## Current Working State
 
-- Phase 7 implemented and uncommitted.
+- Phase 8 implemented and verified. Phase 9 and icon cutout are in the same working tree.
 
 ## Next Actions
 
-1. Commit phase 7 when the owner asks.
+1. Commit, merge onto `main`, and push.
 2. Owner works the final checklist.
 3. Do not store-submit, ad-spend, or remote-migrate.
 
 ## Last Updated
 
-- 2026-08-18 — phase 7 verified after owner asked to proceed.
+- 2026-08-18 — phase 8 local reminders verified; merge to main requested.

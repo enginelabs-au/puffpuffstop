@@ -147,9 +147,26 @@ export function captureSnapshot(): AppSnapshot {
   };
 }
 
+export function migrateSnapshot(raw: unknown): unknown {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
+  const value = { ...(raw as Record<string, unknown>) };
+  if (value.version === SNAPSHOT_VERSION) return value;
+  if (
+    value.version == null &&
+    value.draft &&
+    value.dailyLog &&
+    value.settings &&
+    value.savings
+  ) {
+    return { ...value, version: SNAPSHOT_VERSION };
+  }
+  return value;
+}
+
 export function parseSnapshot(raw: unknown): AppSnapshot | null {
-  if (!raw || typeof raw !== "object") return null;
-  const value = raw as Record<string, unknown>;
+  const migrated = migrateSnapshot(raw);
+  if (!migrated || typeof migrated !== "object") return null;
+  const value = migrated as Record<string, unknown>;
   if (value.version !== SNAPSHOT_VERSION) return null;
   const draft = parseDraft(value.draft);
   const dailyLog = parseDailyLog(value.dailyLog);

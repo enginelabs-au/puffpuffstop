@@ -11,7 +11,7 @@ updated_at: 2026-08-18T11:20:00Z
 
 ## 1. Decision requested
 
-Agent-executable phases 0–7 are done. Choose one for **closure**, not for publish/deploy/spend:
+Agent-executable phases 0–9 are done. Choose one for **closure**, not for publish/deploy/spend:
 
 - `APPROVE` — accept residuals as listed and work `docs/plans/final_implementation_checklist.md` yourself.
 - `REQUEST_CHANGES` — name the gap to remediate before checklist work.
@@ -21,7 +21,7 @@ This is not authorization to publish, advertise, enter secrets, or mutate a remo
 
 ## 2. Delivered outcome
 
-Local 16+ PuffPuffStop loop: age-gate, onboarding, plan, organ home, Log with haptics, settings, local puff savings, on-device snapshot persist, in-app and hostable privacy policy, unpublished store listing drafts, EAS profiles without credentials, owner no-cloud icon, sky-blue tokens, Dynamic Type, confirm-before-delete, shareable export.
+Local 16+ PuffPuffStop loop: age-gate, onboarding, plan, organ home, Log with haptics, settings, opt-in 7pm local reminder, local puff savings, on-device snapshot persist, in-app and hostable privacy policy, unpublished store listing drafts, EAS profiles without credentials, owner no-cloud icon with transparent field, sky-blue tokens, Dynamic Type, confirm-before-delete, shareable export. Bundle ID `au.com.enginelabs.puffpuffstop`.
 
 ## 3. Scope and requirement traceability
 
@@ -42,7 +42,7 @@ PPS-P0-01–07 and later onboarding/home/settings/persist items implemented loca
 
 - Preflight READY
 - `npm run lint` 0
-- `npm test` 47/47
+- `npm test` 58/58
 - `npm run typecheck` 0
 
 ## 6. Changed paths and external changes
@@ -81,6 +81,6 @@ See `docs/plans/final_implementation_checklist.md`: Apple/Google accounts, hoste
 
 ## 12. Owner response
 
-`APPROVE` — 2026-08-18, for local phases 1–7 only.
+`APPROVE` — 2026-08-18, for local phases 1–7 and 9 only (8 skipped).
 
-Phases 1–6 are committed (`35d7e87`, `f3cb2c8`, `63ff524`, `b6ae945`, `32c6ca0`, `29bc181`). Phase 7 is implemented and verified (47 tests) and is local until the owner asks to commit. Production/publish remain unauthorized.
+Phases 1–7 are committed through `dec05c3`. Phase 9 is implemented and verified (50 tests) and is local until the owner asks to commit. Production/publish remain unauthorized.

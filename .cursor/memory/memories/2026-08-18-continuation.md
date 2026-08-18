@@ -126,4 +126,23 @@
 
 - Commit `29bc181` stored phase 6. Phase 7 adds Dynamic Type via `AppText` (1.4× cap), delete confirmation, and system-share export with on-screen fallback.
 - Validation: `npm run lint` 0; `npm test` 47 pass; `npm run typecheck` 0.
-- No phase 8 unless asked. No store submit.
+- No store submit.
+
+## PuffPuffStop launch — phase 8 skipped, phase 9 verified
+
+- Commit `dec05c3` stored phase 7. Owner skipped phase 8 (notifications / SQLite rewrite).
+- Phase 9 locks `au.com.enginelabs.puffpuffstop`, migrates unversioned snapshots to v1, and adds a full local journey test.
+- Validation: `npm run lint` 0; `npm test` 50 pass; `npm run typecheck` 0.
+- No phase 10 unless asked. No store submit.
+
+## Icon cutout
+
+- Owner asked to remove the extra field outside the silver mark. Export now knocks out letterbox/corners to alpha; Android adaptive background is transparent. Inner sky inside the frame is part of the artwork and stays.
+
+## PuffPuffStop launch — phase 8 finished
+
+- Owner reversed the skip. Phase 8 is opt-in local 19:00 check-in via `expo-notifications` (~57.0.12). Remote/background push is off. JSON snapshot stays the persist layer.
+- Settings toggle asks permission only when enabled; deny and delete cancel the schedule.
+- Validation: `npm run lint` 0; `npm test` 58 pass; `npm run typecheck` 0.
+- Owner asked to commit, merge all branches into `main`, and push. Store submit still unauthorized.
+

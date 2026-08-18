@@ -25,6 +25,7 @@ import {
   formatLocalExport,
 } from "../src/data/privacy";
 import { getSavings } from "../src/data/savings-store";
+import { applyReminderPreference } from "../src/data/reminders";
 import { getSettings, updateSettings } from "../src/data/settings-store";
 import { summarizePlan } from "../src/domain/plan-summary";
 import {
@@ -108,17 +109,21 @@ export default function SettingsScreen() {
 
         <AppText style={styles.section}>Reminders</AppText>
         <View style={styles.row}>
-          <AppText style={styles.bodyText}>Local reminder flag</AppText>
+          <AppText style={styles.bodyText}>Daily check-in</AppText>
           <Switch
-            accessibilityLabel="Local reminder flag"
+            accessibilityLabel="Daily check-in reminder"
             value={settings.remindersEnabled}
-            onValueChange={(remindersEnabled) =>
-              setSettings(updateSettings({ remindersEnabled }))
-            }
+            onValueChange={(remindersEnabled) => {
+              setSettings((current) => ({ ...current, remindersEnabled }));
+              void applyReminderPreference(remindersEnabled).then((applied) => {
+                setSettings(updateSettings({ remindersEnabled: applied }));
+              });
+            }}
           />
         </View>
         <AppText style={styles.caption}>
-          Stored on this device only. We do not send notifications yet.
+          Optional 7pm reminder on this device. We ask for notification
+          permission only if you turn this on. No remote or marketing push.
         </AppText>
 
         <AppText style={styles.section}>Puff Savings</AppText>

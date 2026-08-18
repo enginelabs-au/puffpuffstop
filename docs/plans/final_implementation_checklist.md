@@ -9,8 +9,8 @@ updated: 2026-08-18
 
 ## 1. Completion declaration
 
-- [x] All planned agent-executable phases (0–7) are implemented.
-- [x] All available automated validation passes (`lint` 0, `test` 47/47, `typecheck` 0).
+- [x] All planned agent-executable phases (0–9) are implemented.
+- [x] All available automated validation passes (`lint` 0, `test` 58/58, `typecheck` 0).
 - [x] Unverified results are listed below.
 
 ## 2. Outstanding defects or unverified items
@@ -20,7 +20,7 @@ updated: 2026-08-18
 | SEC-P0-001 client age-gate | Under-16 can tap 16+ | Residual | Accept 16+ store rating; no under-16 mode | Owner |
 | SEC-P0-002 Expo `image-size` advisories | Toolchain DoS in Metro | `npm audit` 10 high / 8 moderate / 0 critical | Refresh Expo later; do not force-fix | Owner |
 | SEC-P4-001 unencrypted local snapshot | On-device JSON readable if filesystem is accessed | `src/data/persist.ts` | Accept device lock or add encryption later | Owner |
-| No simulator/device runtime recording | Persist/haptics unproven on a physical device | Node tests use memory/no-op drivers | Run iOS/Android smoke after EAS project exists | Owner |
+| No simulator/device runtime recording | Persist/haptics/reminders unproven on a physical device | Node tests use memory/no-op drivers | Run iOS/Android smoke after a native rebuild | Owner |
 | No hosted privacy URL | Store listings need a public policy page | `docs/legal/privacy.html` ready to host | Publish HTTPS URL and set `EXPO_PUBLIC_PRIVACY_POLICY_URL` | Owner |
 | Listing drafts unpublished | Copy is local only | `docs/store/ios-listing.md`, `docs/store/android-listing.md` | Paste only after residual acceptance | Owner |
 
@@ -106,8 +106,8 @@ This checklist is **not** store-submit authorization.
 
 ## 9. Final evidence
 
-- Plans: `docs/plans/phase_0_foundations_plan.md` through `docs/plans/phase_7_accessibility-safety_plan.md`
+- Plans: `docs/plans/phase_0_foundations_plan.md` through `docs/plans/phase_9_app-identity-journey_plan.md`
 - Blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
 - Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
-- Validation: `npm run lint` 0; `npm test` 47 pass; `npm run typecheck` 0
-- Commits: phase 5 `32c6ca0`; phase 6 `29bc181`. Phase 7 is local until the owner asks to commit.
+- Validation: `npm run lint` 0; `npm test` 58 pass; `npm run typecheck` 0
+- Commits: phase 6 `29bc181`; phase 7 `dec05c3`. Phases 8–9 commit with this merge.

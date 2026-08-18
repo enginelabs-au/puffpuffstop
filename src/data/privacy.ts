@@ -1,6 +1,7 @@
 import { getDailyLog, resetDailyLog } from "./daily-log-store";
 import { resetDraft, getDraft } from "./onboarding-store";
 import { persistNow, setHydrating } from "./persist-hook";
+import { cancelDailyReminder } from "./reminders";
 import { getSavings, resetSavings } from "./savings-store";
 import { getSettings, resetSettings } from "./settings-store";
 
@@ -32,7 +33,7 @@ export function formatLocalExport(data: PrivacyExport = exportLocalData()): stri
   return JSON.stringify(data, null, 2);
 }
 
-export function deleteLocalData(now: Date = new Date()): void {
+export function deleteLocalData(now: Date = new Date()): Promise<void> {
   setHydrating(true);
   try {
     resetDraft();
@@ -43,4 +44,5 @@ export function deleteLocalData(now: Date = new Date()): void {
     setHydrating(false);
   }
   persistNow();
+  return cancelDailyReminder();
 }

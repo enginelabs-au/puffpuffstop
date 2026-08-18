@@ -9,14 +9,16 @@
     "userInterfaceStyle": "light",
     "description": "A 16+ wellness habit coach for teens and young adults. Not a kids app. Not a medical device.",
     "ios": {
+      "bundleIdentifier": "au.com.enginelabs.puffpuffstop",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "package": "au.com.enginelabs.puffpuffstop",
       "adaptiveIcon": {
-        "backgroundColor": "#00B8F8",
+        "backgroundColor": "#00000000",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -30,6 +32,14 @@
     "plugins": [
       "expo-file-system",
       "expo-haptics",
+      [
+        "expo-notifications",
+        {
+          "color": "#00B8F8",
+          "defaultChannel": "daily-reminders",
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",

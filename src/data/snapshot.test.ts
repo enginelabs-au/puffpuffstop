@@ -16,6 +16,7 @@ import { resetSettings, updateSettings } from "./settings-store";
 import {
   SNAPSHOT_VERSION,
   captureSnapshot,
+  migrateSnapshot,
   parseSnapshot,
   restoreSnapshot,
 } from "./snapshot";
@@ -56,5 +57,19 @@ describe("snapshot persist", () => {
   it("rejects a foreign or incomplete snapshot", () => {
     assert.equal(parseSnapshot({ version: 99, draft: {} }), null);
     assert.equal(restoreSnapshot({ version: SNAPSHOT_VERSION }), false);
+  });
+
+  it("upgrades an unversioned snapshot to v1 and rejects unknown versions", () => {
+    const current = captureSnapshot();
+    const unversioned = {
+      draft: current.draft,
+      dailyLog: current.dailyLog,
+      settings: current.settings,
+      savings: current.savings,
+    };
+    const migrated = migrateSnapshot(unversioned) as { version: number };
+    assert.equal(migrated.version, SNAPSHOT_VERSION);
+    assert.equal(parseSnapshot(unversioned)?.version, SNAPSHOT_VERSION);
+    assert.equal(parseSnapshot({ ...unversioned, version: 99 }), null);
   });
 });

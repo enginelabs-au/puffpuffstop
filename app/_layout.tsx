@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { View } from "react-native";
 
 import { bootPersist } from "../src/data/persist";
+import { bootReminders } from "../src/data/reminders";
 import { color } from "../src/theme/tokens";
 
 export default function RootLayout() {
@@ -11,9 +12,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     let cancelled = false;
-    void bootPersist().finally(() => {
-      if (!cancelled) setReady(true);
-    });
+    void bootPersist()
+      .then(() => bootReminders())
+      .finally(() => {
+        if (!cancelled) setReady(true);
+      });
     return () => {
       cancelled = true;
     };
