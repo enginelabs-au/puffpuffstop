@@ -1,24 +1,20 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { BRAND_CATALOG, CATALOG_BRAND_NAMES } from "./brands";
+import { BRAND_CATALOG, CATALOG_BRAND_NAMES, catalogBrandById } from "./brands";
 
 describe("brand catalog", () => {
-  it("is empty in phase 0", () => {
-    assert.equal(BRAND_CATALOG.length, 0);
-    assert.deepEqual(BRAND_CATALOG, []);
+  it("seeds estimation defaults for every reserved name", () => {
+    assert.equal(BRAND_CATALOG.length, CATALOG_BRAND_NAMES.length);
+    for (const name of CATALOG_BRAND_NAMES) {
+      const row = BRAND_CATALOG.find((item) => item.name === name);
+      assert.ok(row);
+      assert.ok((row.puffsPerStandardDevice ?? 0) > 0);
+    }
   });
 
-  it("reserves catalog brand names without seeding rows", () => {
-    assert.deepEqual(CATALOG_BRAND_NAMES, [
-      "IGET",
-      "Alibarbar",
-      "Elf Bar",
-      "Lost Mary",
-      "Geek Bar",
-      "Vuse",
-      "JUUL",
-      "RELX",
-    ]);
+  it("looks up a catalog row by id", () => {
+    assert.equal(catalogBrandById("iget")?.name, "IGET");
+    assert.equal(catalogBrandById("missing"), undefined);
   });
 });

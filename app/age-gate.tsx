@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { resetDraft } from "../src/data/onboarding-store";
 import { evaluateAgeGate } from "../src/domain/age-gate";
 import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
 
@@ -9,13 +10,14 @@ export default function AgeGateScreen() {
   function onConfirmSixteenOrOlder() {
     const decision = evaluateAgeGate(true);
     if (decision.status === "allowed") {
-      router.replace("/foundation");
+      router.replace("/onboarding/nickname");
     }
   }
 
   function onUnderSixteen() {
     const decision = evaluateAgeGate(false);
     if (decision.status === "blocked" && !decision.trackingAllowed) {
+      resetDraft();
       router.replace("/blocked");
     }
   }

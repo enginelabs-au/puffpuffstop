@@ -78,3 +78,12 @@
 - Validation: `npm run lint` 0; `npm test` 12 pass; `npm run typecheck` 0.
 - Residuals: SEC-P0-001 client age-gate; SEC-P0-002 Metro `image-size` advisories (0 critical).
 - Owner handoff: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/delivery/owner-handoff.md`. Phase 1 plan not generated.
+
+## PuffPuffStop launch — phase 1 verified
+
+- Owner `APPROVE` for local phase-1 planning and implementation.
+- Plan: `docs/plans/phase_1_onboarding-plan_plan.md`. Next map: `docs/plans/phase_2_home-log_plan.md` (not implemented).
+- Implementation: `/onboarding/[step]` (13 questions), `/plan`, `/home` placeholder; age-gate 16+ goes to nickname; under-16 resets draft.
+- Brand catalog seeded with estimation defaults. Plan math: day/week/month/year, devices/week, optional spend, commitment.
+- Validation: `npm run lint` 0; `npm test` 18 pass; `npm run typecheck` 0.
+- Residuals unchanged: SEC-P0-001, SEC-P0-002. No store/publish/remote DB.

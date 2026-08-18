@@ -1,10 +1,10 @@
 ---
 schema_version: 1
 task_id: 20260818-puffpuffstop-mobile-mvp
-status: awaiting-owner-decision
-revision: 1
+status: phase-1-approved-and-verified
+revision: 2
 created_at: 2026-08-18T11:32:00Z
-updated_at: 2026-08-18T11:32:00Z
+updated_at: 2026-08-18T11:05:00Z
 ---
 
 # Owner Handoff: PuffPuffStop phase 0 foundations
@@ -80,4 +80,6 @@ Apple/Google accounts, listings, privacy policy, Supabase project, legal review,
 
 ## 12. Owner response
 
-Awaiting exactly one of `APPROVE` / `REQUEST_CHANGES` / `DO_NOT_PROCEED`.
+`APPROVE` — 2026-08-18, for local phase-1 planning and implementation only.
+
+Phase 1 is verified (18 tests, lint/typecheck). Phase 2 plan is drafted at `docs/plans/phase_2_home-log_plan.md` and is not implemented. Production/publish remain unauthorized.

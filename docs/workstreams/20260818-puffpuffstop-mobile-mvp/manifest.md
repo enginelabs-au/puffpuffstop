@@ -3,14 +3,14 @@ schema_version: 1
 task_id: 20260818-puffpuffstop-mobile-mvp
 title: PuffPuffStop mobile MVP foundations
 source_request: Owner-locked PuffPuffStop product launch brief on enginelabs-au/puffpuffstop branch cursor/agent-control-plane
-status: awaiting-owner
+status: phase-1-verified
 risk_tier: 3
 created_at: 2026-08-18T10:45:00Z
-updated_at: 2026-08-18T11:32:00Z
-revision: 2
+updated_at: 2026-08-18T11:05:00Z
+revision: 3
 owner: user-operator
-active_role: project-lead-subagent
-current_gate: owner-decision
+active_role: orchestrating-lead
+current_gate: phase-2-plan-draft
 ---
 
 # Workstream Manifest: PuffPuffStop mobile MVP foundations
@@ -81,8 +81,8 @@ Skipped roles: none. Decision owner: parent orchestrator, following the owner-lo
 | PPS-AGE-01 | 16+ age gate; under 16 hard stop, help resources, no tracking | owner brief | product-manager-subagent | PRD + later implementation | specified |
 | PPS-SAFE-01 | Wellness coach, not medical device; organ % disclaimer | owner brief | product-manager-subagent | PRD + copy rules | specified |
 | PPS-SAFE-02 | Not a kids app; no under-13; no Kids Category; no kids store copy | owner brief | product-manager-subagent / growth-marketing-subagent | PRD + GTM constraints | specified |
-| PPS-ONB-01 | One-question-per-screen onboarding screens 1–14 | owner brief | product-manager-subagent / ui-ux-developer-subagent | PRD + design spec | specified |
-| PPS-EST-01 | Estimation formulas and plan-screen math | owner brief | product-manager-subagent | PRD formulas | specified |
+| PPS-ONB-01 | One-question-per-screen onboarding screens 1–14 | owner brief | product-manager-subagent / ui-ux-developer-subagent | PRD + design spec | verified |
+| PPS-EST-01 | Estimation formulas and plan-screen math | owner brief | product-manager-subagent | PRD formulas | verified |
 | PPS-HOME-01 | Cute organ cards with loop animation and N% | owner brief | ui-ux-developer-subagent | design spec (later impl) | specified |
 | PPS-HOME-02 | Center Log button +1, haptic, undo | owner brief | ui-ux-developer-subagent | design spec (later impl) | specified |
 | PPS-MNY-01 | v1 local estimated savings only; no card/custody/payout | owner brief | product-manager-subagent / security-engineer-subagent | PRD + threat model | specified |
@@ -127,7 +127,7 @@ Skipped roles: none. Decision owner: parent orchestrator, following the owner-lo
 Label assumptions as `verified`, `provisional`, or `blocking`.
 
 - `verified` — Product name, tagline, 16+ audience, 14 onboarding questions, estimation formulas, organ set, Log interaction, money rules, stack, risk tier, six required roles, phase-0-only authorization.
-- `provisional` — Default nickname “friend”; period-to-days conversion uses 7 / 30 / 365; organ baseline 35–85 derived from onboarding history/frequency/strictness/motivation (exact weights later); help-resource list is a non-clinical placeholder set; Expo SDK pinned to the generator’s current stable; brand catalog stays empty until phase 1.
+- `provisional` — Default nickname “friend”; period-to-days conversion uses 7 / 30 / 365; organ baseline 35–85 derived from onboarding history/frequency/strictness/motivation (exact weights later); help-resource list is a non-clinical placeholder set; Expo SDK pinned to the generator’s current stable; brand catalog now has estimation defaults (phase 1).
 - `provisional` — Parent lead materializes specialist artifacts because no Task sub-agent runtime is available.
 - `blocking` — none for phase 0. Store accounts, Apple/Google credentials, Supabase project linking, and paid ads remain deferred.
 
@@ -158,7 +158,7 @@ Label assumptions as `verified`, `provisional`, or `blocking`.
 
 ## 15. Closure
 
-- Final verdict: awaiting owner (`delivery/owner-handoff.md`)
-- Owner handoff: prepared
-- Closure evidence: phase 0 locally verified; phases 1–4 not started
+- Final verdict: owner APPROVE for phase 1; phase 1 verified
+- Owner handoff: updated
+- Closure evidence: phases 0–1 locally verified; phase 2 plan drafted only
 - Remaining manual actions: deferred to later phases / final checklist
