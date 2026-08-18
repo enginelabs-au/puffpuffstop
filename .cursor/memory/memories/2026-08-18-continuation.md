@@ -145,4 +145,5 @@
 - Settings toggle asks permission only when enabled; deny and delete cancel the schedule.
 - Validation: `npm run lint` 0; `npm test` 58 pass; `npm run typecheck` 0.
 - Owner asked to commit, merge all branches into `main`, and push. Store submit still unauthorized.
+- GH007 blocked the first push. Unpublished commits were replayed as `Cursor Agent <cursoragent@cursor.com>` and pushed to `origin/main` as `d930730`.
 

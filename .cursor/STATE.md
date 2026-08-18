@@ -2,11 +2,11 @@
 
 ## Current Objective
 
-- Re-author unpublished `main` commits as Cursor Agent and push to `origin/main`.
+- Phases 0–9 are on `origin/main`. Remaining work is owner checklist only.
 
 ## Current Status
 
-- Phases 0–9 are on local `main`. Push was blocked by GH007. Owner required Cursor anonymous email.
+- `origin/main` is at `d930730`. Unpublished commits were replayed as Cursor Agent and pushed. Do not publish the app.
 
 ## Project Phase
 
@@ -49,7 +49,7 @@
 
 ## Active Items
 
-- Checked out `main` at `11d189e`. Rewriting unpublished commits in a separate worktree so this workspace stays on `main`.
+- Checked out `main` at `d930730`, in sync with `origin/main`.
 - Do not publish the app.
 
 ## Files in Active Use
@@ -82,14 +82,13 @@
 
 ## Current Working State
 
-- Hook restored. Re-authoring unpublished commits without leaving this `main` checkout.
+- Local `main` matches `origin/main`. All pushed commits use `cursoragent@cursor.com`.
 
 ## Next Actions
 
-1. Replay unpublished commits as Cursor Agent and push `origin/main`.
-2. Owner works the final checklist.
-3. Do not store-submit, ad-spend, or remote-migrate.
+1. Owner works the final checklist.
+2. Do not store-submit, ad-spend, or remote-migrate.
 
 ## Last Updated
 
-- 2026-08-18 — recovered onto `main`; rewriting commit emails in a worktree.
+- 2026-08-18 — `origin/main` pushed as Cursor Agent (`d930730`).
