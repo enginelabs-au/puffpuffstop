@@ -90,6 +90,10 @@ export function displayName(draft: OnboardingDraft): string {
   return trimmed.length > 0 ? trimmed : DEFAULT_NICKNAME;
 }
 
+export function canShowHome(draft: OnboardingDraft): boolean {
+  return draft.durationCount > 0 && draft.frequencyCount > 0;
+}
+
 export function clampDial(value: number): number {
   if (!Number.isFinite(value)) return 0;
   return Math.min(DIAL_MAX, Math.max(0, Math.round(value)));

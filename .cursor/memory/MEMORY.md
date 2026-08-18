@@ -51,7 +51,8 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - Canonical blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
 - Phase 0 plan: `docs/plans/phase_0_foundations_plan.md`
 - Phase 1 plan: `docs/plans/phase_1_onboarding-plan_plan.md` (verified)
-- Phase 2 plan: `docs/plans/phase_2_home-log_plan.md` (draft, not implemented)
+- Phase 2 plan: `docs/plans/phase_2_home-log_plan.md` (verified)
+- Phase 3 plan: `docs/plans/phase_3_settings-savings_plan.md` (draft, not implemented)
 - Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
 
 ## Existing workflow references

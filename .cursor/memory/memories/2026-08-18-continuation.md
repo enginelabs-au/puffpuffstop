@@ -87,3 +87,11 @@
 - Brand catalog seeded with estimation defaults. Plan math: day/week/month/year, devices/week, optional spend, commitment.
 - Validation: `npm run lint` 0; `npm test` 18 pass; `npm run typecheck` 0.
 - Residuals unchanged: SEC-P0-001, SEC-P0-002. No store/publish/remote DB.
+
+## PuffPuffStop launch — phase 2 verified
+
+- Commit `35d7e87` stored phase 1. Phase 2 implements `/home` organs, center Log, snackbar/long-press undo, and local-midnight recovery.
+- Scores stay in 1–100; baseline band 35–85; recovery < per-puff damage; over-cap costs extra.
+- Daily log is in-process (testable); SQLite deferred if device reload persistence is required.
+- Validation: `npm run lint` 0; `npm test` 28 pass; `npm run typecheck` 0.
+- Next map only: `docs/plans/phase_3_settings-savings_plan.md`.

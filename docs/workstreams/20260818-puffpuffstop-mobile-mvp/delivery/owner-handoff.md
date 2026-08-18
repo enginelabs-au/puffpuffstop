@@ -82,4 +82,4 @@ Apple/Google accounts, listings, privacy policy, Supabase project, legal review,
 
 `APPROVE` — 2026-08-18, for local phase-1 planning and implementation only.
 
-Phase 1 is verified (18 tests, lint/typecheck). Phase 2 plan is drafted at `docs/plans/phase_2_home-log_plan.md` and is not implemented. Production/publish remain unauthorized.
+Phase 1 is committed (`35d7e87`). Phase 2 is implemented and verified (28 tests). Phase 3 plan is drafted only. Production/publish remain unauthorized.

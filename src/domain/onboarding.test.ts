@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   canContinue,
+  canShowHome,
   clampDial,
   displayName,
   emptyDraft,
@@ -46,6 +47,18 @@ describe("onboarding", () => {
         ...draft,
         brandKind: "custom",
         mlPerPuff: 0.05,
+      }),
+      true,
+    );
+  });
+
+  it("requires duration and frequency before home", () => {
+    assert.equal(canShowHome(emptyDraft()), false);
+    assert.equal(
+      canShowHome({
+        ...emptyDraft(),
+        durationCount: 8,
+        frequencyCount: 12,
       }),
       true,
     );

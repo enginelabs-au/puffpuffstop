@@ -1,6 +1,6 @@
 ---
 plan: phase_2_home-log
-status: draft
+status: verified
 created: 2026-08-18
 updated: 2026-08-18
 owner: lead-agent
@@ -90,10 +90,10 @@ This plan → verified after implementation. Manifest PPS-HOME-* → verified.
 
 | Requirement | Validation method | Expected evidence | Status |
 |---|---|---|---|
-| Baseline band | unit tests | 35–85, clamp 1–100 | pending |
-| Log damage / midnight recover | unit tests | recover only if under cap | pending |
-| Undo | unit tests | log decrements | pending |
-| Toolchain | npm scripts | lint/test/typecheck | pending |
+| Baseline band | unit tests | 35–85, clamp 1–100 | verified |
+| Log damage / midnight recover | unit tests | recover only if under cap | verified |
+| Undo | unit tests | log decrements | verified |
+| Toolchain | npm scripts | lint/test/typecheck | verified |
 
 ## 15. Security, privacy, reliability, accessibility, and performance checks
 
@@ -117,7 +117,10 @@ User finishing onboarding lands on organs + Log. Logging and midnight rules matc
 
 ## 20. Completion evidence
 
-Not implemented.
+- `npm run lint` 0
+- `npm test` 28 pass
+- `npm run typecheck` 0
+- Daily log is in-process (same pattern as the onboarding draft); SQLite can replace it in phase 3 if reload survival is required on device.
 
 ## 21. Deviations and follow-ups
 
