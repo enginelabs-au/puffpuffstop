@@ -31,15 +31,16 @@ Implement as `src/theme/tokens.ts`.
 
 | Token | Value (logical) | Use |
 |---|---|---|
-| `color.bg` | `#FFF6F0` cream | screen |
+| `color.sky` | `#00B8F8` icon sky | splash / adaptive |
+| `color.bg` | `#D8F4FC` sky wash | screen |
 | `color.surface` | `#FFFFFF` | cards |
-| `color.ink` | `#2B2140` | primary text |
-| `color.inkMuted` | `#6B6080` | secondary |
-| `color.accent` | `#7C6CFF` lilac | primary buttons |
-| `color.accentMint` | `#3ECFB2` | recovery / 16+ confirm |
+| `color.ink` | `#163047` | primary text |
+| `color.inkMuted` | `#4A6A80` | secondary |
+| `color.accent` | `#7A6BA8` metallic lavender | primary buttons |
+| `color.accentMint` | `#2EC4A8` | recovery / 16+ confirm |
 | `color.amber` | `#F4B942` | over-cap |
 | `color.danger` | `#E35D6A` | destructive only (delete later); not over-cap |
-| `color.blockedBg` | `#F3EEF8` | under-16 screen |
+| `color.blockedBg` | `#E4EEF8` | under-16 screen |
 | `space.xs/sm/md/lg/xl` | 4 / 8 / 16 / 24 / 40 | spacing |
 | `radius.sm/md/pill` | 12 / 20 / 999 | cards / Log |
 | `type.title` | 28 / 800 | headlines |

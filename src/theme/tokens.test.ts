@@ -6,6 +6,7 @@ import { color, minTapTarget, motion, radius, space, tokens, type } from "./toke
 describe("design tokens", () => {
   it("exports the required color keys", () => {
     for (const key of [
+      "sky",
       "bg",
       "surface",
       "ink",
@@ -28,5 +29,7 @@ describe("design tokens", () => {
     assert.equal(motion.fast, 160);
     assert.equal(type.title.fontSize, 28);
     assert.equal(tokens.color.bg, color.bg);
+    assert.equal(color.sky, "#00B8F8");
+    assert.equal(color.bg, "#D8F4FC");
   });
 });

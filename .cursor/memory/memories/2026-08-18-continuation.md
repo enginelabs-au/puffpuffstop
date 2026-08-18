@@ -114,4 +114,10 @@
 
 - Commit `b6ae945` stored phase 4. Phase 5 adds Log/undo haptics, Reduce Motion, `eas.json` (no secrets), 16+ listing drafts, hostable `docs/legal/privacy.html`, HTTPS-only `EXPO_PUBLIC_PRIVACY_POLICY_URL`.
 - Validation: `npm run lint` 0; `npm test` 46 pass; `npm run typecheck` 0.
-- Owner authorized this extra implementation phase. No phase 6 unless asked. No store submit.
+- Owner authorized this extra implementation phase. No store submit.
+
+## PuffPuffStop launch — phase 6 verified
+
+- Commit `32c6ca0` stored phase 5. Phase 6 installs the owner no-cloud icon: master JPEG in `assets/brand/source/`, 1024 RGB PNG master, Expo images regenerated, sky tokens `#00B8F8` / `#D8F4FC`.
+- Validation: export script assertions; `npm run lint` 0; `npm test` 46 pass; `npm run typecheck` 0.
+- No phase 7 unless asked. No store submit.

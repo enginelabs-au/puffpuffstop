@@ -1,13 +1,14 @@
 export const color = {
-  bg: "#FFF6F0",
+  sky: "#00B8F8",
+  bg: "#D8F4FC",
   surface: "#FFFFFF",
-  ink: "#2B2140",
-  inkMuted: "#6B6080",
-  accent: "#7C6CFF",
-  accentMint: "#3ECFB2",
+  ink: "#163047",
+  inkMuted: "#4A6A80",
+  accent: "#7A6BA8",
+  accentMint: "#2EC4A8",
   amber: "#F4B942",
   danger: "#E35D6A",
-  blockedBg: "#F3EEF8",
+  blockedBg: "#E4EEF8",
   onAccent: "#FFFFFF",
 } as const;
 
