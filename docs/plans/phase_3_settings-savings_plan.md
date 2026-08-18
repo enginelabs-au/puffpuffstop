@@ -1,6 +1,6 @@
 ---
 plan: phase_3_settings-savings
-status: draft
+status: verified
 created: 2026-08-18
 updated: 2026-08-18
 owner: lead-agent
@@ -12,30 +12,80 @@ workstream: docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md
 
 ## 1. Objective
 
-Add settings (profile, brand, goals, notifications toggle, privacy export/delete) and a local **Puff Savings** ledger of estimated money not spent. No card, no custody, no payout. Do not implement until phase 2 is verified and this plan is the active execution step.
+Add settings (profile, goals, brand cost, local reminder flag, privacy export/delete) and a local Puff Savings ledger. No card, custody, or payout.
 
 ## 2. Relation to project end-state
 
-Home logging is the daily habit. Settings lets users edit the commitment inputs. Savings is a motivation meter, not a wallet.
+Home is the daily loop. Settings edits the commitment inputs. Savings is estimated money not spent after under-cap days.
 
 ## 3. Entry criteria and inherited evidence
 
-Phase 2 must be verified first. SEC-P0-001/002 remain. 16+ only. No production.
+Phase 2 verified (28 tests). Owner asked to commit phase 2 and proceed. SEC-P0-001/002 remain.
 
 ## 4. Scope
 
-- Settings screens from the locked brief.
-- Local savings: `$X` per puff under commitment, accumulated, never charged.
-- Export/delete local draft + log.
+- `/settings` from home.
+- Local reminder boolean only (no OS notifications).
+- Stake per puff (default from device cost / puffs-per-device, else 0.10).
+- Credit `max(0, commitment − logged) * stake` when a local day rolls and yesterday was at or under cap.
+- Export JSON of draft + log + settings + savings. Delete resets all local stores and returns to the age-gate.
 
 ## 5. Non-goals
 
-Cards, IAP, bank linking, store submit, ads, remote sync.
+Cards, IAP, bank linking, store submit, ads, remote sync, real notifications.
 
-## 6–21. Deferred detail
+## 6. Current-state audit
 
-Fill exhaustive sections at execution time from the phase-0 map and verified phase-2 store. Do not implement in this turn.
+In-process onboarding and daily-log stores. No settings or savings.
+
+## 7. Assumptions
+
+- Savings credit happens on day rollover, not per log tap.
+- Export is on-screen selectable text, not a file share sheet.
+- Growth skipped; no store copy this phase.
+
+## 8–12. Implementation
+
+Domain `src/domain/savings.ts`, stores, `src/data/privacy.ts`, `src/data/day-cycle.ts`, `app/settings.tsx`, home Settings + pot line.
+
+## 13. Adaptive role map
+
+Parent-led. Required: PM (inherited), UX, SWE, Security (no money custody), Project Lead. Growth skipped.
+
+## 14. Tests
+
+Unit tests for savings math, day-cycle credit, export/delete. lint/test/typecheck.
+
+## 15. Security
+
+No card UI. Disclaimer on savings. Delete clears draft/log/settings/pot. Under-16 path still resets draft.
+
+## 16. Environment variables
+
+None new.
+
+## 17. Deferred human actions
+
+Unchanged store/legal/Supabase/ads items.
+
+## 18. Rollback
+
+Revert phase-3 commits.
+
+## 19. Acceptance criteria
+
+User can edit nickname/goals/stake, see a local pot, export JSON, and delete everything. No payment surfaces.
+
+## 20. Completion evidence
+
+- `npm run lint` 0
+- `npm test` 32 pass
+- `npm run typecheck` 0
+
+## 21. Deviations
+
+In-process stores remain (SQLite is phase 4).
 
 ## 22. Next Plan Generation Prompt
 
-Read `/AGENTS.md`, the complete core agent context, `/instructions/PROJECT_PLANNING.md`, `/instructions/ROLES.md`, `docs/plans/phase_0_foundations_plan.md`, this completed phase plan, the active workstream, and current repository state. Then generate exactly one next phase plan at `docs/plans/phase_4_store-ready_plan.md`. Do not implement that phase until the plan is written.
+Generate `docs/plans/phase_4_store-ready_plan.md` after this phase is verified. Do not implement phase 4 until that plan is the active execution step.

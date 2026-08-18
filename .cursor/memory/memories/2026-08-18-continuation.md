@@ -95,3 +95,10 @@
 - Daily log is in-process (testable); SQLite deferred if device reload persistence is required.
 - Validation: `npm run lint` 0; `npm test` 28 pass; `npm run typecheck` 0.
 - Next map only: `docs/plans/phase_3_settings-savings_plan.md`.
+
+## PuffPuffStop launch — phase 3 verified
+
+- Commit `f3cb2c8` stored phase 2. Phase 3 adds `/settings`, local reminder flag, stake-per-puff, pot credited on under-cap midnight, export JSON, delete-all.
+- No card, custody, or payout. Savings disclaimer on screen.
+- Validation: `npm run lint` 0; `npm test` 32 pass; `npm run typecheck` 0.
+- Next map only: `docs/plans/phase_4_store-ready_plan.md`.

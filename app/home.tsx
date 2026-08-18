@@ -1,14 +1,17 @@
-import { Redirect } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
-  applyDayRollover,
+  getDailyLog,
   logPuff,
   undoPuff,
+  type DailyLogState,
 } from "../src/data/daily-log-store";
+import { applyDayCycle } from "../src/data/day-cycle";
 import { getDraft } from "../src/data/onboarding-store";
+import { getSavings } from "../src/data/savings-store";
 import { canShowHome } from "../src/domain/onboarding";
 import {
   ORGAN_IDS,
@@ -16,6 +19,7 @@ import {
   organScores,
 } from "../src/domain/organs";
 import { PLAN_DISCLAIMER, summarizePlan } from "../src/domain/plan-summary";
+import { formatMoney } from "../src/domain/savings";
 import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
 import { OrganCard } from "../src/ui/OrganCard";
 
@@ -29,13 +33,17 @@ export default function HomeScreen() {
     [summary.historyDays, summary.puffsPerDay],
   );
 
-  const [log, setLog] = useState(() =>
-    applyDayRollover(summary.commitment),
-  );
+  const [log, setLog] = useState<DailyLogState>(() => {
+    applyDayCycle(summary.commitment);
+    return getDailyLog();
+  });
   const [snackVisible, setSnackVisible] = useState(false);
+  const [pot, setPot] = useState(() => getSavings().pot);
 
   useEffect(() => {
-    setLog(applyDayRollover(summary.commitment));
+    applyDayCycle(summary.commitment);
+    setLog(getDailyLog());
+    setPot(getSavings().pot);
   }, [summary.commitment]);
 
   useEffect(() => {
@@ -70,9 +78,19 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.stage}>
-        <Text style={styles.hello} accessibilityRole="header">
-          Hey {summary.displayName}
-        </Text>
+        <View style={styles.top}>
+          <Text style={styles.hello} accessibilityRole="header">
+            Hey {summary.displayName}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            onPress={() => router.push("/settings")}
+            style={styles.settings}
+          >
+            <Text style={styles.settingsLabel}>Settings</Text>
+          </Pressable>
+        </View>
         <Text
           style={[styles.strip, overCap ? styles.stripOver : null]}
           accessibilityLabel={`${log.logged} of ${summary.commitment} puffs today`}
@@ -89,6 +107,9 @@ export default function HomeScreen() {
             />
           ))}
         </View>
+        {pot > 0 ? (
+          <Text style={styles.caption}>Puff Savings ${formatMoney(pot)}</Text>
+        ) : null}
         <Text style={styles.caption}>{PLAN_DISCLAIMER}</Text>
       </View>
 
@@ -130,9 +151,24 @@ const styles = StyleSheet.create({
     paddingTop: space.md,
     gap: space.md,
   },
+  top: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: space.sm,
+  },
   hello: {
     ...type.title,
     color: color.ink,
+    flex: 1,
+  },
+  settings: {
+    minHeight: minTapTarget,
+    justifyContent: "center",
+  },
+  settingsLabel: {
+    ...type.body,
+    color: color.accent,
   },
   strip: {
     ...type.body,

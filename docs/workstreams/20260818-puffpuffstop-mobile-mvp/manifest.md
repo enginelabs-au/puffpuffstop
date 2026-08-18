@@ -3,14 +3,14 @@ schema_version: 1
 task_id: 20260818-puffpuffstop-mobile-mvp
 title: PuffPuffStop mobile MVP foundations
 source_request: Owner-locked PuffPuffStop product launch brief on enginelabs-au/puffpuffstop branch cursor/agent-control-plane
-status: phase-2-verified
+status: phase-3-verified
 risk_tier: 3
 created_at: 2026-08-18T10:45:00Z
 updated_at: 2026-08-18T11:05:00Z
 revision: 3
 owner: user-operator
 active_role: orchestrating-lead
-current_gate: phase-3-plan-draft
+current_gate: phase-4-plan-draft
 ---
 
 # Workstream Manifest: PuffPuffStop mobile MVP foundations
@@ -85,7 +85,7 @@ Skipped roles: none. Decision owner: parent orchestrator, following the owner-lo
 | PPS-EST-01 | Estimation formulas and plan-screen math | owner brief | product-manager-subagent | PRD formulas | verified |
 | PPS-HOME-01 | Cute organ cards with loop animation and N% | owner brief | ui-ux-developer-subagent | design spec (later impl) | verified |
 | PPS-HOME-02 | Center Log button +1, haptic, undo | owner brief | ui-ux-developer-subagent | design spec (later impl) | verified |
-| PPS-MNY-01 | v1 local estimated savings only; no card/custody/payout | owner brief | product-manager-subagent / security-engineer-subagent | PRD + threat model | specified |
+| PPS-MNY-01 | v1 local estimated savings only; no card/custody/payout | owner brief | product-manager-subagent / security-engineer-subagent | PRD + threat model | verified |
 
 ## 7. Dependency and gate order
 
@@ -160,5 +160,5 @@ Label assumptions as `verified`, `provisional`, or `blocking`.
 
 - Final verdict: owner APPROVE for phase 1; phase 1 verified
 - Owner handoff: updated
-- Closure evidence: phases 0–2 locally verified; phase 3 plan drafted only
+- Closure evidence: phases 0–3 locally verified; phase 4 plan drafted only
 - Remaining manual actions: deferred to later phases / final checklist

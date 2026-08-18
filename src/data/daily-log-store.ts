@@ -6,6 +6,12 @@ export type DailyLogState = {
   recoveryTicks: number;
 };
 
+export type RolloverResult = DailyLogState & {
+  rolled: boolean;
+  previousLogged: number;
+  recovered: boolean;
+};
+
 let state: DailyLogState = {
   dateKey: localDateKey(),
   logged: 0,
@@ -24,17 +30,30 @@ export function resetDailyLog(now: Date = new Date()): DailyLogState {
 export function applyDayRollover(
   commitment: number,
   now: Date = new Date(),
-): DailyLogState {
+): RolloverResult {
   const today = localDateKey(now);
-  if (state.dateKey === today) return getDailyLog();
+  if (state.dateKey === today) {
+    return {
+      ...getDailyLog(),
+      rolled: false,
+      previousLogged: state.logged,
+      recovered: false,
+    };
+  }
 
-  const recovered = state.logged <= commitment;
+  const previousLogged = state.logged;
+  const recovered = previousLogged <= commitment;
   state = {
     dateKey: today,
     logged: 0,
     recoveryTicks: state.recoveryTicks + (recovered ? 1 : 0),
   };
-  return getDailyLog();
+  return {
+    ...getDailyLog(),
+    rolled: true,
+    previousLogged,
+    recovered,
+  };
 }
 
 export function logPuff(commitment: number, now: Date = new Date()): DailyLogState {

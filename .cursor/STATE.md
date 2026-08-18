@@ -2,20 +2,20 @@
 
 ## Current Objective
 
-- Phase 2 organ home and Log are implemented and locally verified. Phase 3 settings/savings is drafted only.
+- Phase 3 settings and local puff savings are implemented and locally verified. Phase 4 store-ready is drafted only.
 
 ## Current Status
 
-- Phase 2 verified. Next: execute `docs/plans/phase_3_settings-savings_plan.md` only when authorized.
+- Phase 3 verified. Next: execute `docs/plans/phase_4_store-ready_plan.md` only when authorized.
 
 ## Project Phase
 
-- Phase 2 — Organ home and Log (verified). Phases 0–1 verified. Phases 3–4 not implemented.
+- Phase 3 — Settings and puff savings (verified). Phases 0–2 verified. Phase 4 not implemented.
 
 ## Active Plan
 
-- `docs/plans/phase_2_home-log_plan.md` (status: verified)
-- Next plan file: `docs/plans/phase_3_settings-savings_plan.md` (draft, not implemented)
+- `docs/plans/phase_3_settings-savings_plan.md` (status: verified)
+- Next plan file: `docs/plans/phase_4_store-ready_plan.md` (draft, not implemented)
 
 ## Active Workstream
 
@@ -24,8 +24,8 @@
 
 ## Active Role and Gate
 
-- Parent-led phase 2 implementation complete. Current gate: phase-3 plan draft.
-- Last integrated validation: `npm run lint` 0; `npm test` 28/28; `npm run typecheck` 0.
+- Parent-led phase 3 implementation complete. Current gate: phase-4 plan draft.
+- Last integrated validation: `npm run lint` 0; `npm test` 32/32; `npm run typecheck` 0.
 
 ## Predecessor Handoff
 
@@ -37,7 +37,7 @@
 
 ## Owner Decision
 
-- `APPROVE` recorded for phase 1; owner then asked to commit and proceed with phase 2.
+- Owner asked to commit phase 2 and proceed with phase 3.
 - Production, store publish, ads, secrets, cards, and remote DB mutation remain unauthorized.
 
 ## Active Instructions
@@ -49,8 +49,8 @@
 ## Active Items
 
 - Working branch: `cursor/puffpuffstop-phase-0-foundations-1685`
-- Draft PR #1 still covers earlier commits vs `cursor/agent-control-plane`.
-- Phase 1 committed as `35d7e87`. Phase 2 is local until committed.
+- Phase 1 `35d7e87` and phase 2 `f3cb2c8` committed, not pushed.
+- Phase 3 is local until committed.
 - Do not push to `main`. Do not publish the app.
 
 ## Files in Active Use
@@ -63,12 +63,8 @@
 - `/TOOLS.md`
 - `/memory/MEMORY.md`
 - `/memory/memories/2026-08-18-continuation.md`
-- `docs/blueprints/2026-08-18_puffpuffstop.md`
-- `docs/plans/phase_0_foundations_plan.md`
-- `docs/plans/phase_1_onboarding-plan_plan.md`
-- `docs/plans/phase_2_home-log_plan.md`
 - `docs/plans/phase_3_settings-savings_plan.md`
-- `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
+- `docs/plans/phase_4_store-ready_plan.md`
 - `app/`, `src/`
 
 ## Open Blockers
@@ -77,28 +73,24 @@
 
 ## Attempts Performed
 
-- Cloud phase 0: bootstrap, artifacts, Expo skeleton, PR #1.
-- Owner APPROVE for phase 1.
-- Implemented 13 onboarding steps, plan screen, placeholder home; 18 tests pass.
-- Implemented organ home, Log, undo, midnight recovery; 28 tests pass.
+- Phase 2 committed. Phase 3 settings, savings ledger, export/delete implemented.
 
 ## Decisions and Assumptions
 
-- Catalog now has estimation defaults (not ads).
-- Growth skipped for phase 1 only.
-- Daily log is in-process memory, not SQLite yet.
-- Under-16 still resets the draft and blocks tracking.
+- Savings credit on under-cap day rollover only. No card or payout.
+- Reminder flag is local storage only; no OS notifications yet.
+- In-process stores remain until phase 4 persistence.
 
 ## Current Working State
 
-- Phase 1 is committed. Phase 2 is implemented and uncommitted.
+- Phase 3 implemented and uncommitted.
 
 ## Next Actions
 
-1. Commit phase 2 when the owner asks.
-2. Execute phase 3 (settings + puff savings) when authorized.
+1. Commit phase 3 when the owner asks.
+2. Execute phase 4 (store-ready hardening) when authorized.
 3. Do not store-submit, ad-spend, or remote-migrate.
 
 ## Last Updated
 
-- 2026-08-18 — phase 2 verified after owner asked to proceed.
+- 2026-08-18 — phase 3 verified after owner asked to proceed.
