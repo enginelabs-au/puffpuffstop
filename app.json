@@ -29,6 +29,7 @@
     },
     "plugins": [
       "expo-file-system",
+      "expo-haptics",
       "expo-router",
       [
         "expo-splash-screen",

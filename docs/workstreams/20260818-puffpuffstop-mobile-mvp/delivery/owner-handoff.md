@@ -11,7 +11,7 @@ updated_at: 2026-08-18T11:20:00Z
 
 ## 1. Decision requested
 
-Agent-executable phases 0–4 are done. Choose one for **closure**, not for publish/deploy/spend:
+Agent-executable phases 0–5 are done. Choose one for **closure**, not for publish/deploy/spend:
 
 - `APPROVE` — accept residuals as listed and work `docs/plans/final_implementation_checklist.md` yourself.
 - `REQUEST_CHANGES` — name the gap to remediate before checklist work.
@@ -21,7 +21,7 @@ This is not authorization to publish, advertise, enter secrets, or mutate a remo
 
 ## 2. Delivered outcome
 
-Local 16+ PuffPuffStop loop: age-gate, onboarding, plan, organ home, Log, settings, local puff savings, on-device snapshot persist, in-app privacy policy.
+Local 16+ PuffPuffStop loop: age-gate, onboarding, plan, organ home, Log with haptics, settings, local puff savings, on-device snapshot persist, in-app and hostable privacy policy, unpublished store listing drafts, EAS profiles without credentials.
 
 ## 3. Scope and requirement traceability
 
@@ -42,7 +42,7 @@ PPS-P0-01–07 and later onboarding/home/settings/persist items implemented loca
 
 - Preflight READY
 - `npm run lint` 0
-- `npm test` 40/40
+- `npm test` 46/46
 - `npm run typecheck` 0
 
 ## 6. Changed paths and external changes
@@ -53,7 +53,7 @@ External: npm install only. No store, Vercel, or remote DB.
 
 ## 7. Integrated security and production status
 
-- Implemented: local MVP through persist + privacy
+- Implemented: local MVP through persist, privacy, and release-preview packaging
 - Verified: lint/test/typecheck
 - Ready for production: **no**
 - Deployed: **no**
@@ -81,6 +81,6 @@ See `docs/plans/final_implementation_checklist.md`: Apple/Google accounts, hoste
 
 ## 12. Owner response
 
-`APPROVE` — 2026-08-18, for local phases 1–4 only.
+`APPROVE` — 2026-08-18, for local phases 1–5 only.
 
-Phases 1–3 are committed (`35d7e87`, `f3cb2c8`, `63ff524`). Phase 4 is implemented and verified (40 tests) and is local until the owner asks to commit. Production/publish remain unauthorized.
+Phases 1–4 are committed (`35d7e87`, `f3cb2c8`, `63ff524`, `b6ae945`). Phase 5 is implemented and verified (46 tests) and is local until the owner asks to commit. Production/publish remain unauthorized.

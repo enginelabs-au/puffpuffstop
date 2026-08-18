@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { readPrivacyPolicyUrl } from "../src/config/env";
 import { readSyncStatus, syncStatusLabel } from "../src/config/sync";
 import { getDraft, resetDraft, updateDraft } from "../src/data/onboarding-store";
 import { deleteLocalData, exportLocalData } from "../src/data/privacy";
@@ -29,6 +31,7 @@ export default function SettingsScreen() {
   const [settings, setSettings] = useState(getSettings);
   const [savings, setSavings] = useState(getSavings);
   const [exportText, setExportText] = useState<string | null>(null);
+  const hostedPrivacyUrl = readPrivacyPolicyUrl();
   const summary = useMemo(() => summarizePlan(draft), [draft]);
   const stake = settings.stakePerPuff ?? defaultStakePerPuff(draft);
 
@@ -139,6 +142,18 @@ export default function SettingsScreen() {
         >
           <Text style={styles.buttonLabel}>Privacy policy</Text>
         </Pressable>
+        {hostedPrivacyUrl ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Open hosted privacy policy"
+            onPress={() => {
+              void Linking.openURL(hostedPrivacyUrl);
+            }}
+            style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}
+          >
+            <Text style={styles.buttonLabel}>Open hosted privacy policy</Text>
+          </Pressable>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export local data"

@@ -21,6 +21,7 @@ import {
 import { PLAN_DISCLAIMER, summarizePlan } from "../src/domain/plan-summary";
 import { formatMoney } from "../src/domain/savings";
 import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
+import { playLogHaptic, playUndoHaptic } from "../src/ui/haptics";
 import { OrganCard } from "../src/ui/OrganCard";
 
 const UNDO_MS = 5000;
@@ -68,11 +69,13 @@ export default function HomeScreen() {
   function onLog() {
     setLog(logPuff(summary.commitment));
     setSnackVisible(true);
+    void playLogHaptic();
   }
 
   function onUndo() {
     setLog(undoPuff(summary.commitment));
     setSnackVisible(false);
+    void playUndoHaptic();
   }
 
   return (

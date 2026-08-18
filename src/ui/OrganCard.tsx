@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { AccessibilityInfo, Animated, StyleSheet, Text, View } from "react-native";
 
 import {
   ORGAN_LABELS,
@@ -34,9 +34,24 @@ export function OrganCard({ id, score, recovering }: Props) {
   const label = ORGAN_LABELS[id];
   const percent = formatOrganPercent(score);
   const pulse = useRef(new Animated.Value(1)).current;
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
-    if (!recovering) {
+    let cancelled = false;
+    void AccessibilityInfo.isReduceMotionEnabled()
+      .then((enabled) => {
+        if (!cancelled) setReduceMotion(enabled);
+      })
+      .catch(() => {
+        if (!cancelled) setReduceMotion(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!recovering || reduceMotion) {
       pulse.setValue(1);
       return undefined;
     }
@@ -56,7 +71,7 @@ export function OrganCard({ id, score, recovering }: Props) {
     );
     loop.start();
     return () => loop.stop();
-  }, [pulse, recovering]);
+  }, [pulse, recovering, reduceMotion]);
 
   return (
     <Animated.View

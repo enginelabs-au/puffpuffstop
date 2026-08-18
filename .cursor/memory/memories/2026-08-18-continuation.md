@@ -108,4 +108,10 @@
 - Commit `63ff524` stored phase 3. Phase 4 adds a versioned JSON snapshot (memory driver in tests, `expo-file-system` File/Paths on device), age-gate resume/delete, `/privacy`, sync-status stub, recovering pulse.
 - Security replay: SEC-P4-001 unencrypted local snapshot; SEC-P0-001 blocked path now deletes persisted data.
 - Validation: `npm run lint` 0; `npm test` 40 pass; `npm run typecheck` 0.
-- Closure list: `docs/plans/final_implementation_checklist.md`. No phase 5. No store submit.
+- Closure list: `docs/plans/final_implementation_checklist.md`. No store submit.
+
+## PuffPuffStop launch — phase 5 verified
+
+- Commit `b6ae945` stored phase 4. Phase 5 adds Log/undo haptics, Reduce Motion, `eas.json` (no secrets), 16+ listing drafts, hostable `docs/legal/privacy.html`, HTTPS-only `EXPO_PUBLIC_PRIVACY_POLICY_URL`.
+- Validation: `npm run lint` 0; `npm test` 46 pass; `npm run typecheck` 0.
+- Owner authorized this extra implementation phase. No phase 6 unless asked. No store submit.
