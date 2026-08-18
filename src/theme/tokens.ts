@@ -37,6 +37,16 @@ export const motion = {
   loop: 2400,
 } as const;
 
-export const tokens = { color, space, radius, type, motion } as const;
+export const fontScale = {
+  allowFontScaling: true,
+  maxFontSizeMultiplier: 1.4,
+} as const;
+
+export const scaledInput = {
+  allowFontScaling: fontScale.allowFontScaling,
+  maxFontSizeMultiplier: fontScale.maxFontSizeMultiplier,
+} as const;
+
+export const tokens = { color, space, radius, type, motion, fontScale } as const;
 
 export const minTapTarget = 44;

@@ -1,10 +1,11 @@
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getDraft } from "../src/data/onboarding-store";
 import { formatCount, summarizePlan } from "../src/domain/plan-summary";
 import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
+import { AppText } from "../src/ui/AppText";
 
 const STRICTNESS_COPY = {
   chill: "We’ll keep things gentle.",
@@ -32,40 +33,40 @@ export default function PlanScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
-        <Text style={styles.title} accessibilityRole="header">
+        <AppText style={styles.title} accessibilityRole="header">
           Your plan, {summary.displayName}
-        </Text>
-        <Text style={styles.bodyText}>
+        </AppText>
+        <AppText style={styles.bodyText}>
           You vape about {formatCount(summary.puffsPerDay)} puffs a day.
-        </Text>
-        <Text style={styles.bodyText}>
+        </AppText>
+        <AppText style={styles.bodyText}>
           That’s about {formatCount(summary.puffsPerWeek)} a week,{" "}
           {formatCount(summary.puffsPerMonth)} a month, and{" "}
           {formatCount(summary.puffsPerYear)} a year.
-        </Text>
+        </AppText>
         {summary.devicesPerWeek !== null ? (
-          <Text style={styles.bodyText}>
+          <AppText style={styles.bodyText}>
             About {formatCount(summary.devicesPerWeek)} devices a week
             {summary.spendPerWeek !== null
               ? `, around ${formatCount(summary.spendPerWeek)} if prices stay similar`
               : ""}
             .
-          </Text>
+          </AppText>
         ) : null}
-        <Text style={styles.highlight}>
+        <AppText style={styles.highlight}>
           We’ll aim for {formatCount(summary.commitment)} puffs today.
-        </Text>
-        <Text style={styles.bodyText}>
+        </AppText>
+        <AppText style={styles.bodyText}>
           {tone} You’re aiming for {window}.
-        </Text>
-        <Text style={styles.caption}>{summary.disclaimer}</Text>
+        </AppText>
+        <AppText style={styles.caption}>{summary.disclaimer}</AppText>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="See my organs"
           onPress={() => router.replace("/home")}
           style={({ pressed }) => [styles.primary, pressed ? styles.pressed : null]}
         >
-          <Text style={styles.primaryLabel}>See my organs</Text>
+          <AppText style={styles.primaryLabel}>See my organs</AppText>
         </Pressable>
       </View>
     </SafeAreaView>

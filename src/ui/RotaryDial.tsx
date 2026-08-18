@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { clampDial, DIAL_MAX } from "../domain/onboarding";
 import { color, minTapTarget, radius, space, type } from "../theme/tokens";
+import { AppText } from "./AppText";
 
 type Props = {
   value: number;
@@ -21,18 +22,18 @@ export function RotaryDial({ value, onChange, accessibilityLabel }: Props) {
         onPress={() => onChange(clampDial(value - 1))}
         style={({ pressed }) => [styles.step, pressed ? styles.pressed : null]}
       >
-        <Text style={styles.stepLabel}>−</Text>
+        <AppText style={styles.stepLabel}>−</AppText>
       </Pressable>
-      <Text style={styles.value} accessibilityRole="text">
+      <AppText style={styles.value} accessibilityRole="text">
         {clampDial(value)}
-      </Text>
+      </AppText>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Increase"
         onPress={() => onChange(clampDial(value + 1))}
         style={({ pressed }) => [styles.step, pressed ? styles.pressed : null]}
       >
-        <Text style={styles.stepLabel}>+</Text>
+        <AppText style={styles.stepLabel}>+</AppText>
       </Pressable>
     </View>
   );

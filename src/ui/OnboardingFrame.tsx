@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { color, minTapTarget, radius, space, type } from "../theme/tokens";
+import { AppText } from "./AppText";
 
 type Props = {
   title: string;
@@ -24,10 +25,10 @@ export function OnboardingFrame({
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
-        <Text style={styles.title} accessibilityRole="header">
+        <AppText style={styles.title} accessibilityRole="header">
           {title}
-        </Text>
-        {helper ? <Text style={styles.helper}>{helper}</Text> : null}
+        </AppText>
+        {helper ? <AppText style={styles.helper}>{helper}</AppText> : null}
         <View style={styles.content}>{children}</View>
         <Pressable
           accessibilityRole="button"
@@ -41,7 +42,7 @@ export function OnboardingFrame({
             pressed && !continueDisabled ? styles.pressed : null,
           ]}
         >
-          <Text style={styles.primaryLabel}>{continueLabel}</Text>
+          <AppText style={styles.primaryLabel}>{continueLabel}</AppText>
         </Pressable>
       </View>
     </SafeAreaView>

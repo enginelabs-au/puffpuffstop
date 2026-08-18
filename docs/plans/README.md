@@ -6,7 +6,7 @@ Plans are generated and executed sequentially.
 2. Each later phase plan is generated only after the prior phase is complete and verified.
 3. `final_implementation_checklist.md` is created after all planned agent-executable work is complete.
 
-Current: phases 0–6 verified. Closure list is `final_implementation_checklist.md`.
+Current: phases 0–7 verified. Closure list is `final_implementation_checklist.md`.
 
 Each substantive plan links its `docs/workstreams/<task-id>/manifest.md`, records every canonical role as required or skipped, and closes only after required role gates have evidence-backed verdicts.
 

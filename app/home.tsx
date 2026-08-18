@@ -1,6 +1,6 @@
 import { Redirect, router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -22,6 +22,7 @@ import { PLAN_DISCLAIMER, summarizePlan } from "../src/domain/plan-summary";
 import { formatMoney } from "../src/domain/savings";
 import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
 import { playLogHaptic, playUndoHaptic } from "../src/ui/haptics";
+import { AppText } from "../src/ui/AppText";
 import { OrganCard } from "../src/ui/OrganCard";
 
 const UNDO_MS = 5000;
@@ -82,24 +83,24 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.stage}>
         <View style={styles.top}>
-          <Text style={styles.hello} accessibilityRole="header">
+          <AppText style={styles.hello} accessibilityRole="header">
             Hey {summary.displayName}
-          </Text>
+          </AppText>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Settings"
             onPress={() => router.push("/settings")}
             style={styles.settings}
           >
-            <Text style={styles.settingsLabel}>Settings</Text>
+            <AppText style={styles.settingsLabel}>Settings</AppText>
           </Pressable>
         </View>
-        <Text
+        <AppText
           style={[styles.strip, overCap ? styles.stripOver : null]}
           accessibilityLabel={`${log.logged} of ${summary.commitment} puffs today`}
         >
           {log.logged} / {summary.commitment}
-        </Text>
+        </AppText>
         <View style={styles.grid}>
           {ORGAN_IDS.map((id) => (
             <OrganCard
@@ -111,9 +112,9 @@ export default function HomeScreen() {
           ))}
         </View>
         {pot > 0 ? (
-          <Text style={styles.caption}>Puff Savings ${formatMoney(pot)}</Text>
+          <AppText style={styles.caption}>Puff Savings ${formatMoney(pot)}</AppText>
         ) : null}
-        <Text style={styles.caption}>{PLAN_DISCLAIMER}</Text>
+        <AppText style={styles.caption}>{PLAN_DISCLAIMER}</AppText>
       </View>
 
       {snackVisible ? (
@@ -123,7 +124,7 @@ export default function HomeScreen() {
           onPress={onUndo}
           style={styles.snack}
         >
-          <Text style={styles.snackText}>Puff logged. Undo</Text>
+          <AppText style={styles.snackText}>Puff logged. Undo</AppText>
         </Pressable>
       ) : null}
 
@@ -136,7 +137,7 @@ export default function HomeScreen() {
           onLongPress={onUndo}
           style={({ pressed }) => [styles.log, pressed ? styles.pressed : null]}
         >
-          <Text style={styles.logLabel}>Log</Text>
+          <AppText style={styles.logLabel}>Log</AppText>
         </Pressable>
       </View>
     </SafeAreaView>

@@ -22,6 +22,16 @@ export function exportLocalData(now: Date = new Date()): PrivacyExport {
   };
 }
 
+export const DELETE_LOCAL_TITLE = "Delete all local data?";
+export const DELETE_LOCAL_BODY =
+  "This removes your plan, puff log, settings, and puff savings on this device. It cannot be undone.";
+export const DELETE_LOCAL_KEEP = "Keep data";
+export const DELETE_LOCAL_CONFIRM = "Delete";
+
+export function formatLocalExport(data: PrivacyExport = exportLocalData()): string {
+  return JSON.stringify(data, null, 2);
+}
+
 export function deleteLocalData(now: Date = new Date()): void {
   setHydrating(true);
   try {

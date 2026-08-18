@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getDraft } from "../src/data/onboarding-store";
@@ -7,6 +7,7 @@ import { deleteLocalData } from "../src/data/privacy";
 import { evaluateAgeGate } from "../src/domain/age-gate";
 import { resumeAfterAgeGate } from "../src/domain/onboarding";
 import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
+import { AppText } from "../src/ui/AppText";
 
 export default function AgeGateScreen() {
   function onConfirmSixteenOrOlder() {
@@ -27,15 +28,15 @@ export default function AgeGateScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
-        <Text style={styles.wordmark} accessibilityRole="header">
+        <AppText style={styles.wordmark} accessibilityRole="header">
           PuffPuffStop
-        </Text>
-        <Text style={styles.tagline}>Break the cycle, reclaim your lungs.</Text>
-        <Text style={styles.question}>Are you 16 or older?</Text>
-        <Text style={styles.helper}>
+        </AppText>
+        <AppText style={styles.tagline}>Break the cycle, reclaim your lungs.</AppText>
+        <AppText style={styles.question}>Are you 16 or older?</AppText>
+        <AppText style={styles.helper}>
           This wellness coach is for teens and young adults. It is not a kids
           app and not a medical device.
-        </Text>
+        </AppText>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Yes, I am 16 or older"
@@ -45,7 +46,7 @@ export default function AgeGateScreen() {
             pressed ? styles.pressed : null,
           ]}
         >
-          <Text style={styles.primaryLabel}>Yes, I’m 16+</Text>
+          <AppText style={styles.primaryLabel}>Yes, I’m 16+</AppText>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -56,7 +57,7 @@ export default function AgeGateScreen() {
             pressed ? styles.pressed : null,
           ]}
         >
-          <Text style={styles.secondaryLabel}>No, I’m under 16</Text>
+          <AppText style={styles.secondaryLabel}>No, I’m under 16</AppText>
         </Pressable>
       </View>
     </SafeAreaView>

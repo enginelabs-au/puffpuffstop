@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, StyleSheet, Text, View } from "react-native";
+import { AccessibilityInfo, Animated, StyleSheet, View } from "react-native";
 
 import {
   ORGAN_LABELS,
@@ -7,6 +7,7 @@ import {
   type OrganId,
 } from "../domain/organs";
 import { color, motion, radius, space, type } from "../theme/tokens";
+import { AppText } from "./AppText";
 
 const GLYPH: Record<OrganId, string> = {
   lungs: "Lu",
@@ -83,10 +84,10 @@ export function OrganCard({ id, score, recovering }: Props) {
       ]}
     >
       <View style={[styles.glyph, { backgroundColor: TINT[id] }]}>
-        <Text style={styles.glyphLabel}>{GLYPH[id]}</Text>
+        <AppText style={styles.glyphLabel}>{GLYPH[id]}</AppText>
       </View>
-      <Text style={styles.name}>{label}</Text>
-      <Text style={styles.percent}>{percent}%</Text>
+      <AppText style={styles.name}>{label}</AppText>
+      <AppText style={styles.percent}>{percent}%</AppText>
     </Animated.View>
   );
 }

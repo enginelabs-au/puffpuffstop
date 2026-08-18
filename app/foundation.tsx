@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { readAppEnv } from "../src/config/env";
 import { BRAND_CATALOG } from "../src/data/brands";
 import { color, space, type } from "../src/theme/tokens";
+import { AppText } from "../src/ui/AppText";
 
 export default function FoundationScreen() {
   const appEnv = readAppEnv();
@@ -11,20 +12,20 @@ export default function FoundationScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
-        <Text style={styles.title} accessibilityRole="header">
+        <AppText style={styles.title} accessibilityRole="header">
           You’re in. Onboarding comes next.
-        </Text>
-        <Text style={styles.bodyText}>
+        </AppText>
+        <AppText style={styles.bodyText}>
           Phase 0 foundation only. Home, organs, and the Log button are not
           built yet.
-        </Text>
-        <Text style={styles.caption}>
+        </AppText>
+        <AppText style={styles.caption}>
           Brand catalog rows: {BRAND_CATALOG.length}. Environment: {appEnv}.
-        </Text>
-        <Text style={styles.caption}>
+        </AppText>
+        <AppText style={styles.caption}>
           These organ percentages will be motivational estimates, not medical
           measurements or diagnoses.
-        </Text>
+        </AppText>
       </View>
     </SafeAreaView>
   );

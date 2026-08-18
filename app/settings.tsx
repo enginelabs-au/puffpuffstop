@@ -1,12 +1,13 @@
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
+  Alert,
   Linking,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Switch,
-  Text,
   TextInput,
   View,
 } from "react-native";
@@ -15,7 +16,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { readPrivacyPolicyUrl } from "../src/config/env";
 import { readSyncStatus, syncStatusLabel } from "../src/config/sync";
 import { getDraft, resetDraft, updateDraft } from "../src/data/onboarding-store";
-import { deleteLocalData, exportLocalData } from "../src/data/privacy";
+import {
+  DELETE_LOCAL_BODY,
+  DELETE_LOCAL_CONFIRM,
+  DELETE_LOCAL_KEEP,
+  DELETE_LOCAL_TITLE,
+  deleteLocalData,
+  formatLocalExport,
+} from "../src/data/privacy";
 import { getSavings } from "../src/data/savings-store";
 import { getSettings, updateSettings } from "../src/data/settings-store";
 import { summarizePlan } from "../src/domain/plan-summary";
@@ -24,7 +32,8 @@ import {
   defaultStakePerPuff,
   formatMoney,
 } from "../src/domain/savings";
-import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
+import { color, minTapTarget, radius, scaledInput, space, type } from "../src/theme/tokens";
+import { AppText } from "../src/ui/AppText";
 
 export default function SettingsScreen() {
   const [draft, setDraft] = useState(getDraft);
@@ -42,12 +51,13 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body}>
-        <Text style={styles.title} accessibilityRole="header">
+        <AppText style={styles.title} accessibilityRole="header">
           Settings
-        </Text>
+        </AppText>
 
-        <Text style={styles.section}>Profile</Text>
+        <AppText style={styles.section}>Profile</AppText>
         <TextInput
+          {...scaledInput}
           accessibilityLabel="Nickname"
           value={draft.nickname}
           placeholder="Friend"
@@ -56,11 +66,12 @@ export default function SettingsScreen() {
           style={styles.input}
         />
 
-        <Text style={styles.section}>Goals</Text>
-        <Text style={styles.caption}>
+        <AppText style={styles.section}>Goals</AppText>
+        <AppText style={styles.caption}>
           Daily commitment is {summary.commitment} puffs. Cut down by:
-        </Text>
+        </AppText>
         <TextInput
+          {...scaledInput}
           accessibilityLabel="Puffs to cut down each day"
           keyboardType="number-pad"
           value={String(draft.cutDownPerDay)}
@@ -73,13 +84,14 @@ export default function SettingsScreen() {
           style={styles.input}
         />
 
-        <Text style={styles.section}>Brand</Text>
-        <Text style={styles.caption}>
+        <AppText style={styles.section}>Brand</AppText>
+        <AppText style={styles.caption}>
           {draft.catalogBrandId ?? (draft.otherBrandName || "Custom / not set")}.
           Change this by restarting onboarding after delete, or keep estimates
           here for now.
-        </Text>
+        </AppText>
         <TextInput
+          {...scaledInput}
           accessibilityLabel="Typical device cost"
           keyboardType="decimal-pad"
           placeholder="Device cost"
@@ -94,9 +106,9 @@ export default function SettingsScreen() {
           style={styles.input}
         />
 
-        <Text style={styles.section}>Reminders</Text>
+        <AppText style={styles.section}>Reminders</AppText>
         <View style={styles.row}>
-          <Text style={styles.bodyText}>Local reminder flag</Text>
+          <AppText style={styles.bodyText}>Local reminder flag</AppText>
           <Switch
             accessibilityLabel="Local reminder flag"
             value={settings.remindersEnabled}
@@ -105,16 +117,17 @@ export default function SettingsScreen() {
             }
           />
         </View>
-        <Text style={styles.caption}>
+        <AppText style={styles.caption}>
           Stored on this device only. We do not send notifications yet.
-        </Text>
+        </AppText>
 
-        <Text style={styles.section}>Puff Savings</Text>
-        <Text style={styles.highlight}>${formatMoney(savings.pot)}</Text>
-        <Text style={styles.caption}>
+        <AppText style={styles.section}>Puff Savings</AppText>
+        <AppText style={styles.highlight}>${formatMoney(savings.pot)}</AppText>
+        <AppText style={styles.caption}>
           Stake per puff you stay under your cap (estimate).
-        </Text>
+        </AppText>
         <TextInput
+          {...scaledInput}
           accessibilityLabel="Stake per puff"
           keyboardType="decimal-pad"
           value={String(stake)}
@@ -128,19 +141,19 @@ export default function SettingsScreen() {
           }}
           style={styles.input}
         />
-        <Text style={styles.caption}>{SAVINGS_DISCLAIMER}</Text>
+        <AppText style={styles.caption}>{SAVINGS_DISCLAIMER}</AppText>
 
-        <Text style={styles.section}>Cloud sync</Text>
-        <Text style={styles.caption}>{syncStatusLabel(readSyncStatus())}</Text>
+        <AppText style={styles.section}>Cloud sync</AppText>
+        <AppText style={styles.caption}>{syncStatusLabel(readSyncStatus())}</AppText>
 
-        <Text style={styles.section}>Privacy</Text>
+        <AppText style={styles.section}>Privacy</AppText>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Read privacy policy"
           onPress={() => router.push("/privacy")}
           style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}
         >
-          <Text style={styles.buttonLabel}>Privacy policy</Text>
+          <AppText style={styles.buttonLabel}>Privacy policy</AppText>
         </Pressable>
         {hostedPrivacyUrl ? (
           <Pressable
@@ -151,32 +164,49 @@ export default function SettingsScreen() {
             }}
             style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}
           >
-            <Text style={styles.buttonLabel}>Open hosted privacy policy</Text>
+            <AppText style={styles.buttonLabel}>Open hosted privacy policy</AppText>
           </Pressable>
         ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export local data"
-          onPress={() => setExportText(JSON.stringify(exportLocalData(), null, 2))}
+          onPress={() => {
+            const payload = formatLocalExport();
+            void Share.share({
+              message: payload,
+              title: "PuffPuffStop local data",
+            }).catch(() => {
+              setExportText(payload);
+            });
+          }}
           style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}
         >
-          <Text style={styles.buttonLabel}>Export local data</Text>
+          <AppText style={styles.buttonLabel}>Export local data</AppText>
         </Pressable>
-        {exportText ? <Text selectable style={styles.export}>{exportText}</Text> : null}
+        {exportText ? <AppText selectable style={styles.export}>{exportText}</AppText> : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Delete all local data"
           onPress={() => {
-            deleteLocalData();
-            setDraft(resetDraft());
-            setSettings(getSettings());
-            setSavings(getSavings());
-            setExportText(null);
-            router.replace("/age-gate");
+            Alert.alert(DELETE_LOCAL_TITLE, DELETE_LOCAL_BODY, [
+              { text: DELETE_LOCAL_KEEP, style: "cancel" },
+              {
+                text: DELETE_LOCAL_CONFIRM,
+                style: "destructive",
+                onPress: () => {
+                  deleteLocalData();
+                  setDraft(resetDraft());
+                  setSettings(getSettings());
+                  setSavings(getSavings());
+                  setExportText(null);
+                  router.replace("/age-gate");
+                },
+              },
+            ]);
           }}
           style={({ pressed }) => [styles.danger, pressed ? styles.pressed : null]}
         >
-          <Text style={styles.dangerLabel}>Delete all local data</Text>
+          <AppText style={styles.dangerLabel}>Delete all local data</AppText>
         </Pressable>
 
         <Pressable
@@ -185,7 +215,7 @@ export default function SettingsScreen() {
           onPress={() => router.back()}
           style={styles.link}
         >
-          <Text style={styles.linkLabel}>Back</Text>
+          <AppText style={styles.linkLabel}>Back</AppText>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

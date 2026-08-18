@@ -1,7 +1,16 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { color, minTapTarget, motion, radius, space, tokens, type } from "./tokens";
+import {
+  color,
+  fontScale,
+  minTapTarget,
+  motion,
+  radius,
+  space,
+  tokens,
+  type,
+} from "./tokens";
 
 describe("design tokens", () => {
   it("exports the required color keys", () => {
@@ -31,5 +40,8 @@ describe("design tokens", () => {
     assert.equal(tokens.color.bg, color.bg);
     assert.equal(color.sky, "#00B8F8");
     assert.equal(color.bg, "#D8F4FC");
+    assert.equal(fontScale.allowFontScaling, true);
+    assert.equal(fontScale.maxFontSizeMultiplier, 1.4);
+    assert.equal(tokens.fontScale, fontScale);
   });
 });

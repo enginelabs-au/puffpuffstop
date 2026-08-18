@@ -1,6 +1,6 @@
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, TextInput } from "react-native";
+import { StyleSheet, TextInput } from "react-native";
 
 import { BRAND_CATALOG, catalogBrandById } from "../../src/data/brands";
 import { getDraft, updateDraft } from "../../src/data/onboarding-store";
@@ -18,7 +18,8 @@ import {
   type Strictness,
   type Trigger,
 } from "../../src/domain/onboarding";
-import { color, radius, space, type } from "../../src/theme/tokens";
+import { color, radius, scaledInput, space, type } from "../../src/theme/tokens";
+import { AppText } from "../../src/ui/AppText";
 import { ChipGroup } from "../../src/ui/ChipGroup";
 import { OnboardingFrame } from "../../src/ui/OnboardingFrame";
 import { RotaryDial } from "../../src/ui/RotaryDial";
@@ -116,6 +117,7 @@ export default function OnboardingStepScreen() {
     >
       {step === "nickname" ? (
         <TextInput
+          {...scaledInput}
           accessibilityLabel="Nickname"
           placeholder="Friend"
           placeholderTextColor={color.inkMuted}
@@ -197,6 +199,7 @@ export default function OnboardingStepScreen() {
           />
           {draft.brandKind === "other" ? (
             <TextInput
+          {...scaledInput}
               accessibilityLabel="Other brand name"
               placeholder="Brand name"
               placeholderTextColor={color.inkMuted}
@@ -210,8 +213,9 @@ export default function OnboardingStepScreen() {
 
       {step === "device-math" && draft.brandKind === "custom" ? (
         <>
-          <Text style={styles.caption}>ml per puff (estimate)</Text>
+          <AppText style={styles.caption}>ml per puff (estimate)</AppText>
           <TextInput
+          {...scaledInput}
             accessibilityLabel="Millilitres per puff"
             keyboardType="decimal-pad"
             placeholder="0.05"
@@ -223,8 +227,9 @@ export default function OnboardingStepScreen() {
             }}
             style={styles.input}
           />
-          <Text style={styles.caption}>Optional device size (ml)</Text>
+          <AppText style={styles.caption}>Optional device size (ml)</AppText>
           <TextInput
+          {...scaledInput}
             accessibilityLabel="Device millilitres"
             keyboardType="decimal-pad"
             placeholder="10"
@@ -241,7 +246,7 @@ export default function OnboardingStepScreen() {
 
       {step === "device-math" && draft.brandKind !== "custom" ? (
         <>
-          <Text style={styles.caption}>Puffs in a standard device (editable)</Text>
+          <AppText style={styles.caption}>Puffs in a standard device (editable)</AppText>
           <RotaryDial
             accessibilityLabel="Puffs per standard device"
             value={draft.puffsPerDevice ?? 0}
@@ -278,6 +283,7 @@ export default function OnboardingStepScreen() {
           {draft.nicotineLabel.length > 0 &&
           !["0", "3", "5", "20", "50"].includes(draft.nicotineLabel) ? (
             <TextInput
+          {...scaledInput}
               accessibilityLabel="Other nicotine strength"
               placeholder="e.g. 10 mg/ml"
               placeholderTextColor={color.inkMuted}
@@ -291,6 +297,7 @@ export default function OnboardingStepScreen() {
 
       {step === "cost" ? (
         <TextInput
+          {...scaledInput}
           accessibilityLabel="Typical device cost"
           keyboardType="decimal-pad"
           placeholder="Skip if you prefer"

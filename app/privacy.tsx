@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -7,19 +7,20 @@ import {
   PRIVACY_POLICY_TITLE,
 } from "../src/domain/privacy-policy";
 import { color, minTapTarget, space, type } from "../src/theme/tokens";
+import { AppText } from "../src/ui/AppText";
 
 export default function PrivacyScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.body}>
-        <Text style={styles.title} accessibilityRole="header">
+        <AppText style={styles.title} accessibilityRole="header">
           {PRIVACY_POLICY_TITLE}
-        </Text>
+        </AppText>
         {PRIVACY_POLICY_SECTIONS.map((section) => (
-          <Text key={section.heading} style={styles.section}>
-            <Text style={styles.heading}>{section.heading}. </Text>
+          <AppText key={section.heading} style={styles.section}>
+            <AppText style={styles.heading}>{section.heading}. </AppText>
             {section.body}
-          </Text>
+          </AppText>
         ))}
         <Pressable
           accessibilityRole="button"
@@ -27,7 +28,7 @@ export default function PrivacyScreen() {
           onPress={() => router.back()}
           style={styles.link}
         >
-          <Text style={styles.linkLabel}>Back</Text>
+          <AppText style={styles.linkLabel}>Back</AppText>
         </Pressable>
       </ScrollView>
     </SafeAreaView>

@@ -9,8 +9,8 @@ updated: 2026-08-18
 
 ## 1. Completion declaration
 
-- [x] All planned agent-executable phases (0–6) are implemented.
-- [x] All available automated validation passes (`lint` 0, `test` 46/46, `typecheck` 0).
+- [x] All planned agent-executable phases (0–7) are implemented.
+- [x] All available automated validation passes (`lint` 0, `test` 47/47, `typecheck` 0).
 - [x] Unverified results are listed below.
 
 ## 2. Outstanding defects or unverified items
@@ -106,8 +106,8 @@ This checklist is **not** store-submit authorization.
 
 ## 9. Final evidence
 
-- Plans: `docs/plans/phase_0_foundations_plan.md` through `docs/plans/phase_6_brand-identity_plan.md`
+- Plans: `docs/plans/phase_0_foundations_plan.md` through `docs/plans/phase_7_accessibility-safety_plan.md`
 - Blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
 - Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
-- Validation: `npm run lint` 0; `npm test` 46 pass; `npm run typecheck` 0
-- Commits: phase 4 `b6ae945`; phase 5 `32c6ca0`. Phase 6 is local until the owner asks to commit.
+- Validation: `npm run lint` 0; `npm test` 47 pass; `npm run typecheck` 0
+- Commits: phase 5 `32c6ca0`; phase 6 `29bc181`. Phase 7 is local until the owner asks to commit.

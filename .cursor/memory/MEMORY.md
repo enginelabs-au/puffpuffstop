@@ -49,7 +49,7 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - 16+ wellness habit coach (not medical, not a kids app). v1 money is a local estimate ledger only.
 - Stack: Expo + TypeScript + Expo Router, local versioned JSON snapshot persist (`expo-file-system`), Supabase Auth/Postgres/RLS later.
 - Canonical blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
-- Phase 0–6 plans verified. Brand art lives in `assets/brand/`; Expo icons in `assets/images/`.
+- Phase 0–7 plans verified. Brand art lives in `assets/brand/`; Expo icons in `assets/images/`.
 - Closure list: `docs/plans/final_implementation_checklist.md`
 - Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
 

@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { color, minTapTarget, radius, space, type } from "../theme/tokens";
+import { AppText } from "./AppText";
 
 export type ChipOption<T extends string> = {
   value: T;
@@ -39,9 +40,9 @@ export function ChipGroup<T extends string>({
               pressed ? styles.pressed : null,
             ]}
           >
-            <Text style={[styles.label, isOn ? styles.labelOn : null]}>
+            <AppText style={[styles.label, isOn ? styles.labelOn : null]}>
               {option.label}
-            </Text>
+            </AppText>
           </Pressable>
         );
       })}

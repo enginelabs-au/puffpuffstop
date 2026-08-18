@@ -10,7 +10,13 @@ import {
   setPersistDriver,
 } from "./persist";
 import { setHydrating } from "./persist-hook";
-import { deleteLocalData, exportLocalData } from "./privacy";
+import {
+  DELETE_LOCAL_BODY,
+  DELETE_LOCAL_TITLE,
+  deleteLocalData,
+  exportLocalData,
+  formatLocalExport,
+} from "./privacy";
 import { addSavings, getSavings, resetSavings } from "./savings-store";
 import { getSettings, resetSettings, updateSettings } from "./settings-store";
 
@@ -55,5 +61,15 @@ describe("privacy", () => {
     assert.equal(restored, true);
     assert.equal(exportLocalData(now).draft.nickname, "");
     assert.equal(getSavings().pot, 0);
+  });
+
+  it("confirms delete is local and formats export JSON", () => {
+    assert.match(DELETE_LOCAL_TITLE, /delete/i);
+    assert.match(DELETE_LOCAL_BODY, /this device/i);
+    assert.match(DELETE_LOCAL_BODY, /cannot be undone/i);
+    const now = new Date(2026, 7, 18, 12);
+    const json = formatLocalExport(exportLocalData(now));
+    assert.match(json, /exportedAt/);
+    assert.match(json, /dailyLog/);
   });
 });

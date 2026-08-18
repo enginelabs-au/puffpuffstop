@@ -120,4 +120,10 @@
 
 - Commit `32c6ca0` stored phase 5. Phase 6 installs the owner no-cloud icon: master JPEG in `assets/brand/source/`, 1024 RGB PNG master, Expo images regenerated, sky tokens `#00B8F8` / `#D8F4FC`.
 - Validation: export script assertions; `npm run lint` 0; `npm test` 46 pass; `npm run typecheck` 0.
-- No phase 7 unless asked. No store submit.
+- No store submit.
+
+## PuffPuffStop launch — phase 7 verified
+
+- Commit `29bc181` stored phase 6. Phase 7 adds Dynamic Type via `AppText` (1.4× cap), delete confirmation, and system-share export with on-screen fallback.
+- Validation: `npm run lint` 0; `npm test` 47 pass; `npm run typecheck` 0.
+- No phase 8 unless asked. No store submit.
