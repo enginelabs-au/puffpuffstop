@@ -247,6 +247,38 @@ Prefer built-in project scripts and official tooling over improvised alternative
 
 ---
 
+### Tool: Expo (PuffPuffStop app)
+
+**Category**
+
+- runtime / build / mobile
+
+**Purpose**
+
+- Local Expo + Expo Router development for the PuffPuffStop iOS/Android client.
+
+**When to use**
+
+- Phase-0+ application work in this repository: start Metro, typecheck, lint, or add Expo modules.
+
+**How to access**
+
+- From repo root: `npm start`, `npm run ios`, `npm run android`, `npm run web`, `npm run lint`, `npm test`, `npm run typecheck`.
+
+**Common operations**
+
+- Add screens under `app/`; keep domain logic in `src/`.
+
+**Constraints**
+
+- Do not EAS submit or store-publish without explicit owner authorization. Do not commit secret values.
+
+**Related files**
+
+- `package.json`, `app.json`, `app/`, `src/`
+
+---
+
 ### Tool: Product lifecycle launcher
 
 **Category**

@@ -4,6 +4,10 @@
 !.env.example
 *.pem
 *.key
+*.p12
+*.p8
+*.jks
+*.mobileprovision
 node_modules/
 dist/
 build/
@@ -14,3 +18,9 @@ coverage/
 *.log
 .idea/
 .vscode/
+.expo/
+web-build/
+*.tsbuildinfo
+.metro-health-check*
+/ios
+/android

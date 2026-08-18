@@ -43,6 +43,15 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - Agent workspace layout: `/memory/runbooks/agent-workspace.md`
 - Bootstrap procedure: `/memory/runbooks/agent-config-bootstrap.md`
 
+## Product architecture (PuffPuffStop)
+
+- Name/tagline locked: PuffPuffStop — “Break the cycle, reclaim your lungs.”
+- 16+ wellness habit coach (not medical, not a kids app). v1 money is a local estimate ledger only.
+- Stack: Expo + TypeScript + Expo Router, offline-first SQLite later, Supabase Auth/Postgres/RLS later.
+- Canonical blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
+- Phase 0 plan: `docs/plans/phase_0_foundations_plan.md`
+- Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
+
 ## Existing workflow references
 
 - Vercel: `/skills/vercel-deploy-workflow/SKILL.md` and `/memory/runbooks/vercel-workflow.md`
