@@ -1,29 +1,31 @@
 ---
 schema_version: 1
 task_id: 20260818-puffpuffstop-mobile-mvp
-status: phase-1-approved-and-verified
-revision: 2
+status: phases-0-4-verified
+revision: 3
 created_at: 2026-08-18T11:32:00Z
-updated_at: 2026-08-18T11:05:00Z
+updated_at: 2026-08-18T11:20:00Z
 ---
 
-# Owner Handoff: PuffPuffStop phase 0 foundations
+# Owner Handoff: PuffPuffStop local MVP
 
 ## 1. Decision requested
 
-Choose one for **continuing local phase-1 planning** (onboarding + plan screen). This is not a request to publish, deploy, spend, or enter secrets.
+Agent-executable phases 0–4 are done. Choose one for **closure**, not for publish/deploy/spend:
 
-- `APPROVE` — generate `docs/plans/phase_1_onboarding-plan_plan.md` next and implement only after that plan exists.
-- `REQUEST_CHANGES` — name the phase-0 gap to remediate.
-- `DO_NOT_PROCEED` — stop the workstream.
+- `APPROVE` — accept residuals as listed and work `docs/plans/final_implementation_checklist.md` yourself.
+- `REQUEST_CHANGES` — name the gap to remediate before checklist work.
+- `DO_NOT_PROCEED` — stop. Do not store-submit.
+
+This is not authorization to publish, advertise, enter secrets, or mutate a remote database.
 
 ## 2. Delivered outcome
 
-Local phase-0 foundations for PuffPuffStop: strategy blueprint, six-role workstream, phase-0 plan, Expo/TypeScript/Expo Router skeleton, design tokens, 16+ age-gate stub, empty brand table, lint/test/typecheck, Supabase folder with empty baseline, env-name wiring.
+Local 16+ PuffPuffStop loop: age-gate, onboarding, plan, organ home, Log, settings, local puff savings, on-device snapshot persist, in-app privacy policy.
 
 ## 3. Scope and requirement traceability
 
-PPS-P0-01–07 implemented and verified. Later PRD items specified, not built.
+PPS-P0-01–07 and later onboarding/home/settings/persist items implemented locally. Store submit remains out of scope.
 
 ## 4. Role and stage-gate summary
 
@@ -33,42 +35,41 @@ PPS-P0-01–07 implemented and verified. Later PRD items specified, not built.
 | ui-ux-developer-subagent | required | PASS | `ui-ux-developer-subagent/handoff.md` |
 | software-engineer-subagent | required | PASS | `software-engineer-subagent/handoff.md` |
 | security-engineer-subagent | required | CONDITIONAL | `security-engineer-subagent/handoff.md` |
-| growth-marketing-subagent | required | PASS | `growth-marketing-subagent/handoff.md` |
+| growth-marketing-subagent | skipped for impl phases | PASS positioning only; no campaigns | `growth-marketing-subagent/handoff.md` |
 | project-lead-subagent | required | CONDITIONAL | `project-lead-subagent/handoff.md` |
-
-Skipped: none.
 
 ## 5. Verification evidence
 
-- Bootstrap exit 0; preflight READY
+- Preflight READY
 - `npm run lint` 0
-- `npm test` 12/12
+- `npm test` 40/40
 - `npm run typecheck` 0
 
 ## 6. Changed paths and external changes
 
-Application: `app/`, `src/`, Expo configs, `supabase/`, `.env.example`.  
-Docs: blueprint, phase-0 plan, workstream.  
+Application: `app/`, `src/`, Expo configs, `expo-file-system`.  
+Docs: phases 0–4, final checklist, workstream.  
 External: npm install only. No store, Vercel, or remote DB.
 
 ## 7. Integrated security and production status
 
-- Implemented: phase-0 local foundation
-- Verified: lint/test/typecheck + role artifacts
+- Implemented: local MVP through persist + privacy
+- Verified: lint/test/typecheck
 - Ready for production: **no**
 - Deployed: **no**
 - Owner-approved: **not inferred**
 
 ## 8. Residual risks and accepted limitations
 
-- SEC-P0-001 client-only age-gate
+- SEC-P0-001 client-only age-gate (blocked path now deletes persisted data)
 - SEC-P0-002 Expo/Metro `image-size` toolchain advisories
-- No simulator runtime recording
+- SEC-P4-001 unencrypted local JSON snapshot
+- File persist unproven on a physical device (Node uses a memory driver)
 - Parent lead materialized specialist roles (no Task runtime)
 
 ## 9. Rollback, recovery, and operational ownership
 
-Revert the feature branch. Do not apply the baseline SQL remotely.
+Revert the feature branch. Delete `puffpuffstop-snapshot.json` on device if needed. Do not apply the baseline SQL remotely.
 
 ## 10. Environment variables and credentials still required
 
@@ -76,10 +77,10 @@ Names only: `EXPO_PUBLIC_APP_ENV`, `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPA
 
 ## 11. Human-only or production actions
 
-Apple/Google accounts, listings, privacy policy, Supabase project, legal review, ads, 18+ money — all deferred.
+See `docs/plans/final_implementation_checklist.md`: Apple/Google accounts, hosted privacy URL, legal review, EAS, Supabase link, residual acceptance. Ads and 18+ money stay unauthorized.
 
 ## 12. Owner response
 
-`APPROVE` — 2026-08-18, for local phase-1 planning and implementation only.
+`APPROVE` — 2026-08-18, for local phases 1–4 only.
 
-Phases 1–2 are committed (`35d7e87`, `f3cb2c8`). Phase 3 is implemented and verified (32 tests). Phase 4 plan is drafted only. Production/publish remain unauthorized.
+Phases 1–3 are committed (`35d7e87`, `f3cb2c8`, `63ff524`). Phase 4 is implemented and verified (40 tests) and is local until the owner asks to commit. Production/publish remain unauthorized.

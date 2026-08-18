@@ -1,5 +1,6 @@
 import { getDailyLog, resetDailyLog } from "./daily-log-store";
 import { resetDraft, getDraft } from "./onboarding-store";
+import { persistNow, setHydrating } from "./persist-hook";
 import { getSavings, resetSavings } from "./savings-store";
 import { getSettings, resetSettings } from "./settings-store";
 
@@ -22,8 +23,14 @@ export function exportLocalData(now: Date = new Date()): PrivacyExport {
 }
 
 export function deleteLocalData(now: Date = new Date()): void {
-  resetDraft();
-  resetDailyLog(now);
-  resetSettings();
-  resetSavings();
+  setHydrating(true);
+  try {
+    resetDraft();
+    resetDailyLog(now);
+    resetSettings();
+    resetSavings();
+  } finally {
+    setHydrating(false);
+  }
+  persistNow();
 }

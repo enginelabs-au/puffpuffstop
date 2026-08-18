@@ -102,3 +102,10 @@
 - No card, custody, or payout. Savings disclaimer on screen.
 - Validation: `npm run lint` 0; `npm test` 32 pass; `npm run typecheck` 0.
 - Next map only: `docs/plans/phase_4_store-ready_plan.md`.
+
+## PuffPuffStop launch — phase 4 verified
+
+- Commit `63ff524` stored phase 3. Phase 4 adds a versioned JSON snapshot (memory driver in tests, `expo-file-system` File/Paths on device), age-gate resume/delete, `/privacy`, sync-status stub, recovering pulse.
+- Security replay: SEC-P4-001 unencrypted local snapshot; SEC-P0-001 blocked path now deletes persisted data.
+- Validation: `npm run lint` 0; `npm test` 40 pass; `npm run typecheck` 0.
+- Closure list: `docs/plans/final_implementation_checklist.md`. No phase 5. No store submit.

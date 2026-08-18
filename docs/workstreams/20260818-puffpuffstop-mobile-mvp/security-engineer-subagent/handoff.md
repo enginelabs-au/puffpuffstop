@@ -77,4 +77,4 @@ Gate → growth (no campaigns) then project-lead.
 
 ## 14. Verdict
 
-`CONDITIONAL` — downstream planning may continue. Conditions: (1) SEC-P0-001 remains documented until persistence proves blocked-path writes are impossible; (2) SEC-P0-002 is refreshed with Expo, not force-fixed; (3) no production/publish/secret/remote-DB action.
+`CONDITIONAL` — local implementation may close. Conditions: (1) SEC-P0-001 remains documented (blocked path now deletes persisted data; attestation is still client-only); (2) SEC-P0-002 is refreshed with Expo, not force-fixed; (3) SEC-P4-001 unencrypted local snapshot is accepted or remediated before store submit; (4) no production/publish/secret/remote-DB action. Phase 4 review: `artifacts/phase-4-review.md`.

@@ -1,4 +1,5 @@
 import { localDateKey } from "../domain/organs";
+import { persistNow } from "./persist-hook";
 
 export type DailyLogState = {
   dateKey: string;
@@ -22,8 +23,14 @@ export function getDailyLog(): DailyLogState {
   return { ...state };
 }
 
+export function replaceDailyLog(next: DailyLogState): DailyLogState {
+  state = { ...next };
+  return getDailyLog();
+}
+
 export function resetDailyLog(now: Date = new Date()): DailyLogState {
   state = { dateKey: localDateKey(now), logged: 0, recoveryTicks: 0 };
+  persistNow();
   return getDailyLog();
 }
 
@@ -48,6 +55,7 @@ export function applyDayRollover(
     logged: 0,
     recoveryTicks: state.recoveryTicks + (recovered ? 1 : 0),
   };
+  persistNow();
   return {
     ...getDailyLog(),
     rolled: true,
@@ -59,11 +67,13 @@ export function applyDayRollover(
 export function logPuff(commitment: number, now: Date = new Date()): DailyLogState {
   applyDayRollover(commitment, now);
   state = { ...state, logged: state.logged + 1 };
+  persistNow();
   return getDailyLog();
 }
 
 export function undoPuff(commitment: number, now: Date = new Date()): DailyLogState {
   applyDayRollover(commitment, now);
   state = { ...state, logged: Math.max(0, state.logged - 1) };
+  persistNow();
   return getDailyLog();
 }

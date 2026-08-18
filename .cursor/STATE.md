@@ -2,20 +2,20 @@
 
 ## Current Objective
 
-- Phase 3 settings and local puff savings are implemented and locally verified. Phase 4 store-ready is drafted only.
+- Phase 4 store-ready hardening is implemented and locally verified. Agent-executable phases are closed pending owner checklist actions.
 
 ## Current Status
 
-- Phase 3 verified. Next: execute `docs/plans/phase_4_store-ready_plan.md` only when authorized.
+- Phase 4 verified. Final checklist is open for owner-only store, legal, and credential work. Do not publish.
 
 ## Project Phase
 
-- Phase 3 — Settings and puff savings (verified). Phases 0–2 verified. Phase 4 not implemented.
+- Phase 4 — Store-ready hardening (verified). Phases 0–3 verified. No further implementation phase.
 
 ## Active Plan
 
-- `docs/plans/phase_3_settings-savings_plan.md` (status: verified)
-- Next plan file: `docs/plans/phase_4_store-ready_plan.md` (draft, not implemented)
+- `docs/plans/phase_4_store-ready_plan.md` (status: verified)
+- Closure: `docs/plans/final_implementation_checklist.md` (status: open)
 
 ## Active Workstream
 
@@ -24,8 +24,8 @@
 
 ## Active Role and Gate
 
-- Parent-led phase 3 implementation complete. Current gate: phase-4 plan draft.
-- Last integrated validation: `npm run lint` 0; `npm test` 32/32; `npm run typecheck` 0.
+- Parent-led phase 4 complete. Current gate: owner checklist (store/legal/credentials).
+- Last integrated validation: `npm run lint` 0; `npm test` 40/40; `npm run typecheck` 0.
 
 ## Predecessor Handoff
 
@@ -33,11 +33,11 @@
 
 ## Pending Remediation
 
-- None blocking. Residuals: SEC-P0-001 (client age-gate), SEC-P0-002 (Expo/Metro `image-size` toolchain advisories).
+- None blocking. Residuals: SEC-P0-001 (client age-gate), SEC-P0-002 (Expo/Metro `image-size`), SEC-P4-001 (unencrypted local snapshot).
 
 ## Owner Decision
 
-- Owner asked to commit phase 2 and proceed with phase 3.
+- Owner asked to commit phase 3 and proceed with phase 4.
 - Production, store publish, ads, secrets, cards, and remote DB mutation remain unauthorized.
 
 ## Active Instructions
@@ -49,8 +49,8 @@
 ## Active Items
 
 - Working branch: `cursor/puffpuffstop-phase-0-foundations-1685`
-- Phase 1 `35d7e87` and phase 2 `f3cb2c8` committed, not pushed.
-- Phase 3 is local until committed.
+- Phase 1 `35d7e87`, phase 2 `f3cb2c8`, phase 3 `63ff524` committed, not all pushed.
+- Phase 4 is local until the owner asks to commit.
 - Do not push to `main`. Do not publish the app.
 
 ## Files in Active Use
@@ -63,8 +63,8 @@
 - `/TOOLS.md`
 - `/memory/MEMORY.md`
 - `/memory/memories/2026-08-18-continuation.md`
-- `docs/plans/phase_3_settings-savings_plan.md`
 - `docs/plans/phase_4_store-ready_plan.md`
+- `docs/plans/final_implementation_checklist.md`
 - `app/`, `src/`
 
 ## Open Blockers
@@ -73,24 +73,24 @@
 
 ## Attempts Performed
 
-- Phase 2 committed. Phase 3 settings, savings ledger, export/delete implemented.
+- Phase 3 committed. Phase 4 persist, privacy, sync stub, and checklist implemented.
 
 ## Decisions and Assumptions
 
-- Savings credit on under-cap day rollover only. No card or payout.
-- Reminder flag is local storage only; no OS notifications yet.
-- In-process stores remain until phase 4 persistence.
+- Persistence is a versioned JSON snapshot, not SQLite.
+- File driver is used on device; Node tests use a memory driver.
+- Cloud sync remains off even if a Supabase URL name is present.
 
 ## Current Working State
 
-- Phase 3 implemented and uncommitted.
+- Phase 4 implemented and uncommitted.
 
 ## Next Actions
 
-1. Commit phase 3 when the owner asks.
-2. Execute phase 4 (store-ready hardening) when authorized.
+1. Commit phase 4 when the owner asks.
+2. Owner works the final checklist (accounts, hosted privacy URL, residual acceptance).
 3. Do not store-submit, ad-spend, or remote-migrate.
 
 ## Last Updated
 
-- 2026-08-18 — phase 3 verified after owner asked to proceed.
+- 2026-08-18 — phase 4 verified after owner asked to proceed.

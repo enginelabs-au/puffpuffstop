@@ -3,14 +3,14 @@ schema_version: 1
 task_id: 20260818-puffpuffstop-mobile-mvp
 title: PuffPuffStop mobile MVP foundations
 source_request: Owner-locked PuffPuffStop product launch brief on enginelabs-au/puffpuffstop branch cursor/agent-control-plane
-status: phase-3-verified
+status: phase-4-verified
 risk_tier: 3
 created_at: 2026-08-18T10:45:00Z
-updated_at: 2026-08-18T11:05:00Z
-revision: 3
+updated_at: 2026-08-18T11:20:00Z
+revision: 4
 owner: user-operator
 active_role: orchestrating-lead
-current_gate: phase-4-plan-draft
+current_gate: owner-final-checklist
 ---
 
 # Workstream Manifest: PuffPuffStop mobile MVP foundations
@@ -160,5 +160,5 @@ Label assumptions as `verified`, `provisional`, or `blocking`.
 
 - Final verdict: owner APPROVE for phase 1; phase 1 verified
 - Owner handoff: updated
-- Closure evidence: phases 0–3 locally verified; phase 4 plan drafted only
-- Remaining manual actions: deferred to later phases / final checklist
+- Closure evidence: phases 0–4 locally verified; `docs/plans/final_implementation_checklist.md` opened
+- Remaining manual actions: store accounts, hosted privacy URL, residual acceptance, EAS, Supabase link — owner only

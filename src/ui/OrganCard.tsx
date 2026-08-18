@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, StyleSheet, Text, View } from "react-native";
 
 import {
   ORGAN_LABELS,
   formatOrganPercent,
   type OrganId,
 } from "../domain/organs";
-import { color, radius, space, type } from "../theme/tokens";
+import { color, motion, radius, space, type } from "../theme/tokens";
 
 const GLYPH: Record<OrganId, string> = {
   lungs: "Lu",
@@ -32,17 +33,46 @@ type Props = {
 export function OrganCard({ id, score, recovering }: Props) {
   const label = ORGAN_LABELS[id];
   const percent = formatOrganPercent(score);
+  const pulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!recovering) {
+      pulse.setValue(1);
+      return undefined;
+    }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 0.94,
+          duration: motion.loop / 2,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: motion.loop / 2,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse, recovering]);
+
   return (
-    <View
+    <Animated.View
       accessibilityLabel={`${label}, ${percent} percent, motivational estimate`}
-      style={[styles.card, recovering ? styles.recovering : null]}
+      style={[
+        styles.card,
+        recovering ? styles.recovering : null,
+        { transform: [{ scale: pulse }] },
+      ]}
     >
       <View style={[styles.glyph, { backgroundColor: TINT[id] }]}>
         <Text style={styles.glyphLabel}>{GLYPH[id]}</Text>
       </View>
       <Text style={styles.name}>{label}</Text>
       <Text style={styles.percent}>{percent}%</Text>
-    </View>
+    </Animated.View>
   );
 }
 

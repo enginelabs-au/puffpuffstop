@@ -3,9 +3,16 @@ import { describe, it } from "node:test";
 
 import { logPuff, resetDailyLog } from "./daily-log-store";
 import { resetDraft, updateDraft } from "./onboarding-store";
+import {
+  createMemoryPersistDriver,
+  hydrateFromDriver,
+  resetPersistDriver,
+  setPersistDriver,
+} from "./persist";
+import { setHydrating } from "./persist-hook";
+import { deleteLocalData, exportLocalData } from "./privacy";
 import { addSavings, getSavings, resetSavings } from "./savings-store";
 import { getSettings, resetSettings, updateSettings } from "./settings-store";
-import { deleteLocalData, exportLocalData } from "./privacy";
 
 describe("privacy", () => {
   it("exports and then deletes all local stores", () => {
@@ -29,6 +36,24 @@ describe("privacy", () => {
     assert.equal(exportLocalData(now).draft.nickname, "");
     assert.equal(exportLocalData(now).dailyLog.logged, 0);
     assert.equal(getSettings().remindersEnabled, false);
+    assert.equal(getSavings().pot, 0);
+  });
+
+  it("persists an empty snapshot after delete", async () => {
+    resetPersistDriver();
+    const store = new Map<string, string>();
+    setPersistDriver(createMemoryPersistDriver(store));
+    const now = new Date(2026, 7, 18, 12);
+    updateDraft({ nickname: "Sam", durationCount: 2, frequencyCount: 10 });
+    addSavings(2);
+    deleteLocalData(now);
+    setHydrating(true);
+    updateDraft({ nickname: "KeepMe" });
+    addSavings(9);
+    setHydrating(false);
+    const restored = await hydrateFromDriver();
+    assert.equal(restored, true);
+    assert.equal(exportLocalData(now).draft.nickname, "");
     assert.equal(getSavings().pot, 0);
   });
 });

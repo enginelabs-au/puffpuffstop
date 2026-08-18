@@ -47,13 +47,9 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 
 - Name/tagline locked: PuffPuffStop — “Break the cycle, reclaim your lungs.”
 - 16+ wellness habit coach (not medical, not a kids app). v1 money is a local estimate ledger only.
-- Stack: Expo + TypeScript + Expo Router, offline-first SQLite later, Supabase Auth/Postgres/RLS later.
+- Stack: Expo + TypeScript + Expo Router, local versioned JSON snapshot persist (`expo-file-system`), Supabase Auth/Postgres/RLS later.
 - Canonical blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
-- Phase 0 plan: `docs/plans/phase_0_foundations_plan.md`
-- Phase 1 plan: `docs/plans/phase_1_onboarding-plan_plan.md` (verified)
-- Phase 2 plan: `docs/plans/phase_2_home-log_plan.md` (verified)
-- Phase 3 plan: `docs/plans/phase_3_settings-savings_plan.md` (verified)
-- Phase 4 plan: `docs/plans/phase_4_store-ready_plan.md` (draft, not implemented)
+- Phase 0–4 plans verified. Closure list: `docs/plans/final_implementation_checklist.md`
 - Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
 
 ## Existing workflow references

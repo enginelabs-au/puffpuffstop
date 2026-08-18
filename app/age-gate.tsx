@@ -2,22 +2,24 @@ import { router } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { resetDraft } from "../src/data/onboarding-store";
+import { getDraft } from "../src/data/onboarding-store";
+import { deleteLocalData } from "../src/data/privacy";
 import { evaluateAgeGate } from "../src/domain/age-gate";
+import { resumeAfterAgeGate } from "../src/domain/onboarding";
 import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
 
 export default function AgeGateScreen() {
   function onConfirmSixteenOrOlder() {
     const decision = evaluateAgeGate(true);
     if (decision.status === "allowed") {
-      router.replace("/onboarding/nickname");
+      router.replace(resumeAfterAgeGate(getDraft()));
     }
   }
 
   function onUnderSixteen() {
     const decision = evaluateAgeGate(false);
     if (decision.status === "blocked" && !decision.trackingAllowed) {
-      resetDraft();
+      deleteLocalData();
       router.replace("/blocked");
     }
   }

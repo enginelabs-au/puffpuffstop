@@ -5,6 +5,7 @@ import {
   canContinue,
   canShowHome,
   clampDial,
+  resumeAfterAgeGate,
   displayName,
   emptyDraft,
   isOnboardingStep,
@@ -61,6 +62,18 @@ describe("onboarding", () => {
         frequencyCount: 12,
       }),
       true,
+    );
+  });
+
+  it("resumes home after age-gate when a plan already exists", () => {
+    assert.equal(resumeAfterAgeGate(emptyDraft()), "/onboarding/nickname");
+    assert.equal(
+      resumeAfterAgeGate({
+        ...emptyDraft(),
+        durationCount: 8,
+        frequencyCount: 12,
+      }),
+      "/home",
     );
   });
 });

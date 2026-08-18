@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { readSyncStatus, syncStatusLabel } from "../src/config/sync";
 import { getDraft, resetDraft, updateDraft } from "../src/data/onboarding-store";
 import { deleteLocalData, exportLocalData } from "../src/data/privacy";
 import { getSavings } from "../src/data/savings-store";
@@ -126,7 +127,18 @@ export default function SettingsScreen() {
         />
         <Text style={styles.caption}>{SAVINGS_DISCLAIMER}</Text>
 
+        <Text style={styles.section}>Cloud sync</Text>
+        <Text style={styles.caption}>{syncStatusLabel(readSyncStatus())}</Text>
+
         <Text style={styles.section}>Privacy</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Read privacy policy"
+          onPress={() => router.push("/privacy")}
+          style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}
+        >
+          <Text style={styles.buttonLabel}>Privacy policy</Text>
+        </Pressable>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Export local data"
