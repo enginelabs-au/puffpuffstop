@@ -1,0 +1,21 @@
+# Local Supabase project structure for PuffPuffStop.
+# Phase 0: names and file layout only. Do not link or db push.
+
+project_id = "puffpuffstop-local"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:8081"

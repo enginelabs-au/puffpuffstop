@@ -2,50 +2,56 @@
 
 ## Current Objective
 
-- No active implementation objective.
+- PuffPuffStop phase-0 foundations are implemented and locally verified. Await owner decision on continuing to phase-1 planning only. Production, store publish, ads, secrets, cards, and remote DB mutation remain unauthorized.
 
 ## Current Status
 
-- Complete — the explicit native launcher, read-only preflight, adaptive intake contract, corrected Build boundary, and full control-plane reachability validation are implemented and verified.
+- Phase 0 verified — awaiting owner decision (`APPROVE` / `REQUEST_CHANGES` / `DO_NOT_PROCEED` for local phase-1 planning).
 
 ## Project Phase
 
-- Agent control-plane hardening complete.
+- Phase 0 — Foundations (verified). Phases 1–4 mapped, not planned in detail or implemented.
 
 ## Active Plan
 
-- None.
+- `docs/plans/phase_0_foundations_plan.md` (status: verified)
 
 ## Active Workstream
 
-- None.
+- `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
+- Task ID: `20260818-puffpuffstop-mobile-mvp`
 
 ## Active Role and Gate
 
-- None.
-- Last integrated validation: `PASS`.
+- `project-lead-subagent` complete (CONDITIONAL). Current gate: owner-decision.
+- Last integrated validation: `npm run lint` 0; `npm test` 12/12; `npm run typecheck` 0.
 
 ## Predecessor Handoff
 
-- None.
+- `docs/workstreams/20260818-puffpuffstop-mobile-mvp/delivery/owner-handoff.md`
 
 ## Pending Remediation
 
-- None recorded.
+- None blocking. Residuals: SEC-P0-001 (client age-gate), SEC-P0-002 (Expo/Metro `image-size` toolchain advisories).
 
 ## Owner Decision
 
-- The protected launch-route alignment is applied. Spent apply scripts and the patch handoff were removed. No further physical control-plane edits are required for the stack to route as one system.
+- Product/stack/risk/roles locked. Local phase-0 authorization used.
+- Owner response for next phase: not recorded.
 
 ## Active Instructions
 
-- None.
+- `/instructions/LAUCH.md`
+- `/instructions/STRATEGY.md`
+- `/instructions/PROJECT_PLANNING.md`
+- `/instructions/SUBAGENTS.md`
+- `/instructions/ROLES.md`
 
 ## Active Items
 
-- External controls documented in `docs/handover/agent-governance-operator-setup.md` are not represented as complete until the owner configures them.
-- The agent control plane remains untracked and uncommitted by explicit scope.
-- Root routing, instruction registry, session startup, bootstrap, config validator, CI, and CLI allowlists include `/launch-pipeline`.
+- Cloud branch: `cursor/puffpuffstop-phase-0-foundations-1685`
+- Do not generate the phase-1 plan file until the owner approves continuation.
+- Do not push to `main`. Do not publish the app.
 
 ## Files in Active Use
 
@@ -56,6 +62,11 @@
 - `/SKILLS.md`
 - `/TOOLS.md`
 - `/memory/MEMORY.md`
+- `/memory/memories/2026-08-18-continuation.md`
+- `docs/blueprints/2026-08-18_puffpuffstop.md`
+- `docs/plans/phase_0_foundations_plan.md`
+- `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
+- `app/`, `src/`, `supabase/`, `.env.example`
 
 ## Open Blockers
 
@@ -63,34 +74,29 @@
 
 ## Attempts Performed
 
-- Implemented and reconciled the canonical role catalog, native adapters, routing, workstream artifacts, security controls, validation, and documentation.
-- Ran policy tests, config validation, syntax checks, link/whitespace checks, secret-pattern scans, live hook response smoke tests, and repeated bootstrap idempotence checks.
-- Added `/launch-pipeline`, `/instructions/LAUCH.md`, a complete `.cursor/` map, and launch-link validation across strategy, planning, roles, state, memory, skills, tools, and configuration documentation.
-- Extended launch validation to verify the bootstrap source contract, generated documentation directories, and seeded indexes; the later preflight change moved bootstrap to the first post-approval mutation.
-- Made `/launch-pipeline` explicit-only, added a read-only JSON preflight with seven mode/state tests, corrected bootstrap to the first post-Build mutation, and added an activation-summary/AskQuestion contract.
-- Extended launch validation to classify all 77 `.cursor` files as native, routed, indexed, compatibility, or generated history and fail on an orphan.
-- Attempted the planned `/INSTRUCTIONS.md` route update; the fail-closed hook denied direct agent edits. The owner then authorized an owner-run apply script, which patched the protected files without weakening hooks.
+- Bootstrap exit 0; preflight READY.
+- Materialized six-role workstream, blueprint, and phase-0 plan.
+- Implemented lean Expo 57 Router skeleton; verified lint/test/typecheck.
+- Independent security review: CONDITIONAL.
 
 ## Decisions and Assumptions
 
-- Adaptive gated routing is canonical; irrelevant roles may be skipped only with an evidence-based manifest entry.
-- Task-specific role directives and handoffs live under `docs/workstreams/`, not application source.
-- Role identity is not authorization. Production and external mutations remain owner/CI-controlled.
-- Non-implementation specialists are read-only; the orchestrating lead materializes their verified artifacts.
-- Native runtime JSON files remain at documented `.cursor/` root paths; organization is provided through `/config/README.md` rather than unsupported relocation or symlinks.
-- Read-only preflight precedes lifecycle mode selection. Every pre-Build Cursor plan must close with `bash .cursor/scripts/bootstrap.sh` as the first post-Build action; bootstrap remains the first mutating gate after Build or explicit Agent-mode implementation authorization.
-- Users invoke one command and receive one adaptive activation summary; the parent Agent selects files and roles without file-by-file prompts.
+- All six roles required; none skipped.
+- Parent lead materialized specialist artifacts (no Task runtime).
+- `daysIn` month=30, year=365.
+- Brand catalog stays empty until a later phase.
+- Wellness, not medical; 16+, not kids; local savings only.
 
 ## Current Working State
 
-- Explicit `/launch-pipeline` is now routed from the root router, instruction registry, session startup, bootstrap, validator, CI, and CLI allowlist. Fail-closed hooks remain in place. Reachability covers all 77 control-plane files.
+- Phase 0 acceptance criteria met locally. Owner handoff prepared.
 
 ## Next Actions
 
-- External GitHub/Vercel/Supabase operator setup remains optional and is documented in `docs/handover/agent-governance-operator-setup.md`.
-- No further physical `.cursor` edits are required for the stack to work as one system. Start the next product lifecycle with `/launch-pipeline`.
-- If desired, explicitly request a commit so the currently untracked control plane is versioned.
+1. Owner records a decision on the handoff.
+2. If APPROVE: generate exactly `docs/plans/phase_1_onboarding-plan_plan.md` from the phase-0 next-plan prompt, then implement.
+3. Do not store-submit, ad-spend, or remote-migrate.
 
 ## Last Updated
 
-- 2026-08-18 — removed spent launch-route apply scripts and patch handoff after successful application.
+- 2026-08-18 — phase 0 verified, owner decision pending.

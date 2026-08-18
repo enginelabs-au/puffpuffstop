@@ -60,3 +60,21 @@
 
 - Removed `docs/handover/protected-launch-route-patch.md`, `docs/handover/apply-protected-launch-route-patch.sh`, and `docs/handover/apply-protected-launch-route-patch.mjs` after the patch landed in the live control-plane files.
 - Removed the MEMORY index entry for the spent patch. The applied routing now lives in `AGENTS.md`, `/INSTRUCTIONS.md`, `/AGENTS.md`, the session-start rule, bootstrap, the config validator, CI, and `cli.json`.
+
+## PuffPuffStop launch — phase 0 intake
+
+- Parent orchestrator started new-product mode for `20260818-puffpuffstop-mobile-mvp` on repo `enginelabs-au/puffpuffstop`.
+- First mutation: `bash .cursor/scripts/bootstrap.sh` → exit `0` (`agent config validation complete`; `launch pipeline validation complete: 77 control-plane files`; `bootstrap complete: /workspace`).
+- Read-only preflight: `node .cursor/skills/launch-pipeline/scripts/preflight.mjs` → exit `0`, `status: READY`, `checked_at: 2026-08-18T10:44:25.224Z`, `bootstrap_required: false`.
+- Classification: risk tier 3, all six canonical roles required, local planning + phase-0 foundations only. Production deploy, store publish, paid ads, secrets, card processing, and remote DB mutation remain unauthorized.
+- Working branch: `cursor/puffpuffstop-phase-0-foundations-1685` from `cursor/agent-control-plane`.
+- No Task sub-agent runtime is available in this session; the parent lead materializes role artifacts in pipeline order.
+
+## PuffPuffStop launch — phase 0 verified
+
+- Artifacts: `docs/blueprints/2026-08-18_puffpuffstop.md`, `docs/plans/phase_0_foundations_plan.md`, workstream `20260818-puffpuffstop-mobile-mvp` with all six roles required.
+- Role verdicts: PM PASS, UX PASS, SWE PASS, Security CONDITIONAL, Growth PASS (no campaigns), Project Lead CONDITIONAL.
+- Implementation: Expo Router skeleton, tokens, age-gate/blocked/foundation screens, empty `BRAND_CATALOG`, estimation helpers, `supabase` empty baseline, `.env.example` names only.
+- Validation: `npm run lint` 0; `npm test` 12 pass; `npm run typecheck` 0.
+- Residuals: SEC-P0-001 client age-gate; SEC-P0-002 Metro `image-size` advisories (0 critical).
+- Owner handoff: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/delivery/owner-handoff.md`. Phase 1 plan not generated.
