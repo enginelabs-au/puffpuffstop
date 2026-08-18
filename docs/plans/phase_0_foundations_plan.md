@@ -247,7 +247,7 @@ Phase 0 is additive. If the Expo scaffold fails, remove generated app files and 
 - `npm test` exit 0 (12 pass / 0 fail)
 - `npm run typecheck` exit 0
 - Security CONDITIONAL residuals: SEC-P0-001, SEC-P0-002
-- Commit SHA: recorded on the feature branch after commit
+- Commit SHA: `51c63bf6b149b08fe9f4b980172417cd5695af7f`
 
 ## 21. Deviations and follow-ups
 
