@@ -1,0 +1,54 @@
+name: Agent governance
+
+on:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - ".cursor/**"
+      - ".cursorignore"
+      - "docs/**"
+      - ".github/workflows/agent-governance.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "AGENTS.md"
+      - ".cursor/**"
+      - ".cursorignore"
+      - "docs/**"
+      - ".github/workflows/agent-governance.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test deterministic agent policy
+        run: node --test .cursor/hooks/policy.test.mjs
+
+      - name: Validate agent configuration
+        run: node .cursor/scripts/validate-agent-config.mjs
+
+      - name: Validate launch pipeline
+        run: |
+          node .cursor/skills/launch-pipeline/scripts/preflight.mjs
+          node --test .cursor/skills/launch-pipeline/scripts/preflight.test.mjs
+          node .cursor/skills/launch-pipeline/scripts/validate-launch.mjs
+
+      - name: Verify bootstrap idempotence
+        run: |
+          bash .cursor/scripts/bootstrap.sh
+          bash .cursor/scripts/bootstrap.sh
+          git diff --exit-code
