@@ -2,11 +2,11 @@
 
 ## Current Objective
 
-- Phase 8 local reminders are implemented. Commit phases 8–9 and the icon cutout, merge onto `main`, and push.
+- Re-author unpublished `main` commits as Cursor Agent and push to `origin/main`.
 
 ## Current Status
 
-- Phases 0–9 verified locally. Final checklist remains open for store, legal, and credential work. Do not publish the app.
+- Phases 0–9 are on local `main`. Push was blocked by GH007. Owner required Cursor anonymous email.
 
 ## Project Phase
 
@@ -25,7 +25,7 @@
 
 ## Active Role and Gate
 
-- Parent-led phases 8–9 complete. Current gate: owner checklist (store/legal/credentials).
+- Parent-led phases 8–9 complete. Current gate: owner checklist after `origin/main` is updated.
 - Last integrated validation: `npm run lint` 0; `npm test` 58/58; `npm run typecheck` 0.
 
 ## Predecessor Handoff
@@ -38,7 +38,7 @@
 
 ## Owner Decision
 
-- Owner asked to finish phase 8, commit, merge all branches into `main`, check out `main`, and push.
+- Always commit as `Cursor Agent <cursoragent@cursor.com>`. Do not change git config.
 - Production, store publish, ads, secrets, cards, and remote DB mutation remain unauthorized.
 
 ## Active Instructions
@@ -49,8 +49,7 @@
 
 ## Active Items
 
-- Working branch: `cursor/puffpuffstop-phase-0-foundations-1685` until the merge lands on `main`.
-- Phase 7 commit: `dec05c3`.
+- Checked out `main` at `11d189e`. Rewriting unpublished commits in a separate worktree so this workspace stays on `main`.
 - Do not publish the app.
 
 ## Files in Active Use
@@ -73,24 +72,24 @@
 
 ## Attempts Performed
 
-- Reversed the phase-8 skip with opt-in local 19:00 reminders. SQLite rewrite stays deferred.
+- Direct rewrite on `origin/main` removed the hook file and fail-closed the agent. Recovered by returning to `main`.
 
 ## Decisions and Assumptions
 
-- Bundle ID `au.com.enginelabs.puffpuffstop` is local identity only, not a store listing.
-- JSON snapshot remains persist; notifications are local-only with remote push off.
-- 19:00 local is the reversible reminder default.
+- Bundle ID `au.com.enginelabs.puffpuffstop` is local identity only.
+- JSON snapshot remains persist; notifications are local-only.
+- Git identity is Cursor Agent via env vars only.
 
 ## Current Working State
 
-- Phase 8 implemented and verified. Phase 9 and icon cutout are in the same working tree.
+- Hook restored. Re-authoring unpublished commits without leaving this `main` checkout.
 
 ## Next Actions
 
-1. Commit, merge onto `main`, and push.
+1. Replay unpublished commits as Cursor Agent and push `origin/main`.
 2. Owner works the final checklist.
 3. Do not store-submit, ad-spend, or remote-migrate.
 
 ## Last Updated
 
-- 2026-08-18 — phase 8 local reminders verified; merge to main requested.
+- 2026-08-18 — recovered onto `main`; rewriting commit emails in a worktree.

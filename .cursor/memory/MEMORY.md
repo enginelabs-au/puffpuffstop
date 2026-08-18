@@ -11,6 +11,7 @@
 - Use adaptive role routing for substantive work: record required/skipped canonical roles, require role charters before action, and preserve evidence-backed handoffs under `docs/workstreams/`.
 - Treat prompts and role identities as guidance, not production authorization; deterministic policy and external access controls govern sensitive actions.
 - Never store passwords, tokens, private keys, or secret values in agent markdown, plans, memories, logs, or templates.
+- Always commit as `Cursor Agent <cursoragent@cursor.com>` via author/committer environment variables. Never use a personal email. Never change git config to set identity.
 
 ## Memory role
 
