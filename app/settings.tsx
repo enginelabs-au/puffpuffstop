@@ -6,7 +6,6 @@ import {
   Pressable,
   ScrollView,
   Share,
-  StyleSheet,
   Switch,
   TextInput,
   View,
@@ -26,23 +25,50 @@ import {
 } from "../src/data/privacy";
 import { getSavings } from "../src/data/savings-store";
 import { applyReminderPreference } from "../src/data/reminders";
+import {
+  REDO_SETUP_BODY,
+  REDO_SETUP_CANCEL,
+  REDO_SETUP_CONFIRM,
+  REDO_SETUP_TITLE,
+  VOICE_EXAMPLE_HINT,
+  VOICE_EXAMPLE_LOG,
+  VOICE_EXAMPLE_REMOVE,
+} from "../src/domain/quick-log";
 import { getSettings, updateSettings } from "../src/data/settings-store";
+import { applyTimeZonePreference } from "../src/data/time-zone-preference";
+import { DAY_RESET_CAPTION, timeZoneOptions } from "../src/domain/timezones";
 import { summarizePlan } from "../src/domain/plan-summary";
 import {
   SAVINGS_DISCLAIMER,
   defaultStakePerPuff,
-  formatMoney,
+  formatCurrency,
 } from "../src/domain/savings";
-import { color, minTapTarget, radius, scaledInput, space, type } from "../src/theme/tokens";
+import {
+  minTapTarget,
+  radius,
+  scaledInput,
+  space,
+  THEME_OPTIONS,
+  type,
+  type ColorTokens,
+} from "../src/theme/tokens";
+import { AppTabs } from "../src/ui/AppTabs";
 import { AppText } from "../src/ui/AppText";
+import { ChipGroup } from "../src/ui/ChipGroup";
+import { SelectField } from "../src/ui/SelectField";
+import { useTheme } from "../src/ui/ThemeProvider";
+import { useThemedStyles } from "../src/ui/use-themed-styles";
 
 export default function SettingsScreen() {
+  const { theme, color, setTheme } = useTheme();
+  const styles = useThemedStyles(settingsStyles);
   const [draft, setDraft] = useState(getDraft);
   const [settings, setSettings] = useState(getSettings);
   const [savings, setSavings] = useState(getSavings);
   const [exportText, setExportText] = useState<string | null>(null);
   const hostedPrivacyUrl = readPrivacyPolicyUrl();
   const summary = useMemo(() => summarizePlan(draft), [draft]);
+  const zoneOptions = useMemo(() => timeZoneOptions(), []);
   const stake = settings.stakePerPuff ?? defaultStakePerPuff(draft);
 
   function patchDraft(partial: Parameters<typeof updateDraft>[0]) {
@@ -56,6 +82,20 @@ export default function SettingsScreen() {
           Settings
         </AppText>
 
+        <AppText style={styles.section}>Appearance</AppText>
+        <ChipGroup
+          options={THEME_OPTIONS}
+          selected={theme}
+          onChange={(value) => {
+            setTheme(value);
+            setSettings(getSettings());
+          }}
+        />
+        <AppText style={styles.caption}>
+          Dark is the default. This only changes how the app looks on this
+          device.
+        </AppText>
+
         <AppText style={styles.section}>Profile</AppText>
         <TextInput
           {...scaledInput}
@@ -66,6 +106,26 @@ export default function SettingsScreen() {
           onChangeText={(nickname) => patchDraft({ nickname })}
           style={styles.input}
         />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Redo setup"
+          onPress={() => {
+            Alert.alert(REDO_SETUP_TITLE, REDO_SETUP_BODY, [
+              { text: REDO_SETUP_CANCEL, style: "cancel" },
+              {
+                text: REDO_SETUP_CONFIRM,
+                onPress: () => router.push("/onboarding/nickname"),
+              },
+            ]);
+          }}
+          style={({ pressed }) => [styles.button, pressed ? styles.pressed : null]}
+        >
+          <AppText style={styles.buttonLabel}>Redo setup</AppText>
+        </Pressable>
+        <AppText style={styles.caption}>
+          Walk through onboarding again to change device, brand, or goals.
+          Today’s log and savings stay.
+        </AppText>
 
         <AppText style={styles.section}>Goals</AppText>
         <AppText style={styles.caption}>
@@ -88,8 +148,7 @@ export default function SettingsScreen() {
         <AppText style={styles.section}>Brand</AppText>
         <AppText style={styles.caption}>
           {draft.catalogBrandId ?? (draft.otherBrandName || "Custom / not set")}.
-          Change this by restarting onboarding after delete, or keep estimates
-          here for now.
+          Change this with Redo setup, or keep estimates here for now.
         </AppText>
         <TextInput
           {...scaledInput}
@@ -106,6 +165,19 @@ export default function SettingsScreen() {
           }}
           style={styles.input}
         />
+
+        <AppText style={styles.section}>Day</AppText>
+        <SelectField
+          label="Timezone"
+          value={settings.timeZone}
+          options={zoneOptions}
+          searchable
+          onChange={(timeZone) => {
+            applyTimeZonePreference(timeZone);
+            setSettings(getSettings());
+          }}
+        />
+        <AppText style={styles.caption}>{DAY_RESET_CAPTION}</AppText>
 
         <AppText style={styles.section}>Reminders</AppText>
         <View style={styles.row}>
@@ -126,8 +198,17 @@ export default function SettingsScreen() {
           permission only if you turn this on. No remote or marketing push.
         </AppText>
 
+        <AppText style={styles.section}>Voice log</AppText>
+        <View style={styles.examples}>
+          <AppText style={styles.example}>{VOICE_EXAMPLE_LOG}</AppText>
+          <AppText style={styles.example}>{VOICE_EXAMPLE_REMOVE}</AppText>
+        </View>
+        <AppText style={styles.caption}>{VOICE_EXAMPLE_HINT}</AppText>
+
         <AppText style={styles.section}>Puff Savings</AppText>
-        <AppText style={styles.highlight}>${formatMoney(savings.pot)}</AppText>
+        <AppText style={styles.highlight}>
+          {formatCurrency(savings.pot, draft.currencyCode)}
+        </AppText>
         <AppText style={styles.caption}>
           Stake per puff you stay under your cap (estimate).
         </AppText>
@@ -202,9 +283,10 @@ export default function SettingsScreen() {
                   deleteLocalData();
                   setDraft(resetDraft());
                   setSettings(getSettings());
+                  setTheme(getSettings().theme);
                   setSavings(getSavings());
                   setExportText(null);
-                  router.replace("/age-gate");
+                  router.replace("/onboarding/nickname");
                 },
               },
             ]);
@@ -214,110 +296,112 @@ export default function SettingsScreen() {
           <AppText style={styles.dangerLabel}>Delete all local data</AppText>
         </Pressable>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Back to home"
-          onPress={() => router.back()}
-          style={styles.link}
-        >
-          <AppText style={styles.linkLabel}>Back</AppText>
-        </Pressable>
       </ScrollView>
+      <AppTabs active="settings" />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: color.bg,
-  },
-  body: {
-    padding: space.lg,
-    gap: space.sm,
-    paddingBottom: space.xl,
-  },
-  title: {
-    ...type.title,
-    color: color.ink,
-    marginBottom: space.sm,
-  },
-  section: {
-    ...type.body,
-    fontWeight: "700",
-    color: color.ink,
-    marginTop: space.md,
-  },
-  bodyText: {
-    ...type.body,
-    color: color.ink,
-  },
-  caption: {
-    ...type.caption,
-    color: color.inkMuted,
-  },
-  highlight: {
-    ...type.title,
-    fontSize: 24,
-    color: color.ink,
-  },
-  input: {
-    minHeight: 48,
-    borderRadius: radius.md,
-    backgroundColor: color.surface,
-    paddingHorizontal: space.md,
-    ...type.body,
-    color: color.ink,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    minHeight: minTapTarget,
-  },
-  button: {
-    minHeight: minTapTarget,
-    borderRadius: radius.pill,
-    backgroundColor: color.accentMint,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: space.sm,
-  },
-  buttonLabel: {
-    ...type.body,
-    fontWeight: "700",
-    color: color.ink,
-  },
-  danger: {
-    minHeight: minTapTarget,
-    borderRadius: radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: space.sm,
-  },
-  dangerLabel: {
-    ...type.body,
-    color: color.danger,
-    textDecorationLine: "underline",
-  },
-  export: {
-    ...type.caption,
-    color: color.ink,
-    backgroundColor: color.surface,
-    padding: space.sm,
-    borderRadius: radius.sm,
-  },
-  link: {
-    minHeight: minTapTarget,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: space.md,
-  },
-  linkLabel: {
-    ...type.body,
-    color: color.accent,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-});
+function settingsStyles(color: ColorTokens) {
+  return {
+    safe: {
+      flex: 1,
+      backgroundColor: color.bg,
+    },
+    body: {
+      padding: space.lg,
+      gap: space.sm,
+      paddingBottom: space.xl,
+    },
+    title: {
+      ...type.title,
+      color: color.ink,
+      marginBottom: space.sm,
+    },
+    section: {
+      ...type.body,
+      fontWeight: "700" as const,
+      color: color.ink,
+      marginTop: space.md,
+    },
+    bodyText: {
+      ...type.body,
+      color: color.ink,
+    },
+    caption: {
+      ...type.caption,
+      color: color.inkMuted,
+    },
+    examples: {
+      gap: space.lg,
+    },
+    example: {
+      ...type.body,
+      color: color.ink,
+    },
+    highlight: {
+      ...type.title,
+      fontSize: 24,
+      color: color.ink,
+    },
+    input: {
+      minHeight: 48,
+      borderRadius: radius.md,
+      backgroundColor: color.surface,
+      paddingHorizontal: space.md,
+      ...type.body,
+      color: color.ink,
+    },
+    row: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "space-between" as const,
+      minHeight: minTapTarget,
+    },
+    button: {
+      minHeight: minTapTarget,
+      borderRadius: radius.pill,
+      backgroundColor: color.accentMint,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      marginTop: space.sm,
+    },
+    buttonLabel: {
+      ...type.body,
+      fontWeight: "700" as const,
+      color: color.ink,
+    },
+    danger: {
+      minHeight: minTapTarget,
+      borderRadius: radius.pill,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      marginTop: space.sm,
+    },
+    dangerLabel: {
+      ...type.body,
+      color: color.danger,
+      textDecorationLine: "underline" as const,
+    },
+    export: {
+      ...type.caption,
+      color: color.ink,
+      backgroundColor: color.surface,
+      padding: space.sm,
+      borderRadius: radius.sm,
+    },
+    link: {
+      minHeight: minTapTarget,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      marginTop: space.md,
+    },
+    linkLabel: {
+      ...type.body,
+      color: color.accent,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+  };
+}

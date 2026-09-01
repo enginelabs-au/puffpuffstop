@@ -259,15 +259,17 @@ Prefer built-in project scripts and official tooling over improvised alternative
 
 **When to use**
 
-- Phase-0+ application work in this repository: start Metro, typecheck, lint, or add Expo modules.
+- Phase-0+ application work in this repository: start Metro, typecheck, lint, add Expo modules, or install a local debug build on a connected iPhone.
 
 **How to access**
 
 - From repo root: `npm start`, `npm run ios`, `npm run android`, `npm run web`, `npm run lint`, `npm test`, `npm run typecheck`.
+- Physical iPhone: `npx expo run:ios --device <hardware-udid>` (from `xcrun xctrace list devices`).
 
 **Common operations**
 
 - Add screens under `app/`; keep domain logic in `src/`.
+- Local device install: `/memory/runbooks/ios-device-debug-build.md`.
 
 **Constraints**
 
@@ -276,6 +278,7 @@ Prefer built-in project scripts and official tooling over improvised alternative
 **Related files**
 
 - `package.json`, `app.json`, `app/`, `src/`
+- `/memory/runbooks/ios-device-debug-build.md`
 
 ---
 

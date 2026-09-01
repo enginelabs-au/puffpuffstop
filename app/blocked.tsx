@@ -1,10 +1,12 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { color, space, type } from "../src/theme/tokens";
+import { space, type, type ColorTokens } from "../src/theme/tokens";
 import { AppText } from "../src/ui/AppText";
+import { useThemedStyles } from "../src/ui/use-themed-styles";
 
 export default function BlockedScreen() {
+  const styles = useThemedStyles(blockedStyles);
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
@@ -29,27 +31,29 @@ export default function BlockedScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: color.blockedBg,
-  },
-  body: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: space.lg,
-    gap: space.md,
-  },
-  title: {
-    ...type.title,
-    color: color.ink,
-  },
-  bodyText: {
-    ...type.body,
-    color: color.ink,
-  },
-  caption: {
-    ...type.caption,
-    color: color.inkMuted,
-  },
-});
+function blockedStyles(color: ColorTokens) {
+  return {
+    safe: {
+      flex: 1,
+      backgroundColor: color.blockedBg,
+    },
+    body: {
+      flex: 1,
+      justifyContent: "center" as const,
+      paddingHorizontal: space.lg,
+      gap: space.md,
+    },
+    title: {
+      ...type.title,
+      color: color.ink,
+    },
+    bodyText: {
+      ...type.body,
+      color: color.ink,
+    },
+    caption: {
+      ...type.caption,
+      color: color.inkMuted,
+    },
+  };
+}

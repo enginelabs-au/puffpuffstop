@@ -19,7 +19,7 @@ describe("plan summary", () => {
       cutDownPerDay: 4,
       strictness: "steady",
       motivation: "high",
-      quitWindow: "1-month",
+      quitWindow: "few-months",
     });
 
     assert.equal(summary.displayName, "Sam");

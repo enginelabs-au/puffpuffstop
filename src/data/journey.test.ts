@@ -15,7 +15,7 @@ import { getSavings, resetSavings } from "./savings-store";
 import { getSettings, resetSettings } from "./settings-store";
 
 describe("local journey", () => {
-  it("walks age-gate, plan, log, export, and confirmed delete", () => {
+  it("walks onboarding, plan, log, export, and confirmed delete", () => {
     const now = new Date(2026, 7, 18, 12);
     resetDraft();
     resetDailyLog(now);

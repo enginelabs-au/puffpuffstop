@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="log_puff_queries">
+        <item>log a puff</item>
+        <item>log a puff in puffpuffstop</item>
+        <item>log a puff on puffpuffstop</item>
+        <item>log one puff</item>
+        <item>log one puff in puffpuffstop</item>
+        <item>log puff</item>
+        <item>log $count</item>
+        <item>log $count in puffpuffstop</item>
+        <item>log $count on puffpuffstop</item>
+        <item>log $count puffs</item>
+        <item>log $count puff</item>
+        <item>log $count puffs in puffpuffstop</item>
+        <item>log $count puffs on puffpuffstop</item>
+        <item>add $count</item>
+        <item>add $count in puffpuffstop</item>
+        <item>add $count puffs</item>
+        <item>add $count puffs in puffpuffstop</item>
+        <item>add one puff</item>
+        <item>add a puff</item>
+        <item>add a puff from puffpuffstop</item>
+        <item>add a puff in puffpuffstop</item>
+        <item>add a puff to puffpuffstop</item>
+        <item>add a puff on puffpuffstop</item>
+        <item>add $count puffs to puffpuffstop</item>
+        <item>log a puff to puffpuffstop</item>
+        <item>include $count puffs</item>
+        <item>include one puff</item>
+    </string-array>
+    <string-array name="undo_puff_queries">
+        <item>undo</item>
+        <item>undo in puffpuffstop</item>
+        <item>undo on puffpuffstop</item>
+        <item>undo puffs</item>
+        <item>undo a puff</item>
+        <item>undo $count</item>
+        <item>undo $count in puffpuffstop</item>
+        <item>undo $count on puffpuffstop</item>
+        <item>undo $count puffs</item>
+        <item>undo $count puffs in puffpuffstop</item>
+        <item>remove</item>
+        <item>remove a puff</item>
+        <item>remove a puff in puffpuffstop</item>
+        <item>remove one puff</item>
+        <item>remove one puff in puffpuffstop</item>
+        <item>remove $count puff</item>
+        <item>remove $count puff in puffpuffstop</item>
+        <item>undo a puff</item>
+        <item>undo one puff</item>
+        <item>remove in puffpuffstop</item>
+        <item>remove on puffpuffstop</item>
+        <item>remove $count</item>
+        <item>remove $count in puffpuffstop</item>
+        <item>remove $count on puffpuffstop</item>
+        <item>remove $count from puffpuffstop</item>
+        <item>remove $count puffs from puffpuffstop</item>
+        <item>remove $count puff from puffpuffstop</item>
+        <item>remove a puff from puffpuffstop</item>
+        <item>remove a puff to puffpuffstop</item>
+        <item>remove one puff from puffpuffstop</item>
+        <item>remove $count puffs to puffpuffstop</item>
+        <item>remove $count puff to puffpuffstop</item>
+        <item>undo a puff to puffpuffstop</item>
+        <item>undo $count puffs from puffpuffstop</item>
+        <item>undo a puff from puffpuffstop</item>
+        <item>remove $count puffs</item>
+        <item>remove $count puffs in puffpuffstop</item>
+        <item>reset $count</item>
+        <item>reset $count in puffpuffstop</item>
+        <item>reset $count puffs</item>
+        <item>subtract</item>
+        <item>subtract $count</item>
+        <item>subtract $count in puffpuffstop</item>
+        <item>subtract $count puffs</item>
+        <item>take one off</item>
+        <item>take one off in puffpuffstop</item>
+        <item>take one off on puffpuffstop</item>
+        <item>take $count off</item>
+        <item>take $count off in puffpuffstop</item>
+        <item>take $count off on puffpuffstop</item>
+        <item>take off $count</item>
+        <item>take off $count in puffpuffstop</item>
+        <item>take away $count</item>
+        <item>take away $count puffs</item>
+        <item>reduce $count</item>
+        <item>reduce $count in puffpuffstop</item>
+        <item>reduce $count puffs</item>
+        <item>revert $count</item>
+        <item>revert $count in puffpuffstop</item>
+        <item>revert $count puffs</item>
+        <item>decrease $count</item>
+        <item>decrease $count in puffpuffstop</item>
+        <item>decrease $count puffs</item>
+        <item>take away $count in puffpuffstop</item>
+        <item>clear $count</item>
+        <item>clear $count in puffpuffstop</item>
+    </string-array>
+    <string-array name="clear_puff_queries">
+        <item>reset</item>
+        <item>reset in puffpuffstop</item>
+        <item>reset on puffpuffstop</item>
+        <item>reset puffs</item>
+        <item>reset today's log</item>
+        <item>reset today's log in puffpuffstop</item>
+        <item>clear</item>
+        <item>clear in puffpuffstop</item>
+        <item>clear today's log</item>
+        <item>wipe today's log</item>
+        <item>wipe in puffpuffstop</item>
+        <item>clear on puffpuffstop</item>
+    </string-array>
+</resources>

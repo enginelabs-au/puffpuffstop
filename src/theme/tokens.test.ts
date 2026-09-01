@@ -3,10 +3,15 @@ import { describe, it } from "node:test";
 
 import {
   color,
+  colorsFor,
+  darkColor,
+  DEFAULT_THEME,
   fontScale,
+  lightColor,
   minTapTarget,
   motion,
   radius,
+  resolveTheme,
   space,
   tokens,
   type,
@@ -25,21 +30,29 @@ describe("design tokens", () => {
       "amber",
       "danger",
       "blockedBg",
+      "sheen",
+      "tabOn",
     ] as const) {
       assert.equal(typeof color[key], "string");
-      assert.match(color[key], /^#/);
+      assert.match(color[key], /^(#|rgba\()/);
     }
   });
 
   it("uses the specified spacing and radius scale", () => {
     assert.deepEqual(space, { xs: 4, sm: 8, md: 16, lg: 24, xl: 40 });
-    assert.deepEqual(radius, { sm: 12, md: 20, pill: 999 });
+    assert.deepEqual(radius, { sm: 12, md: 20, lg: 28, pill: 999 });
     assert.equal(minTapTarget, 44);
     assert.equal(motion.fast, 160);
     assert.equal(type.title.fontSize, 28);
     assert.equal(tokens.color.bg, color.bg);
     assert.equal(color.sky, "#00B8F8");
     assert.equal(color.bg, "#D8F4FC");
+    assert.equal(DEFAULT_THEME, "dark");
+    assert.equal(resolveTheme(undefined), "dark");
+    assert.equal(resolveTheme("light"), "light");
+    assert.equal(colorsFor("dark").bg, darkColor.bg);
+    assert.equal(colorsFor("light").bg, lightColor.bg);
+    assert.notEqual(darkColor.bg, lightColor.bg);
     assert.equal(fontScale.allowFontScaling, true);
     assert.equal(fontScale.maxFontSizeMultiplier, 1.4);
     assert.equal(tokens.fontScale, fontScale);

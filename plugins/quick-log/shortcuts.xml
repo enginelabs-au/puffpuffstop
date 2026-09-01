@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <shortcut
+        android:shortcutId="log_puff"
+        android:shortcutShortLabel="@string/voice_log_short"
+        android:shortcutLongLabel="@string/voice_log_long">
+        <intent
+            android:action="au.com.enginelabs.puffpuffstop.LOG_PUFF"
+            android:targetPackage="au.com.enginelabs.puffpuffstop"
+            android:targetClass="au.com.enginelabs.puffpuffstop.VoiceLogActivity" />
+        <capability-binding android:key="custom.actions.intent.LOG_PUFFS" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="undo_puff"
+        android:shortcutShortLabel="@string/voice_undo_short"
+        android:shortcutLongLabel="@string/voice_undo_long">
+        <intent
+            android:action="au.com.enginelabs.puffpuffstop.UNDO_PUFF"
+            android:targetPackage="au.com.enginelabs.puffpuffstop"
+            android:targetClass="au.com.enginelabs.puffpuffstop.VoiceLogActivity" />
+        <capability-binding android:key="custom.actions.intent.UNDO_PUFFS" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="undo_all_puffs"
+        android:shortcutShortLabel="@string/voice_undo_all_short"
+        android:shortcutLongLabel="@string/voice_undo_all_long">
+        <intent
+            android:action="au.com.enginelabs.puffpuffstop.CLEAR_PUFFS"
+            android:targetPackage="au.com.enginelabs.puffpuffstop"
+            android:targetClass="au.com.enginelabs.puffpuffstop.VoiceLogActivity" />
+        <capability-binding android:key="custom.actions.intent.CLEAR_PUFFS" />
+    </shortcut>
+
+    <capability
+        android:name="custom.actions.intent.LOG_PUFFS"
+        app:queryPatterns="@array/log_puff_queries">
+        <intent
+            android:action="au.com.enginelabs.puffpuffstop.LOG_PUFF"
+            android:targetPackage="au.com.enginelabs.puffpuffstop"
+            android:targetClass="au.com.enginelabs.puffpuffstop.VoiceLogActivity">
+            <url-template android:value="puffpuffstop://quick-log?action=up{&amp;count}" />
+            <parameter
+                android:name="count"
+                android:key="count"
+                android:mimeType="https://schema.org/Number" />
+        </intent>
+    </capability>
+
+    <capability
+        android:name="custom.actions.intent.UNDO_PUFFS"
+        app:queryPatterns="@array/undo_puff_queries">
+        <intent
+            android:action="au.com.enginelabs.puffpuffstop.UNDO_PUFF"
+            android:targetPackage="au.com.enginelabs.puffpuffstop"
+            android:targetClass="au.com.enginelabs.puffpuffstop.VoiceLogActivity">
+            <url-template android:value="puffpuffstop://quick-log?action=down{&amp;count}" />
+            <parameter
+                android:name="count"
+                android:key="count"
+                android:mimeType="https://schema.org/Number" />
+        </intent>
+    </capability>
+
+    <capability
+        android:name="custom.actions.intent.CLEAR_PUFFS"
+        app:queryPatterns="@array/clear_puff_queries">
+        <intent
+            android:action="au.com.enginelabs.puffpuffstop.CLEAR_PUFFS"
+            android:targetPackage="au.com.enginelabs.puffpuffstop"
+            android:targetClass="au.com.enginelabs.puffpuffstop.VoiceLogActivity">
+            <url-template android:value="puffpuffstop://quick-log?action=clear" />
+        </intent>
+    </capability>
+</shortcuts>

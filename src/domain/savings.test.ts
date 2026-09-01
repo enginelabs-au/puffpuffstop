@@ -6,6 +6,7 @@ import {
   DEFAULT_STAKE,
   creditAmount,
   defaultStakePerPuff,
+  formatCurrency,
   formatMoney,
   puffsSaved,
 } from "./savings";
@@ -31,5 +32,6 @@ describe("savings", () => {
       0.1,
     );
     assert.equal(formatMoney(2), "2.00");
+    assert.match(formatCurrency(2, "AUD"), /2/);
   });
 });

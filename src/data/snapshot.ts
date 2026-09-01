@@ -1,4 +1,15 @@
-import { emptyDraft, type OnboardingDraft, type Trigger } from "../domain/onboarding";
+import {
+  DEFAULT_CURRENCY,
+  QUIT_WINDOWS,
+  TRIGGERS,
+  emptyDraft,
+  type OnboardingDraft,
+  type QuitWindow,
+  type Trigger,
+} from "../domain/onboarding";
+import { resolveTheme } from "../theme/tokens";
+import { deviceTimeZone, resolveTimeZone } from "../domain/timezones";
+import { isCurrencyCode } from "./currencies";
 import { getDailyLog, replaceDailyLog, type DailyLogState } from "./daily-log-store";
 import { getDraft, replaceDraft } from "./onboarding-store";
 import { getSavings, replaceSavings, type SavingsState } from "./savings-store";
@@ -13,15 +24,6 @@ export type AppSnapshot = {
   settings: SettingsState;
   savings: SavingsState;
 };
-
-const TRIGGERS: readonly Trigger[] = [
-  "morning",
-  "school-work",
-  "evenings",
-  "stressed",
-  "bored",
-  "social",
-];
 
 function asFiniteNumber(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -78,12 +80,16 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
         ? value.brandKind
         : null,
     catalogBrandId: asString(value.catalogBrandId ?? "", "") || null,
+    catalogProductId: asString(value.catalogProductId ?? "", "") || null,
     otherBrandName: asString(value.otherBrandName, ""),
     puffsPerDevice: asNullNumber(value.puffsPerDevice),
     mlPerPuff: asNullNumber(value.mlPerPuff),
     deviceMl: asNullNumber(value.deviceMl),
     nicotineLabel: asString(value.nicotineLabel, ""),
     deviceCost: asNullNumber(value.deviceCost),
+    currencyCode: isCurrencyCode(asString(value.currencyCode, DEFAULT_CURRENCY))
+      ? asString(value.currencyCode, DEFAULT_CURRENCY)
+      : DEFAULT_CURRENCY,
     triggers,
     strictness:
       value.strictness === "chill" ||
@@ -98,14 +104,18 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
       value.motivation === "all-in"
         ? value.motivation
         : null,
-    quitWindow:
-      value.quitWindow === "2-weeks" ||
-      value.quitWindow === "1-month" ||
-      value.quitWindow === "3-months" ||
-      value.quitWindow === "6-months" ||
-      value.quitWindow === "unsure"
-        ? value.quitWindow
-        : null,
+    quitWindow: QUIT_WINDOWS.includes(value.quitWindow as QuitWindow)
+      ? (value.quitWindow as QuitWindow)
+      : null,
+    quitOtherCount: asFiniteNumber(value.quitOtherCount, 0),
+    quitOtherPeriod:
+      value.quitOtherPeriod === "days" ||
+      value.quitOtherPeriod === "weeks" ||
+      value.quitOtherPeriod === "months" ||
+      value.quitOtherPeriod === "years"
+        ? value.quitOtherPeriod
+        : base.quitOtherPeriod,
+    quitExactDate: asString(value.quitExactDate, ""),
     cutDownPerDay: asFiniteNumber(value.cutDownPerDay, 0),
   };
 }
@@ -128,6 +138,8 @@ function parseSettings(raw: unknown): SettingsState | null {
   return {
     remindersEnabled: value.remindersEnabled,
     stakePerPuff: asNullNumber(value.stakePerPuff),
+    timeZone: resolveTimeZone(asString(value.timeZone, deviceTimeZone())),
+    theme: resolveTheme(value.theme),
   };
 }
 

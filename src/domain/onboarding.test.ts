@@ -5,10 +5,15 @@ import {
   canContinue,
   canShowHome,
   clampDial,
+  frequencyCaption,
+  previousStep,
+  PUFF_DIAL_MAX,
   resumeAfterAgeGate,
   displayName,
   emptyDraft,
+  formatAuDateInput,
   isOnboardingStep,
+  isValidAuDate,
   nextStep,
 } from "./onboarding";
 
@@ -21,17 +26,26 @@ describe("onboarding", () => {
     );
   });
 
-  it("clamps the rotary dial to 0–999", () => {
+  it("clamps the rotary dial to 0–999 by default and 999,999 for puffs", () => {
     assert.equal(clampDial(-4), 0);
     assert.equal(clampDial(1500), 999);
     assert.equal(clampDial(12.6), 13);
+    assert.equal(clampDial(2_000_000, PUFF_DIAL_MAX), 999_999);
   });
 
   it("walks steps toward the plan", () => {
     assert.equal(isOnboardingStep("nickname"), true);
     assert.equal(isOnboardingStep("home"), false);
-    assert.equal(nextStep("nickname"), "duration");
-    assert.equal(nextStep("cut-down"), "plan");
+    assert.equal(nextStep("nickname"), "timezone");
+    assert.equal(nextStep("timezone"), "duration");
+    assert.equal(nextStep("cut-down"), "quick-log");
+    assert.equal(nextStep("quick-log"), "plan");
+    assert.equal(previousStep("nickname"), null);
+    assert.equal(previousStep("timezone"), "nickname");
+    assert.equal(previousStep("duration"), "timezone");
+    assert.equal(canContinue("timezone", emptyDraft()), true);
+    assert.equal(frequencyCaption(1, "days"), "1 puff a day");
+    assert.equal(frequencyCaption(12, "weeks"), "12 puffs a week");
   });
 
   it("requires core answers before continue", () => {
@@ -43,6 +57,19 @@ describe("onboarding", () => {
       true,
     );
     assert.equal(canContinue("brand", { ...draft, brandKind: "custom" }), true);
+    assert.equal(
+      canContinue("brand", { ...draft, brandKind: "catalog", catalogBrandId: "iget" }),
+      false,
+    );
+    assert.equal(
+      canContinue("brand", {
+        ...draft,
+        brandKind: "catalog",
+        catalogBrandId: "iget",
+        catalogProductId: "iget-bar-3500",
+      }),
+      true,
+    );
     assert.equal(
       canContinue("device-math", {
         ...draft,
@@ -60,6 +87,21 @@ describe("onboarding", () => {
         ...emptyDraft(),
         durationCount: 8,
         frequencyCount: 12,
+      }),
+      true,
+    );
+  });
+
+  it("formats and validates Australian day-month-year dates", () => {
+    assert.equal(formatAuDateInput("1908"), "19-08");
+    assert.equal(formatAuDateInput("19082026"), "19-08-2026");
+    assert.equal(isValidAuDate("19-08-2026"), true);
+    assert.equal(isValidAuDate("31-02-2026"), false);
+    assert.equal(
+      canContinue("quit-window", {
+        ...emptyDraft(),
+        quitWindow: "exact-date",
+        quitExactDate: "19-08-2026",
       }),
       true,
     );

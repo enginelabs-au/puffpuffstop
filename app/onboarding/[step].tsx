@@ -1,14 +1,32 @@
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { StyleSheet, TextInput } from "react-native";
+import { TextInput, View } from "react-native";
 
-import { BRAND_CATALOG, catalogBrandById } from "../../src/data/brands";
+import {
+  BRAND_CATALOG,
+  catalogBrandById,
+  catalogProductById,
+  productsForBrand,
+} from "../../src/data/brands";
+import { CURRENCIES } from "../../src/data/currencies";
 import { getDraft, updateDraft } from "../../src/data/onboarding-store";
+import { getSettings } from "../../src/data/settings-store";
+import { applyTimeZonePreference } from "../../src/data/time-zone-preference";
+import { timeZoneOptions } from "../../src/domain/timezones";
+import {
+  VOICE_EXAMPLE_HINT,
+  VOICE_EXAMPLE_LOG,
+  VOICE_EXAMPLE_REMOVE,
+} from "../../src/domain/quick-log";
 import type { Period } from "../../src/domain/estimation";
 import {
+  PUFF_DIAL_MAX,
   canContinue,
+  formatAuDateInput,
+  frequencyCaption,
   isOnboardingStep,
   nextStep,
+  previousStep,
   type BrandKind,
   type DeviceType,
   type Motivation,
@@ -18,13 +36,23 @@ import {
   type Strictness,
   type Trigger,
 } from "../../src/domain/onboarding";
-import { color, radius, scaledInput, space, type } from "../../src/theme/tokens";
+import { radius, scaledInput, space, type, type ColorTokens } from "../../src/theme/tokens";
 import { AppText } from "../../src/ui/AppText";
 import { ChipGroup } from "../../src/ui/ChipGroup";
 import { OnboardingFrame } from "../../src/ui/OnboardingFrame";
 import { RotaryDial } from "../../src/ui/RotaryDial";
+import { SelectField } from "../../src/ui/SelectField";
+import { useTheme } from "../../src/ui/ThemeProvider";
+import { useThemedStyles } from "../../src/ui/use-themed-styles";
 
 const PERIODS: { value: Period; label: string }[] = [
+  { value: "days", label: "day" },
+  { value: "weeks", label: "week" },
+  { value: "months", label: "month" },
+  { value: "years", label: "year" },
+];
+
+const DURATION_PERIODS: { value: Period; label: string }[] = [
   { value: "days", label: "days" },
   { value: "weeks", label: "weeks" },
   { value: "months", label: "months" },
@@ -37,15 +65,15 @@ const DEVICES: { value: DeviceType; label: string }[] = [
   { value: "refillable", label: "Refillable" },
 ];
 
-const NICOTINE = ["0", "3", "5", "20", "50", "Other"];
-
 const TRIGGERS: { value: Trigger; label: string }[] = [
-  { value: "morning", label: "Morning" },
-  { value: "school-work", label: "School / work" },
-  { value: "evenings", label: "Evenings" },
-  { value: "stressed", label: "When stressed" },
-  { value: "bored", label: "Bored" },
-  { value: "social", label: "Social" },
+  { value: "wake-up", label: "When I wake up" },
+  { value: "during-day", label: "During the day" },
+  { value: "evening", label: "In the evening" },
+  { value: "sleep", label: "When I go to sleep" },
+  { value: "social", label: "Socially" },
+  { value: "often", label: "Often" },
+  { value: "rarely", label: "Rarely" },
+  { value: "frequently", label: "Frequently" },
 ];
 
 const STRICTNESS: { value: Strictness; label: string }[] = [
@@ -62,11 +90,12 @@ const MOTIVATION: { value: Motivation; label: string }[] = [
 ];
 
 const QUIT: { value: QuitWindow; label: string }[] = [
-  { value: "2-weeks", label: "2 weeks" },
-  { value: "1-month", label: "1 month" },
-  { value: "3-months", label: "3 months" },
-  { value: "6-months", label: "6 months" },
-  { value: "unsure", label: "I’m not sure" },
+  { value: "few-days", label: "A few days" },
+  { value: "few-weeks", label: "A few weeks" },
+  { value: "few-months", label: "A few months" },
+  { value: "exact-date", label: "Exact date" },
+  { value: "other", label: "Other" },
+  { value: "unsure", label: "I'm not sure" },
 ];
 
 function goNext(step: OnboardingStep) {
@@ -78,10 +107,20 @@ function goNext(step: OnboardingStep) {
   router.push(`/onboarding/${destination}`);
 }
 
+function goBack(step: OnboardingStep) {
+  const previous = previousStep(step);
+  if (!previous) return;
+  router.replace(`/onboarding/${previous}`);
+}
+
 export default function OnboardingStepScreen() {
+  const { color } = useTheme();
+  const styles = useThemedStyles(stepStyles);
   const params = useLocalSearchParams<{ step: string }>();
   const step = params.step ?? "";
   const [draft, setDraft] = useState<OnboardingDraft>(() => getDraft());
+  const [timeZone, setTimeZone] = useState(() => getSettings().timeZone);
+  const zoneOptions = useMemo(() => timeZoneOptions(), []);
 
   const brandOptions = useMemo(
     () => [
@@ -91,6 +130,19 @@ export default function OnboardingStepScreen() {
     ],
     [],
   );
+
+  const productOptions = useMemo(() => {
+    if (!draft.catalogBrandId) return [];
+    return productsForBrand(draft.catalogBrandId).map((row) => ({
+      value: row.id,
+      label: `${row.name} · up to ${row.claimedPuffs.toLocaleString()} puffs`,
+    }));
+  }, [draft.catalogBrandId]);
+
+  const selectedProduct = draft.catalogProductId
+    ? catalogProductById(draft.catalogProductId)
+    : undefined;
+  const nicotineOptions = selectedProduct?.confirmedNicotineMgMl ?? [];
 
   if (!isOnboardingStep(step)) {
     return <Redirect href="/onboarding/nickname" />;
@@ -107,13 +159,18 @@ export default function OnboardingStepScreen() {
       : draft.brandKind === "custom"
         ? "custom"
         : draft.catalogBrandId;
+  const back = previousStep(step) ? () => goBack(step) : undefined;
 
   return (
     <OnboardingFrame
       title={titleFor(step)}
-      helper={helperFor(step)}
+      helper={helperFor(step, draft)}
+      continueLabel="Continue"
       continueDisabled={disabled}
-      onContinue={() => goNext(step)}
+      onContinue={() => {
+        goNext(step);
+      }}
+      onBack={back}
     >
       {step === "nickname" ? (
         <TextInput
@@ -135,7 +192,7 @@ export default function OnboardingStepScreen() {
             onChange={(durationCount) => patch({ durationCount })}
           />
           <ChipGroup
-            options={PERIODS}
+            options={DURATION_PERIODS}
             selected={draft.durationPeriod}
             onChange={(durationPeriod) => patch({ durationPeriod })}
           />
@@ -145,10 +202,13 @@ export default function OnboardingStepScreen() {
       {step === "frequency" ? (
         <>
           <RotaryDial
-            accessibilityLabel="How often you vape, in puffs"
+            accessibilityLabel="How much you vape, in puffs"
             value={draft.frequencyCount}
             onChange={(frequencyCount) => patch({ frequencyCount })}
           />
+          <AppText style={styles.caption}>
+            {frequencyCaption(draft.frequencyCount, draft.frequencyPeriod)}
+          </AppText>
           <ChipGroup
             options={PERIODS}
             selected={draft.frequencyPeriod}
@@ -175,7 +235,9 @@ export default function OnboardingStepScreen() {
                 patch({
                   brandKind: "other",
                   catalogBrandId: null,
+                  catalogProductId: null,
                   puffsPerDevice: null,
+                  nicotineLabel: "",
                 });
                 return;
               }
@@ -183,7 +245,9 @@ export default function OnboardingStepScreen() {
                 patch({
                   brandKind: "custom",
                   catalogBrandId: null,
+                  catalogProductId: null,
                   puffsPerDevice: null,
+                  nicotineLabel: "",
                 });
                 return;
               }
@@ -191,15 +255,38 @@ export default function OnboardingStepScreen() {
               patch({
                 brandKind: "catalog" satisfies BrandKind,
                 catalogBrandId: value,
+                catalogProductId: null,
                 otherBrandName: "",
                 puffsPerDevice: row?.puffsPerStandardDevice ?? null,
                 deviceType: row?.deviceType ?? draft.deviceType,
+                nicotineLabel: "",
               });
             }}
           />
+          {draft.brandKind === "catalog" && productOptions.length > 0 ? (
+            <>
+              <AppText style={styles.caption}>Which product?</AppText>
+              <ChipGroup
+                options={productOptions}
+                selected={draft.catalogProductId}
+                onChange={(productId) => {
+                  const product = catalogProductById(productId);
+                  patch({
+                    catalogProductId: productId,
+                    puffsPerDevice: product?.claimedPuffs ?? draft.puffsPerDevice,
+                    deviceType: product?.deviceType ?? draft.deviceType,
+                    nicotineLabel:
+                      product?.confirmedNicotineMgMl.length === 1
+                        ? String(product.confirmedNicotineMgMl[0])
+                        : "",
+                  });
+                }}
+              />
+            </>
+          ) : null}
           {draft.brandKind === "other" ? (
             <TextInput
-          {...scaledInput}
+              {...scaledInput}
               accessibilityLabel="Other brand name"
               placeholder="Brand name"
               placeholderTextColor={color.inkMuted}
@@ -215,7 +302,7 @@ export default function OnboardingStepScreen() {
         <>
           <AppText style={styles.caption}>ml per puff (estimate)</AppText>
           <TextInput
-          {...scaledInput}
+            {...scaledInput}
             accessibilityLabel="Millilitres per puff"
             keyboardType="decimal-pad"
             placeholder="0.05"
@@ -229,7 +316,7 @@ export default function OnboardingStepScreen() {
           />
           <AppText style={styles.caption}>Optional device size (ml)</AppText>
           <TextInput
-          {...scaledInput}
+            {...scaledInput}
             accessibilityLabel="Device millilitres"
             keyboardType="decimal-pad"
             placeholder="10"
@@ -246,69 +333,64 @@ export default function OnboardingStepScreen() {
 
       {step === "device-math" && draft.brandKind !== "custom" ? (
         <>
-          <AppText style={styles.caption}>Puffs in a standard device (editable)</AppText>
+          <AppText style={styles.caption}>
+            {selectedProduct
+              ? `${selectedProduct.name} is listed at up to ${selectedProduct.claimedPuffs.toLocaleString()} puffs. Rotate or type if yours is different.`
+              : "Puffs in that vape"}
+          </AppText>
           <RotaryDial
-            accessibilityLabel="Puffs per standard device"
+            accessibilityLabel="How many puffs that vape has"
             value={draft.puffsPerDevice ?? 0}
+            max={PUFF_DIAL_MAX}
             onChange={(puffsPerDevice) => patch({ puffsPerDevice })}
           />
         </>
       ) : null}
 
       {step === "nicotine" ? (
-        <>
+        nicotineOptions.length > 0 ? (
           <ChipGroup
-            options={NICOTINE.map((label) => ({ value: label, label }))}
-            selected={
-              ["0", "3", "5", "20", "50"].includes(draft.nicotineLabel)
-                ? draft.nicotineLabel
-                : draft.nicotineLabel.length > 0
-                  ? "Other"
-                  : null
-            }
-            onChange={(label) => {
-              if (label === "Other") {
-                patch({
-                  nicotineLabel: ["0", "3", "5", "20", "50"].includes(
-                    draft.nicotineLabel,
-                  )
-                    ? " "
-                    : draft.nicotineLabel || " ",
-                });
-                return;
-              }
-              patch({ nicotineLabel: label });
-            }}
+            options={nicotineOptions.map((mg) => ({
+              value: String(mg),
+              label: `${mg} mg/ml`,
+            }))}
+            selected={draft.nicotineLabel || null}
+            onChange={(nicotineLabel) => patch({ nicotineLabel })}
           />
-          {draft.nicotineLabel.length > 0 &&
-          !["0", "3", "5", "20", "50"].includes(draft.nicotineLabel) ? (
-            <TextInput
-          {...scaledInput}
-              accessibilityLabel="Other nicotine strength"
-              placeholder="e.g. 10 mg/ml"
-              placeholderTextColor={color.inkMuted}
-              value={draft.nicotineLabel}
-              onChangeText={(nicotineLabel) => patch({ nicotineLabel })}
-              style={styles.input}
-            />
-          ) : null}
-        </>
+        ) : (
+          <AppText style={styles.caption}>
+            We only show nicotine strengths we can confirm for a listed product.
+            Skip this if yours is unknown.
+          </AppText>
+        )
       ) : null}
 
       {step === "cost" ? (
-        <TextInput
-          {...scaledInput}
-          accessibilityLabel="Typical device cost"
-          keyboardType="decimal-pad"
-          placeholder="Skip if you prefer"
-          placeholderTextColor={color.inkMuted}
-          value={draft.deviceCost === null ? "" : String(draft.deviceCost)}
-          onChangeText={(text) => {
-            const parsed = Number(text);
-            patch({ deviceCost: text === "" || Number.isNaN(parsed) ? null : parsed });
-          }}
-          style={styles.input}
-        />
+        <>
+          <SelectField
+            label="Currency"
+            searchable
+            value={draft.currencyCode}
+            options={CURRENCIES.map((row) => ({
+              value: row.code,
+              label: `${row.code} · ${row.name}`,
+            }))}
+            onChange={(currencyCode) => patch({ currencyCode })}
+          />
+          <TextInput
+            {...scaledInput}
+            accessibilityLabel="Typical device cost"
+            keyboardType="decimal-pad"
+            placeholder="Skip if you prefer"
+            placeholderTextColor={color.inkMuted}
+            value={draft.deviceCost === null ? "" : String(draft.deviceCost)}
+            onChangeText={(text) => {
+              const parsed = Number(text);
+              patch({ deviceCost: text === "" || Number.isNaN(parsed) ? null : parsed });
+            }}
+            style={styles.input}
+          />
+        </>
       ) : null}
 
       {step === "triggers" ? (
@@ -342,10 +424,57 @@ export default function OnboardingStepScreen() {
       ) : null}
 
       {step === "quit-window" ? (
-        <ChipGroup
-          options={QUIT}
-          selected={draft.quitWindow}
-          onChange={(quitWindow) => patch({ quitWindow })}
+        <>
+          <SelectField
+            label="How long until you’ve completely stopped"
+            value={draft.quitWindow}
+            options={QUIT}
+            onChange={(quitWindow) => patch({ quitWindow })}
+          />
+          {draft.quitWindow === "exact-date" ? (
+            <>
+              <TextInput
+                {...scaledInput}
+                accessibilityLabel="Exact stop date, day month year"
+                keyboardType="number-pad"
+                placeholder="DD-MM-YYYY"
+                placeholderTextColor={color.inkMuted}
+                maxLength={10}
+                value={draft.quitExactDate}
+                onChangeText={(text) => patch({ quitExactDate: formatAuDateInput(text) })}
+                style={styles.input}
+              />
+              <AppText style={styles.caption}>
+                Day, month, year. Dashes fill in as you type.
+              </AppText>
+            </>
+          ) : null}
+          {draft.quitWindow === "other" ? (
+            <>
+              <RotaryDial
+                accessibilityLabel="Custom stop number"
+                value={draft.quitOtherCount}
+                onChange={(quitOtherCount) => patch({ quitOtherCount })}
+              />
+              <ChipGroup
+                options={PERIODS}
+                selected={draft.quitOtherPeriod}
+                onChange={(quitOtherPeriod) => patch({ quitOtherPeriod })}
+              />
+            </>
+          ) : null}
+        </>
+      ) : null}
+
+      {step === "timezone" ? (
+        <SelectField
+          label="Timezone"
+          value={timeZone}
+          options={zoneOptions}
+          searchable
+          onChange={(next) => {
+            setTimeZone(applyTimeZonePreference(next));
+          }}
         />
       ) : null}
 
@@ -356,6 +485,13 @@ export default function OnboardingStepScreen() {
           onChange={(cutDownPerDay) => patch({ cutDownPerDay })}
         />
       ) : null}
+
+      {step === "quick-log" ? (
+        <View style={styles.examples}>
+          <AppText style={styles.example}>{VOICE_EXAMPLE_LOG}</AppText>
+          <AppText style={styles.example}>{VOICE_EXAMPLE_REMOVE}</AppText>
+        </View>
+      ) : null}
     </OnboardingFrame>
   );
 }
@@ -364,18 +500,20 @@ function titleFor(step: OnboardingStep): string {
   switch (step) {
     case "nickname":
       return "What should we call you?";
+    case "timezone":
+      return "When should a new day start?";
     case "duration":
       return "How long have you been vaping?";
     case "frequency":
-      return "How often do you vape?";
+      return "How much do you vape?";
     case "device":
       return "What do you use most?";
     case "brand":
-      return "What brand do you use most?";
+      return "What vape do you use most?";
     case "device-math":
       return draftBrandMathTitle();
     case "nicotine":
-      return "What nicotine strength?";
+      return "Confirmed nicotine strength";
     case "cost":
       return "What does one device usually cost?";
     case "triggers":
@@ -388,6 +526,8 @@ function titleFor(step: OnboardingStep): string {
       return "How long until you’ve completely stopped?";
     case "cut-down":
       return "By how many puffs will you cut down a day?";
+    case "quick-log":
+      return "Log a puff with your voice?";
   }
 }
 
@@ -395,42 +535,64 @@ function draftBrandMathTitle(): string {
   const draft = getDraft();
   return draft.brandKind === "custom"
     ? "How many ml per puff?"
-    : "How many puffs in a standard device?";
+    : "How many puffs does that vape have?";
 }
 
-function helperFor(step: OnboardingStep): string | undefined {
+function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undefined {
   switch (step) {
     case "nickname":
       return "Optional. We’ll say friend if you skip.";
+    case "timezone":
+      return "Your puff log resets at 11:59pm here. We picked the timezone on this phone.";
     case "duration":
+      return "Rotate the dial, or tap the number to type. Pick days, weeks, months, or years.";
     case "frequency":
-      return "An estimate is fine. Spin the number, then pick a period.";
+      return `${frequencyCaption(draft.frequencyCount, draft.frequencyPeriod)}. Rotate or type the number.`;
     case "brand":
-      return "Used only to estimate usage — not a shop.";
+      return "Pick a listed product so puff counts stay accurate. Not a shop.";
+    case "device-math":
+      return draft.brandKind === "custom"
+        ? undefined
+        : "This dial goes up to 999,999. Tap the number to type.";
+    case "nicotine":
+      return "Only strengths confirmed for the selected product.";
     case "cost":
       return "Optional. Helps later savings math. We never charge a card.";
     case "triggers":
       return "Pick any that fit. You can skip.";
     case "strictness":
       return "This sets how firm reminders and the daily cap will feel.";
+    case "quit-window":
+      return "Choose a listed option, an exact date, or Other.";
     case "cut-down":
       return "We’ll subtract this from your estimated daily puffs.";
+    case "quick-log":
+      return `${VOICE_EXAMPLE_HINT} You can read this again in Settings.`;
     default:
       return undefined;
   }
 }
 
-const styles = StyleSheet.create({
-  input: {
-    minHeight: 48,
-    borderRadius: radius.md,
-    backgroundColor: color.surface,
-    paddingHorizontal: space.md,
-    ...type.body,
-    color: color.ink,
-  },
-  caption: {
-    ...type.caption,
-    color: color.inkMuted,
-  },
-});
+function stepStyles(color: ColorTokens) {
+  return {
+    input: {
+      minHeight: 48,
+      borderRadius: radius.md,
+      backgroundColor: color.surface,
+      paddingHorizontal: space.md,
+      ...type.body,
+      color: color.ink,
+    },
+    caption: {
+      ...type.caption,
+      color: color.inkMuted,
+    },
+    examples: {
+      gap: space.lg,
+    },
+    example: {
+      ...type.body,
+      color: color.ink,
+    },
+  };
+}

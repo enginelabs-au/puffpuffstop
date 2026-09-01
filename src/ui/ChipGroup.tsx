@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 
-import { color, minTapTarget, radius, space, type } from "../theme/tokens";
+import { color, minTapTarget, radius, space, type, type ColorTokens } from "../theme/tokens";
 import { AppText } from "./AppText";
+import { useThemedStyles } from "./use-themed-styles";
 
 export type ChipOption<T extends string> = {
   value: T;
@@ -21,6 +22,7 @@ export function ChipGroup<T extends string>({
   multiple = false,
   onChange,
 }: Props<T>) {
+  const styles = useThemedStyles(chipStyles);
   return (
     <View style={styles.wrap}>
       {options.map((option) => {
@@ -50,30 +52,32 @@ export function ChipGroup<T extends string>({
   );
 }
 
-const styles = StyleSheet.create({
-  wrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: space.sm,
-  },
-  chip: {
-    minHeight: minTapTarget,
-    borderRadius: radius.pill,
-    backgroundColor: color.surface,
-    paddingHorizontal: space.md,
-    justifyContent: "center",
-  },
-  chipOn: {
-    backgroundColor: color.accent,
-  },
-  label: {
-    ...type.body,
-    color: color.ink,
-  },
-  labelOn: {
-    color: color.onAccent,
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-});
+function chipStyles(palette: ColorTokens = color) {
+  return {
+    wrap: {
+      flexDirection: "row" as const,
+      flexWrap: "wrap" as const,
+      gap: space.sm,
+    },
+    chip: {
+      minHeight: minTapTarget,
+      borderRadius: radius.pill,
+      backgroundColor: palette.surface,
+      paddingHorizontal: space.md,
+      justifyContent: "center" as const,
+    },
+    chipOn: {
+      backgroundColor: palette.accent,
+    },
+    label: {
+      ...type.body,
+      color: palette.ink,
+    },
+    labelOn: {
+      color: palette.onAccent,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+  };
+}

@@ -6,13 +6,25 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "puffpuffstop",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "description": "A 16+ wellness habit coach for teens and young adults. Not a kids app. Not a medical device.",
     "ios": {
       "bundleIdentifier": "au.com.enginelabs.puffpuffstop",
+      "appleTeamId": "256U2M55W7",
       "supportsTablet": false,
+      "buildNumber": "8",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleSpokenName": "Puff Puff Stop",
+        "INAlternativeAppNames": [
+          {
+            "INAlternativeAppName": "Puff Puff Stop",
+            "INAlternativeAppNamePronunciationHint": "puff puff stop"
+          },
+          {
+            "INAlternativeAppName": "PuffPuff Stop"
+          }
+        ]
       }
     },
     "android": {
@@ -30,8 +42,8 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "./plugins/with-quick-log",
       "expo-file-system",
-      "expo-haptics",
       [
         "expo-notifications",
         {

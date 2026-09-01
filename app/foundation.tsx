@@ -1,12 +1,14 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { readAppEnv } from "../src/config/env";
 import { BRAND_CATALOG } from "../src/data/brands";
-import { color, space, type } from "../src/theme/tokens";
+import { space, type, type ColorTokens } from "../src/theme/tokens";
 import { AppText } from "../src/ui/AppText";
+import { useThemedStyles } from "../src/ui/use-themed-styles";
 
 export default function FoundationScreen() {
+  const styles = useThemedStyles(foundationStyles);
   const appEnv = readAppEnv();
 
   return (
@@ -31,27 +33,29 @@ export default function FoundationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: color.bg,
-  },
-  body: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: space.lg,
-    gap: space.md,
-  },
-  title: {
-    ...type.title,
-    color: color.ink,
-  },
-  bodyText: {
-    ...type.body,
-    color: color.inkMuted,
-  },
-  caption: {
-    ...type.caption,
-    color: color.inkMuted,
-  },
-});
+function foundationStyles(color: ColorTokens) {
+  return {
+    safe: {
+      flex: 1,
+      backgroundColor: color.bg,
+    },
+    body: {
+      flex: 1,
+      justifyContent: "center" as const,
+      paddingHorizontal: space.lg,
+      gap: space.md,
+    },
+    title: {
+      ...type.title,
+      color: color.ink,
+    },
+    bodyText: {
+      ...type.body,
+      color: color.inkMuted,
+    },
+    caption: {
+      ...type.caption,
+      color: color.inkMuted,
+    },
+  };
+}

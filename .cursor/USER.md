@@ -4,7 +4,7 @@ Store durable user-specific instructions and preferences here. Add new durable i
 
 ## Standing directives
 
-- Always author and commit as `Cursor Agent <cursoragent@cursor.com>` using `GIT_AUTHOR_*` / `GIT_COMMITTER_*` environment variables. Do not use a personal or private email. Do not change git config to set this.
+- HARD RULE: never use the owner's personal Gmail or any personal/private email for git author, committer, push, or GitHub metadata. Always use `Cursor Agent <cursoragent@cursor.com>` via `GIT_AUTHOR_*` / `GIT_COMMITTER_*` environment variables. Never change git config to set identity. See `/rules/git-identity-cursor-anonymous.mdc`.
 - Preserve the user's operational intent and all materially relevant requirements when improving instructions or files.
 - Prefer direct execution over asking the user to perform agent-capable work.
 - Operate autonomously unless blocked by credentials, permissions, a consequential design decision, destructive risk, or a material safety/security/privacy concern.

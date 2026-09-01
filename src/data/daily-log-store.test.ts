@@ -3,10 +3,13 @@ import { describe, it } from "node:test";
 
 import {
   applyDayRollover,
+  getDailyLog,
   logPuff,
   resetDailyLog,
   undoPuff,
 } from "./daily-log-store";
+import { applyTimeZonePreference } from "./time-zone-preference";
+import { resetSettings } from "./settings-store";
 
 describe("daily log store", () => {
   it("logs and undoes puffs on the same local day", () => {
@@ -39,5 +42,29 @@ describe("daily log store", () => {
     logPuff(1, monday);
     const next = applyDayRollover(1, tuesday);
     assert.equal(next.recoveryTicks, 0);
+  });
+
+  it("rolls after 11:59pm in the saved timezone", () => {
+    resetSettings();
+    applyTimeZonePreference("Australia/Brisbane");
+    const stillToday = new Date("2026-09-01T13:59:00.000Z");
+    const nextDay = new Date("2026-09-01T14:00:00.000Z");
+    resetDailyLog(stillToday);
+    logPuff(10, stillToday);
+    assert.equal(getDailyLog().logged, 1);
+    const rolled = applyDayRollover(10, nextDay);
+    assert.equal(rolled.rolled, true);
+    assert.equal(rolled.dateKey, "2026-09-02");
+    assert.equal(rolled.logged, 0);
+  });
+
+  it("keeps today's count when the timezone changes", () => {
+    resetSettings();
+    applyTimeZonePreference("UTC", new Date("2026-09-01T18:00:00.000Z"));
+    resetDailyLog(new Date("2026-09-01T18:00:00.000Z"));
+    logPuff(10, new Date("2026-09-01T18:00:00.000Z"));
+    applyTimeZonePreference("Pacific/Auckland", new Date("2026-09-01T18:00:00.000Z"));
+    assert.equal(getDailyLog().logged, 1);
+    assert.equal(getDailyLog().dateKey, "2026-09-02");
   });
 });

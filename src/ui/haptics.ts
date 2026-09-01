@@ -15,3 +15,12 @@ export async function playUndoHaptic(): Promise<void> {
     // Node tests and unsupported platforms stay silent.
   }
 }
+
+export async function playSuccessHaptic(): Promise<void> {
+  try {
+    const Haptics = await import("expo-haptics");
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  } catch {
+    // Node tests and unsupported platforms stay silent.
+  }
+}

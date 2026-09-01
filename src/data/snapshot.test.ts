@@ -72,4 +72,31 @@ describe("snapshot persist", () => {
     assert.equal(parseSnapshot(unversioned)?.version, SNAPSHOT_VERSION);
     assert.equal(parseSnapshot({ ...unversioned, version: 99 }), null);
   });
+
+  it("fills a missing timezone from the device", () => {
+    const current = captureSnapshot();
+    const parsed = parseSnapshot({
+      ...current,
+      settings: {
+        remindersEnabled: current.settings.remindersEnabled,
+        stakePerPuff: current.settings.stakePerPuff,
+      },
+    });
+    assert.ok(parsed);
+    assert.ok(parsed.settings.timeZone.length > 0);
+  });
+
+  it("defaults a missing appearance to dark", () => {
+    const current = captureSnapshot();
+    const parsed = parseSnapshot({
+      ...current,
+      settings: {
+        remindersEnabled: current.settings.remindersEnabled,
+        stakePerPuff: current.settings.stakePerPuff,
+        timeZone: current.settings.timeZone,
+      },
+    });
+    assert.ok(parsed);
+    assert.equal(parsed.settings.theme, "dark");
+  });
 });

@@ -26,3 +26,14 @@ export function defaultStakePerPuff(draft: OnboardingDraft): number {
 export function formatMoney(value: number): string {
   return value.toFixed(2);
 }
+
+export function formatCurrency(value: number, currencyCode = "AUD"): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currencyCode,
+    }).format(value);
+  } catch {
+    return `${currencyCode} ${formatMoney(value)}`;
+  }
+}

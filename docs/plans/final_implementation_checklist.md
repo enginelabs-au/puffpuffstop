@@ -9,15 +9,15 @@ updated: 2026-08-18
 
 ## 1. Completion declaration
 
-- [x] All planned agent-executable phases (0–9) are implemented.
-- [x] All available automated validation passes (`lint` 0, `test` 58/58, `typecheck` 0).
+- [x] All planned agent-executable phases (0–10) are implemented.
+- [x] All available automated validation passes (`lint` 0, `test` 63/63, `typecheck` 0).
 - [x] Unverified results are listed below.
 
 ## 2. Outstanding defects or unverified items
 
 | Item | Impact | Evidence/status | Required action | Owner |
 |---|---|---|---|---|
-| SEC-P0-001 client age-gate | Under-16 can tap 16+ | Residual | Accept 16+ store rating; no under-16 mode | Owner |
+| SEC-P0-001 client age-gate | In-app 16+ notice removed | Store rating remains 16+ | Owner sets 16+ in App Store / Play | Owner |
 | SEC-P0-002 Expo `image-size` advisories | Toolchain DoS in Metro | `npm audit` 10 high / 8 moderate / 0 critical | Refresh Expo later; do not force-fix | Owner |
 | SEC-P4-001 unencrypted local snapshot | On-device JSON readable if filesystem is accessed | `src/data/persist.ts` | Accept device lock or add encryption later | Owner |
 | No simulator/device runtime recording | Persist/haptics/reminders unproven on a physical device | Node tests use memory/no-op drivers | Run iOS/Android smoke after a native rebuild | Owner |

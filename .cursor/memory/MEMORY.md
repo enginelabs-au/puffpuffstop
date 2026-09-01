@@ -11,7 +11,7 @@
 - Use adaptive role routing for substantive work: record required/skipped canonical roles, require role charters before action, and preserve evidence-backed handoffs under `docs/workstreams/`.
 - Treat prompts and role identities as guidance, not production authorization; deterministic policy and external access controls govern sensitive actions.
 - Never store passwords, tokens, private keys, or secret values in agent markdown, plans, memories, logs, or templates.
-- Always commit as `Cursor Agent <cursoragent@cursor.com>` via author/committer environment variables. Never use a personal email. Never change git config to set identity.
+- HARD RULE: never use the owner's personal Gmail or any personal/private email. Always commit and author as `Cursor Agent <cursoragent@cursor.com>` via `GIT_AUTHOR_*` / `GIT_COMMITTER_*`. Never change git config. Canonical note: `/rules/git-identity-cursor-anonymous.mdc`.
 
 ## Memory role
 
@@ -43,6 +43,7 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - Runbooks: `/memory/runbooks/`
 - Agent workspace layout: `/memory/runbooks/agent-workspace.md`
 - Bootstrap procedure: `/memory/runbooks/agent-config-bootstrap.md`
+- iOS device debug build: `/memory/runbooks/ios-device-debug-build.md`
 
 ## Product architecture (PuffPuffStop)
 
@@ -50,7 +51,7 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - 16+ wellness habit coach (not medical, not a kids app). v1 money is a local estimate ledger only.
 - Stack: Expo + TypeScript + Expo Router, local versioned JSON snapshot persist (`expo-file-system`), Supabase Auth/Postgres/RLS later.
 - Canonical blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
-- Phase 0–9 verified. Bundle ID `au.com.enginelabs.puffpuffstop`. Opt-in local 19:00 reminder; JSON snapshot persist.
+- Phase 0–10 verified locally. Phase 11 is Siri/Gemini voice log (not volume buttons). Bundle ID `au.com.enginelabs.puffpuffstop`. Opt-in local 19:00 reminder; JSON snapshot persist. Organ scores use a 50-year horizon; Science tab cites peer-reviewed links.
 - Closure list: `docs/plans/final_implementation_checklist.md`
 - Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
 

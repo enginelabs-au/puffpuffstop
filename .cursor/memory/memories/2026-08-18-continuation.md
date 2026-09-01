@@ -146,4 +146,5 @@
 - Validation: `npm run lint` 0; `npm test` 58 pass; `npm run typecheck` 0.
 - Owner asked to commit, merge all branches into `main`, and push. Store submit still unauthorized.
 - GH007 blocked the first push. Unpublished commits were replayed as `Cursor Agent <cursoragent@cursor.com>` and pushed to `origin/main` as `d930730`.
+- iOS: booted iPhone 17, `npx expo start --ios` bundled in Expo Go. Fail-closed hook blocked `git branch -d`/`-D` and remote delete. Removed invalid `expo-haptics` plugin entry; added `babel-preset-expo` so Metro can start.
 

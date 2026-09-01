@@ -1,11 +1,12 @@
 import { router } from "expo-router";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getDraft } from "../src/data/onboarding-store";
 import { formatCount, summarizePlan } from "../src/domain/plan-summary";
-import { color, minTapTarget, radius, space, type } from "../src/theme/tokens";
+import { minTapTarget, radius, space, type, type ColorTokens } from "../src/theme/tokens";
 import { AppText } from "../src/ui/AppText";
+import { useThemedStyles } from "../src/ui/use-themed-styles";
 
 const STRICTNESS_COPY = {
   chill: "We’ll keep things gentle.",
@@ -14,14 +15,16 @@ const STRICTNESS_COPY = {
 } as const;
 
 const WINDOW_COPY = {
-  "2-weeks": "a 2-week stop date",
-  "1-month": "a 1-month stop date",
-  "3-months": "a 3-month stop date",
-  "6-months": "a 6-month stop date",
+  "few-days": "a few days",
+  "few-weeks": "a few weeks",
+  "few-months": "a few months",
+  "exact-date": "an exact stop date",
+  other: "a custom timeline",
   unsure: "an open timeline",
 } as const;
 
 export default function PlanScreen() {
+  const styles = useThemedStyles(planStyles);
   const summary = summarizePlan(getDraft());
   const tone = summary.strictness
     ? STRICTNESS_COPY[summary.strictness]
@@ -73,49 +76,51 @@ export default function PlanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: color.bg,
-  },
-  body: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: space.lg,
-    gap: space.md,
-  },
-  title: {
-    ...type.title,
-    color: color.ink,
-  },
-  bodyText: {
-    ...type.body,
-    color: color.inkMuted,
-  },
-  highlight: {
-    ...type.title,
-    fontSize: 22,
-    color: color.ink,
-  },
-  caption: {
-    ...type.caption,
-    color: color.inkMuted,
-  },
-  primary: {
-    minHeight: minTapTarget,
-    borderRadius: radius.pill,
-    backgroundColor: color.accentMint,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: space.lg,
-    marginTop: space.sm,
-  },
-  primaryLabel: {
-    ...type.body,
-    color: color.ink,
-    fontWeight: "700",
-  },
-  pressed: {
-    opacity: 0.85,
-  },
-});
+function planStyles(color: ColorTokens) {
+  return {
+    safe: {
+      flex: 1,
+      backgroundColor: color.bg,
+    },
+    body: {
+      flex: 1,
+      justifyContent: "center" as const,
+      paddingHorizontal: space.lg,
+      gap: space.md,
+    },
+    title: {
+      ...type.title,
+      color: color.ink,
+    },
+    bodyText: {
+      ...type.body,
+      color: color.inkMuted,
+    },
+    highlight: {
+      ...type.title,
+      fontSize: 22,
+      color: color.ink,
+    },
+    caption: {
+      ...type.caption,
+      color: color.inkMuted,
+    },
+    primary: {
+      minHeight: minTapTarget,
+      borderRadius: radius.pill,
+      backgroundColor: color.accentMint,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      paddingHorizontal: space.lg,
+      marginTop: space.sm,
+    },
+    primaryLabel: {
+      ...type.body,
+      color: color.ink,
+      fontWeight: "700" as const,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+  };
+}
