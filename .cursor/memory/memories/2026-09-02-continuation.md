@@ -89,6 +89,12 @@ npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
 - Home shows an amber in-app notice when timed logs in the last 60 minutes pick up vs the hour before: at least 3, at least +2, and at least double if the prior hour was not empty. Copy: “Your usage has increased in the last hour.” Tap or 8s to dismiss; once per clock hour.
 - Validation: `npm test` 116/116, typecheck 0, lint 0. Release build 29 on Free Malware. Not a store submit.
 
+## Pace overage is debt, not credit
+
+- Exceeding a 15/30/60 slot no longer rolls extra as unused credit. Previous hour 3 of 2 → next hour 0/1. Larger overage can hold 0/0 until the carry returns toward the base. Unused leftover still rolls within the lookback of 3.
+- Yellow = slot used up. Red = this slot exceeded or the daily goal is exceeded. Daily goal count uses danger red too.
+- Validation: `npm test` 118/118, typecheck 0, lint 0.
+
 ## Profile score and multi-day stats
 
 - Home top-right circle opens `/stats`. Score is 7-day goal-day adherence (met / counted). Ranges: 7 days, 30 days, 12 weeks.

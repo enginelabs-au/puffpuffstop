@@ -3,7 +3,7 @@ export const PACING_UNUSED_LOOKBACK = 3;
 export const PACING_TRACKER_DISCLAIMER =
   "This only tracks what you log. It does not ask you to vape.";
 export const PACING_FOLD_HINT =
-  "Intervals pace your daily goal. Unused puffs roll to the next slot.";
+  "Intervals pace your daily goal. Unused puffs roll to the next slot. Extra puffs cut the next slot.";
 export const INTERVAL_PACING_HELPER =
   "Interval pacing splits your daily goal into 1 hour, 30 minute, and 15 minute slots. Unused puffs roll into the next slot so we never invent extra. It only tracks what you log — it does not ask you to vape. Yes opens the pace menu on Home; No keeps it folded. You can also choose unused-puff reminders when a slot ends.";
 
@@ -25,6 +25,7 @@ export type PaceWindow = {
   used: number;
   remaining: number;
   open: boolean;
+  over: boolean;
   startMs: number;
   msUntilReset: number;
 };
@@ -166,17 +167,18 @@ export function allowanceAfterUnused(
     dayStart,
     currentStart - PACING_UNUSED_LOOKBACK * windowMs,
   );
-  let allowance = Math.min(base, remainingAt(origin));
+  let carry = 0;
   for (
     let startMs = origin;
     startMs < currentStart;
     startMs += windowMs
   ) {
+    const raw = base + carry;
+    const allowance = Math.min(Math.max(0, raw), remainingAt(startMs));
     const used = countPuffsInWindow(puffAt, startMs, startMs + windowMs);
-    const unused = Math.max(0, allowance - used);
-    allowance = Math.min(base + unused, remainingAt(startMs + windowMs));
+    carry = (raw < 0 ? raw : allowance) - used;
   }
-  return allowance;
+  return Math.min(Math.max(0, base + carry), remainingAt(currentStart));
 }
 
 export function hourAllowanceAfterUnused(
@@ -224,17 +226,20 @@ function paceWindow(
   puffAt: readonly number[],
   now: Date,
   timeZone: string,
+  dailyOver = false,
 ): PaceWindow {
   const { startMs, endMs } = windowBounds(now, timeZone, minutes);
   const used = countPuffsInWindow(puffAt, startMs, endMs);
   const remaining = Math.max(0, allowance - used);
+  const open = remaining > 0;
   return {
     kind,
     minutes,
     allowance,
     used,
     remaining,
-    open: remaining > 0,
+    open,
+    over: used > allowance || (dailyOver && !open),
     startMs,
     msUntilReset: Math.max(0, endMs - now.getTime()),
   };
@@ -278,7 +283,16 @@ export function livePacing(
     pacing.goalPuffsPerDay,
     logged,
   );
-  const hour = paceWindow("hour", 60, hourAllowance, puffAt, now, timeZone);
+  const dailyOver = logged > pacing.goalPuffsPerDay;
+  const hour = paceWindow(
+    "hour",
+    60,
+    hourAllowance,
+    puffAt,
+    now,
+    timeZone,
+    dailyOver,
+  );
   const rawHalf = allowanceAfterUnused(
     puffAt,
     now,
@@ -319,6 +333,7 @@ export function livePacing(
       puffAt,
       now,
       timeZone,
+      dailyOver || hour.over,
     ),
     quarterHour: paceWindow(
       "15 minutes",
@@ -327,6 +342,7 @@ export function livePacing(
       puffAt,
       now,
       timeZone,
+      dailyOver || hour.over,
     ),
   };
 }
@@ -339,6 +355,9 @@ export function paceWindowCaption(window: PaceWindow): string {
         ? "This 30 minutes"
         : "This 15 minutes";
   const left = formatPaceCountdown(window.msUntilReset);
+  if (window.over) {
+    return `${slot}: ${window.used} of ${window.allowance} used. Next window in ${left}.`;
+  }
   if (!window.open) {
     return `${slot}: ${window.allowance} ${
       window.allowance === 1 ? "is" : "are"

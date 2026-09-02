@@ -112,7 +112,14 @@ export function PacingMeter({
           {windows.map((window) => (
             <View
               key={window.kind}
-              style={[styles.chip, window.open ? styles.open : styles.wait]}
+              style={[
+                styles.chip,
+                window.open
+                  ? styles.open
+                  : window.over
+                    ? styles.over
+                    : styles.wait,
+              ]}
             >
               <View style={styles.chipCopy}>
                 <AppText style={styles.chipName}>{windowLabel(window)}</AppText>
@@ -177,6 +184,9 @@ function meterStyles(color: ColorTokens) {
     },
     wait: {
       backgroundColor: color.amber,
+    },
+    over: {
+      backgroundColor: color.danger,
     },
     chipCopy: {
       flex: 1,

@@ -58,7 +58,7 @@ function rowStyles(color: ColorTokens) {
       color: color.ink,
     },
     goalOver: {
-      color: color.amber,
+      color: color.danger,
     },
     time: {
       ...type.body,

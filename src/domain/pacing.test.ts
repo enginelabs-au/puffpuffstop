@@ -54,6 +54,7 @@ describe("live pacing windows", () => {
       "UTC",
     );
     assert.equal(live.hour.open, false);
+    assert.equal(live.hour.over, false);
     assert.equal(live.hour.used, 2);
     assert.equal(live.hour.remaining, 0);
     assert.match(paceWindowCaption(live.hour), /used/);
@@ -118,6 +119,69 @@ describe("live pacing windows", () => {
     assert.equal(hourAllowanceAfterUnused([], afternoon, "UTC", 2, 25), 8);
     assert.equal(hourAllowanceAfterUnused([], afternoon, "UTC", 2, 3), 3);
     assert.equal(allowanceAfterUnused([], afternoon, "UTC", 15, 1, 25), 4);
+  });
+
+  it("cuts the next hour when the previous hour went over, and does not roll extra as credit", () => {
+    const previousStart = windowBounds(
+      new Date("2026-09-02T00:10:00.000Z"),
+      "UTC",
+      60,
+    ).startMs;
+    const nextHour = new Date("2026-09-02T01:05:00.000Z");
+    const overByOne = [
+      previousStart + 1_000,
+      previousStart + 2_000,
+      previousStart + 3_000,
+    ];
+    assert.equal(
+      hourAllowanceAfterUnused(overByOne, nextHour, "UTC", 2, 25),
+      1,
+    );
+    const live = livePacing(goalPacing(50, 25), overByOne, nextHour, "UTC");
+    assert.equal(live.hour.used, 0);
+    assert.equal(live.hour.allowance, 1);
+    assert.equal(live.hour.over, false);
+
+    const overByThree = [
+      ...overByOne,
+      previousStart + 4_000,
+      previousStart + 5_000,
+    ];
+    assert.equal(
+      hourAllowanceAfterUnused(overByThree, nextHour, "UTC", 2, 25),
+      0,
+    );
+    const zeroHour = livePacing(
+      goalPacing(50, 25),
+      overByThree,
+      nextHour,
+      "UTC",
+    );
+    assert.equal(zeroHour.hour.allowance, 0);
+    assert.equal(zeroHour.hour.open, false);
+    assert.equal(zeroHour.hour.over, false);
+  });
+
+  it("marks a window over when this slot or the daily goal is exceeded", () => {
+    const now = new Date("2026-09-02T00:10:00.000Z");
+    const start = windowBounds(now, "UTC", 60).startMs;
+    const overSlot = livePacing(
+      goalPacing(50, 25),
+      [start + 1_000, start + 2_000, start + 3_000],
+      now,
+      "UTC",
+    );
+    assert.equal(overSlot.hour.used, 3);
+    assert.equal(overSlot.hour.allowance, 2);
+    assert.equal(overSlot.hour.over, true);
+    assert.equal(overSlot.hour.open, false);
+    assert.equal(overSlot.quarterHour.over, true);
+
+    const daily = Array.from({ length: 26 }, (_, index) => start + index * 100);
+    const overDay = livePacing(goalPacing(50, 25), daily, now, "UTC", 26);
+    assert.equal(overDay.hour.over, true);
+    assert.equal(overDay.halfHour.over, true);
+    assert.equal(overDay.quarterHour.over, true);
   });
 
   it("keeps 2 an hour when the previous hour already used 2", () => {

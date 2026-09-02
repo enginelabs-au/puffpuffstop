@@ -28,7 +28,7 @@
 ## Active Role and Gate
 
 - Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm test` 116/116; `npm run typecheck` 0; `npm run lint` 0. Release build 29 on Free Malware.
+- Last integrated validation: `npm test` 118/118; `npm run typecheck` 0; `npm run lint` 0. Release build 29 on Free Malware (pacing debt/red not yet reinstalled).
 
 ## Predecessor Handoff
 
@@ -83,7 +83,7 @@
 - VapeFree is a visual-tone reference, not a cloned pet.
 - In-app age-gate screen removed; 16+ remains the store rating.
 - Siri App Intents can write the snapshot with the app closed. Gemini has no public equivalent; Android uses a headless shortcut / Routine.
-- Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Each 15/30/60 window adds leftover from the last two same-length windows (0/1 → 0/2, 0/2 → 0/3, 1/4 lapses to 0/5). Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. No “Credits” label.
+- Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Unused leftover still rolls (lookback 3). Overage is a debt: 3 of 2 last hour → 0/1 next; more overage can hold 0/0 until baseline returns. Extra puffs never become credit. Yellow = slot used up; red = this slot or the daily goal is exceeded. Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. No “Credits” label.
 - Pace timers vibrate once when a 15/30/60 window lapses and that window is green (yellow→green or green→green). No vibrate if the new window is yellow or if a log only flips the color.
 - Onboarding asks Yes/No for hourly interval pacing after cut-down. Yes opens the Home pace fold on first use; No starts it closed. Missing field on an existing plan defaults to Yes/open. Organs use the same fold, open by default; closed header shows the average of all five organ scores.
 - Unused-puff interval reminders are opt-in (onboarding + Settings). Existing plans default off. When on, local notifications fire at a 15/30/60 lapse only if that slot still has leftover puffs, include the unused count, offer Log puff, and use a short buzz. In-app pace haptic is gated on the same setting.
@@ -108,4 +108,4 @@
 
 ## Last Updated
 
-- 2026-09-02 — Usage-surge Home banner. Release build 29.
+- 2026-09-02 — Overage cuts next pace slot and turns timers red.
