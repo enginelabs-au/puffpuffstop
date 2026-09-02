@@ -28,7 +28,7 @@
 ## Active Role and Gate
 
 - Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm test` 95/95; `npm run typecheck` 0; `npm run lint` 0. Release build 22 on Free Malware.
+- Last integrated validation: `npm test` 116/116; `npm run typecheck` 0; `npm run lint` 0. Release build 29 on Free Malware.
 
 ## Predecessor Handoff
 
@@ -66,7 +66,7 @@
 - `/memory/memories/git-identity.md`
 - `/memory/memories/2026-09-02-continuation.md`
 - `docs/plans/phase_12_health-wearables_plan.md`
-- `src/domain/pacing.ts`, `src/ui/PacingMeter.tsx`, `src/ui/GoalResetRow.tsx`, `src/ui/WatchShiftBanner.tsx`, `plugins/health/`
+- `src/domain/pacing.ts`, `src/domain/organs.ts`, `src/ui/PacingMeter.tsx`, `src/ui/OrganFold.tsx`, `app/onboarding/[step].tsx`, `app/home.tsx`
 - `app/`, `src/`, `plugins/quick-log/`
 
 ## Open Blockers
@@ -83,7 +83,11 @@
 - VapeFree is a visual-tone reference, not a cloned pet.
 - In-app age-gate screen removed; 16+ remains the store rating.
 - Siri App Intents can write the snapshot with the app closed. Gemini has no public equivalent; Android uses a headless shortcut / Routine.
-- Goal pacing: hourly allowance is ceil(goal / 24). Unused from the previous hour adds onto this hour (used 1 of 2 → 3; unused hour → 4) and the 30/15 rows split from that hour (4 → 2 / 1). Capped by remaining daily goal. No “Credits” label. Home watch banner only appears when Health is enabled and samples are actually arriving.
+- Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Each 15/30/60 window adds leftover from the last two same-length windows (0/1 → 0/2, 0/2 → 0/3, 1/4 lapses to 0/5). Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. No “Credits” label.
+- Pace timers vibrate once when a 15/30/60 window lapses and that window is green (yellow→green or green→green). No vibrate if the new window is yellow or if a log only flips the color.
+- Onboarding asks Yes/No for hourly interval pacing after cut-down. Yes opens the Home pace fold on first use; No starts it closed. Missing field on an existing plan defaults to Yes/open. Organs use the same fold, open by default; closed header shows the average of all five organ scores.
+- Unused-puff interval reminders are opt-in (onboarding + Settings). Existing plans default off. When on, local notifications fire at a 15/30/60 lapse only if that slot still has leftover puffs, include the unused count, offer Log puff, and use a short buzz. In-app pace haptic is gated on the same setting.
+- Home shows a one-shot amber banner when timed logs in the last 60 minutes jump vs the hour before (at least 3, +2, and double if the prior hour was not empty). Copy: “Your usage has increased in the last hour.” Tap or 8s dismiss; once per clock hour.
 
 ## Current Working State
 
@@ -94,13 +98,14 @@
 - Phase 12: onboarding + Settings connect Health/Fitbit. Fitbit callback route is `app/fitbit.tsx`.
 - 2026-09-02: Release build 10 installed on Free Malware (`0.0.1` / `10`). JS bundle is embedded. Unplug is safe.
 - Goal pacing stacked on Home. Unused hourly puffs raise this hour and split into 30/15. Watch banner only if Health is on and samples are arriving.
+- Release build 29: in-app usage-surge banner on Home.
 
 ## Next Actions
 
-1. Owner can log a puff with Health connected and check whether a heart/oxygen/breathing shift appears. Unplug is still safe.
+1. Owner can tap the top-right score circle on Home to open 7/30/84-day goal stats. Today seeds history; past days start from this install.
 2. Owner: in Google Health, share heart rate / oxygen / breathing to Apple Health, then Sync Apple Health in PuffPuffStop and log a puff. Direct Fitbit login stays off until a Fitbit app id exists.
 3. Do not store-submit.
 
 ## Last Updated
 
-- 2026-09-02 — Owner asked to commit and push phase 12 health, pacing, and watch-metric toggle as Cursor Agent.
+- 2026-09-02 — Usage-surge Home banner. Release build 29.

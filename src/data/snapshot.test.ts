@@ -102,6 +102,46 @@ describe("snapshot persist", () => {
     assert.deepEqual(parsed.dailyLog.puffAt, []);
   });
 
+  it("defaults missing interval pacing to on for an existing plan", () => {
+    const current = captureSnapshot();
+    const { intervalPacing: _ignored, ...draft } = current.draft;
+    const parsed = parseSnapshot({
+      ...current,
+      draft: { ...draft, durationCount: 8, frequencyCount: 12 },
+    });
+    assert.ok(parsed);
+    assert.equal(parsed.draft.intervalPacing, true);
+  });
+
+  it("defaults missing unused-puff reminders to off for an existing plan", () => {
+    const current = captureSnapshot();
+    const { intervalPacingReminders: _ignored, ...draft } = current.draft;
+    const parsed = parseSnapshot({
+      ...current,
+      draft: { ...draft, durationCount: 8, frequencyCount: 12 },
+    });
+    assert.ok(parsed);
+    assert.equal(parsed.draft.intervalPacingReminders, false);
+  });
+
+  it("keeps interval pacing unanswered on a fresh draft", () => {
+    const current = captureSnapshot();
+    const parsed = parseSnapshot({
+      ...current,
+      draft: { nickname: "" },
+    });
+    assert.ok(parsed);
+    assert.equal(parsed.draft.intervalPacing, null);
+  });
+
+  it("defaults missing goal history to empty", () => {
+    const current = captureSnapshot();
+    const { progress: _progress, ...without } = current;
+    const parsed = parseSnapshot(without);
+    assert.ok(parsed);
+    assert.deepEqual(parsed.progress.days, []);
+  });
+
   it("defaults a missing appearance to dark", () => {
     const current = captureSnapshot();
     const parsed = parseSnapshot({

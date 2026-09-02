@@ -1,5 +1,8 @@
 import { localDateKey } from "../domain/organs";
+import { summarizePlan } from "../domain/plan-summary";
 import { persistNow } from "./persist-hook";
+import { getDraft } from "./onboarding-store";
+import { recordProgressDay } from "./progress-store";
 import { getSettings } from "./settings-store";
 
 export type DailyLogState = {
@@ -76,12 +79,27 @@ export function applyDayRollover(
 
   const previousLogged = state.logged;
   const recovered = previousLogged <= commitment;
+  const usual = summarizePlan(getDraft()).puffsPerDay;
+  recordProgressDay({
+    dateKey: state.dateKey,
+    logged: previousLogged,
+    goal: commitment,
+    usual,
+    met: recovered && commitment > 0,
+  });
   state = {
     dateKey: today,
     logged: 0,
     recoveryTicks: state.recoveryTicks + (recovered ? 1 : 0),
     puffAt: [],
   };
+  recordProgressDay({
+    dateKey: today,
+    logged: 0,
+    goal: commitment,
+    usual,
+    met: commitment > 0,
+  });
   persistNow();
   return {
     ...getDailyLog(),
@@ -115,6 +133,14 @@ export function adjustPuffs(
     puffAt = puffAt.slice(0, Math.max(0, puffAt.length + next));
   }
   state = { ...state, logged, puffAt: normalizePuffAt(logged, puffAt) };
+  const usual = summarizePlan(getDraft()).puffsPerDay;
+  recordProgressDay({
+    dateKey: state.dateKey,
+    logged,
+    goal: commitment,
+    usual,
+    met: commitment > 0 && logged <= commitment,
+  });
   persistNow();
   return getDailyLog();
 }
@@ -125,6 +151,13 @@ export function clearTodayPuffs(
 ): DailyLogState {
   applyDayRollover(commitment, now);
   state = { ...state, logged: 0, puffAt: [] };
+  recordProgressDay({
+    dateKey: state.dateKey,
+    logged: 0,
+    goal: commitment,
+    usual: summarizePlan(getDraft()).puffsPerDay,
+    met: commitment > 0,
+  });
   persistNow();
   return getDailyLog();
 }

@@ -72,6 +72,7 @@ object VoiceSnapshot {
         if (at > 0) times.add(at)
       }
       if (dateKey != today) {
+        upsertProgressDay(root, dateKey, logged)
         daily.put("dateKey", today)
         logged = 0
         times.clear()
@@ -93,10 +94,44 @@ object VoiceSnapshot {
       daily.put("logged", logged)
       daily.put("puffAt", nextAt)
       root.put("dailyLog", daily)
+      upsertProgressDay(root, today, logged)
       file.writeText(root.toString(2))
       Result("ok", logged, added)
     } catch (_: Exception) {
       Result("failed", 0, added)
     }
+  }
+
+  fun upsertProgressDay(root: JSONObject, dateKey: String, logged: Int) {
+    if (dateKey.isBlank()) return
+    val progress = root.optJSONObject("progress") ?: JSONObject()
+    val days = progress.optJSONArray("days") ?: org.json.JSONArray()
+    val lastGoal = progress.optInt("lastGoal", logged)
+    val lastUsual = progress.optInt("lastUsual", 0)
+    val row = JSONObject()
+      .put("dateKey", dateKey)
+      .put("logged", logged)
+      .put("goal", lastGoal)
+      .put("usual", lastUsual)
+      .put("met", lastGoal > 0 && logged <= lastGoal)
+    var replaced = false
+    val nextDays = org.json.JSONArray()
+    for (i in 0 until days.length()) {
+      val existing = days.optJSONObject(i) ?: continue
+      if (existing.optString("dateKey") == dateKey) {
+        nextDays.put(row)
+        replaced = true
+      } else {
+        nextDays.put(existing)
+      }
+    }
+    if (!replaced) nextDays.put(row)
+    val trimmed = org.json.JSONArray()
+    val start = maxOf(0, nextDays.length() - 400)
+    for (i in start until nextDays.length()) trimmed.put(nextDays.get(i))
+    progress.put("days", trimmed)
+    progress.put("lastGoal", lastGoal)
+    progress.put("lastUsual", lastUsual)
+    root.put("progress", progress)
   }
 }

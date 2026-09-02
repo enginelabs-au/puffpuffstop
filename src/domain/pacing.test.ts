@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  PACING_FOLD_HINT,
+  allowanceAfterUnused,
   countPuffsInWindow,
   formatPaceCountdown,
   goalPacing,
@@ -10,6 +12,7 @@ import {
   livePacing,
   msUntilDayReset,
   paceWindowCaption,
+  shouldVibrateOnPaceLapse,
   windowBounds,
 } from "./pacing";
 
@@ -22,6 +25,7 @@ describe("goal pacing", () => {
     assert.equal(pacing.per15Minutes, 1);
     assert.match(goalPacingCaption(pacing), /2 puffs an hour/);
     assert.match(goalPacingCaption(pacing), /does not ask you to vape/);
+    assert.match(PACING_FOLD_HINT, /Unused puffs roll to the next slot/);
   });
 
   it("hides windows when the goal is not below the usual day", () => {
@@ -76,25 +80,44 @@ describe("live pacing windows", () => {
     assert.equal(live.hour.open, true);
   });
 
-  it("splits unused hourly puffs into this hour's 30- and 15-minute rows", () => {
-    const hourStart = windowBounds(new Date("2026-09-02T00:10:00.000Z"), "UTC", 60).startMs;
-    const nextHour = new Date("2026-09-02T01:05:00.000Z");
-    const live = livePacing(goalPacing(50, 25), [hourStart + 1_000], nextHour, "UTC");
-    assert.equal(live.hour.allowance, 3);
-    assert.equal(live.hour.used, 0);
-    assert.equal(live.halfHour.allowance, 2);
-    assert.equal(live.quarterHour.allowance, 1);
-    assert.doesNotMatch(paceWindowCaption(live.hour), /credit/i);
-    const unusedHour = livePacing(goalPacing(50, 25), [], nextHour, "UTC");
-    assert.equal(unusedHour.hour.allowance, 4);
-    assert.equal(unusedHour.halfHour.allowance, 2);
-    assert.equal(unusedHour.quarterHour.allowance, 1);
+  it("adds unused leftover from the previous window, not invented logs", () => {
+    const pacing = goalPacing(50, 25);
+    const first15 = new Date("2026-09-02T00:10:00.000Z");
+    const second15 = new Date("2026-09-02T00:16:00.000Z");
+    const first = livePacing(pacing, [], first15, "UTC");
+    const rolled = livePacing(pacing, [], second15, "UTC");
+    assert.equal(first.quarterHour.used, 0);
+    assert.equal(first.quarterHour.allowance, 1);
+    assert.equal(rolled.quarterHour.used, 0);
+    assert.equal(rolled.quarterHour.allowance, 2);
+    assert.doesNotMatch(paceWindowCaption(rolled.quarterHour), /credit/i);
+
+    const first30 = new Date("2026-09-02T00:10:00.000Z");
+    const third30 = new Date("2026-09-02T01:10:00.000Z");
+    assert.equal(livePacing(pacing, [], first30, "UTC").halfHour.allowance, 1);
+    assert.equal(livePacing(pacing, [], third30, "UTC").halfHour.allowance, 3);
+
+    const hourStart = windowBounds(first15, "UTC", 60).startMs;
+    const atFour = new Date("2026-09-02T01:05:00.000Z");
+    const atFive = new Date("2026-09-02T02:05:00.000Z");
+    const oneOfFour = livePacing(pacing, [hourStart + 3_600_000 + 1_000], atFour, "UTC");
+    assert.equal(oneOfFour.hour.used, 1);
+    assert.equal(oneOfFour.hour.allowance, 4);
+    const afterHourLapse = livePacing(
+      pacing,
+      [hourStart + 3_600_000 + 1_000],
+      atFive,
+      "UTC",
+    );
+    assert.equal(afterHourLapse.hour.used, 0);
+    assert.equal(afterHourLapse.hour.allowance, 5);
   });
 
   it("does not bank unused puffs from every empty hour since midnight", () => {
     const afternoon = new Date("2026-09-02T15:05:00.000Z");
-    assert.equal(hourAllowanceAfterUnused([], afternoon, "UTC", 2, 25), 4);
+    assert.equal(hourAllowanceAfterUnused([], afternoon, "UTC", 2, 25), 8);
     assert.equal(hourAllowanceAfterUnused([], afternoon, "UTC", 2, 3), 3);
+    assert.equal(allowanceAfterUnused([], afternoon, "UTC", 15, 1, 25), 4);
   });
 
   it("keeps 2 an hour when the previous hour already used 2", () => {
@@ -120,6 +143,91 @@ describe("live pacing windows", () => {
     const now = new Date("2026-09-02T01:05:00.000Z");
     assert.equal(hourAllowanceAfterUnused([], now, "UTC", 2, 25), 4);
     assert.equal(hourAllowanceAfterUnused([], now, "UTC", 2, 3), 3);
+  });
+
+  it("keeps 15- and 30-minute leftovers inside the hour that is still open", () => {
+    const pacing = goalPacing(50, 25);
+    const start = windowBounds(new Date("2026-09-02T00:10:00.000Z"), "UTC", 60).startMs;
+    const live = livePacing(
+      pacing,
+      [start + 1_000, start + 2_000],
+      new Date("2026-09-02T00:16:00.000Z"),
+      "UTC",
+    );
+    assert.equal(live.hour.open, false);
+    assert.equal(live.quarterHour.allowance, 0);
+    assert.equal(live.quarterHour.open, false);
+  });
+
+  it("vibrates when a lapsed window turns or stays green", () => {
+    const pacing = goalPacing(50, 25);
+    const usedFifteen = [
+      windowBounds(new Date("2026-09-02T00:10:00.000Z"), "UTC", 15).startMs + 1_000,
+    ];
+    const yellow = livePacing(
+      pacing,
+      usedFifteen,
+      new Date("2026-09-02T00:14:50.000Z"),
+      "UTC",
+    );
+    const yellowToGreen = livePacing(
+      pacing,
+      usedFifteen,
+      new Date("2026-09-02T00:15:01.000Z"),
+      "UTC",
+    );
+    assert.equal(yellow.quarterHour.open, false);
+    assert.equal(yellowToGreen.quarterHour.open, true);
+    assert.equal(shouldVibrateOnPaceLapse(yellow, yellowToGreen), true);
+
+    const green = livePacing(
+      pacing,
+      [],
+      new Date("2026-09-02T00:14:50.000Z"),
+      "UTC",
+    );
+    const stillGreen = livePacing(
+      pacing,
+      [],
+      new Date("2026-09-02T00:15:01.000Z"),
+      "UTC",
+    );
+    assert.equal(green.quarterHour.open, true);
+    assert.equal(stillGreen.quarterHour.open, true);
+    assert.equal(shouldVibrateOnPaceLapse(green, stillGreen), true);
+  });
+
+  it("does not vibrate when a window stays closed or only a log changes color", () => {
+    const tight = goalPacing(20, 1);
+    const dayPuff = [
+      windowBounds(new Date("2026-09-02T00:10:00.000Z"), "UTC", 60).startMs + 1_000,
+    ];
+    const closed = livePacing(
+      tight,
+      dayPuff,
+      new Date("2026-09-02T00:59:50.000Z"),
+      "UTC",
+    );
+    const stillClosed = livePacing(
+      tight,
+      dayPuff,
+      new Date("2026-09-02T01:00:01.000Z"),
+      "UTC",
+    );
+    assert.equal(closed.hour.open, false);
+    assert.equal(stillClosed.hour.open, false);
+    assert.equal(shouldVibrateOnPaceLapse(closed, stillClosed), false);
+    assert.equal(shouldVibrateOnPaceLapse(null, stillClosed), false);
+
+    const pacing = goalPacing(50, 25);
+    const start =
+      windowBounds(new Date("2026-09-02T00:10:00.000Z"), "UTC", 60).startMs;
+    const now = new Date("2026-09-02T00:10:00.000Z");
+    const open = livePacing(pacing, [start + 1_000], now, "UTC");
+    const used = livePacing(pacing, [start + 1_000, start + 2_000], now, "UTC");
+    assert.equal(open.hour.open, true);
+    assert.equal(used.hour.open, false);
+    assert.equal(shouldVibrateOnPaceLapse(open, used), false);
   });
 
   it("formats a countdown without fractions", () => {

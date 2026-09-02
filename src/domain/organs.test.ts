@@ -18,7 +18,9 @@ import {
   organBaseline,
   organBaselines,
   organScore,
+  organScores,
   overCapPuffs,
+  totalOrganScore,
 } from "./organs";
 
 describe("organs", () => {
@@ -92,6 +94,16 @@ describe("organs", () => {
     const noRecover = organScore(70, 3, 3, 0);
     const recovered = organScore(70, 0, 3, 1);
     assert.ok(recovered > noRecover);
+  });
+
+  it("averages organ scores so a log or recovery day moves the total", () => {
+    const baselines = organBaselines(365, 20);
+    const idle = totalOrganScore(organScores(baselines, 0, 20, 0));
+    const afterLog = totalOrganScore(organScores(baselines, 1, 20, 0));
+    const afterGoal = totalOrganScore(organScores(baselines, 0, 20, 1));
+    assert.ok(afterLog < idle);
+    assert.ok(afterGoal > idle);
+    assert.equal(formatOrganPercent(idle).length > 0, true);
   });
 
   it("formats percents finely enough to show a single log", () => {

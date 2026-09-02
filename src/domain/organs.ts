@@ -144,6 +144,11 @@ export function organScores(
   };
 }
 
+export function totalOrganScore(scores: Record<OrganId, number>): number {
+  const sum = ORGAN_IDS.reduce((total, id) => total + scores[id], 0);
+  return sum / ORGAN_IDS.length;
+}
+
 export function formatOrganPercent(value: number): string {
   const hundredths = Math.round(value * 100) / 100;
   if (Number.isInteger(hundredths)) return `${hundredths}`;

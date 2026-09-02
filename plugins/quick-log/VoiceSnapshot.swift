@@ -120,6 +120,7 @@ enum VoiceSnapshot {
         return 0
       }.filter { $0 > 0 }
       if dateKey != today {
+        archiveClosedDay(root: &root, dateKey: dateKey, logged: logged)
         daily["dateKey"] = today
         logged = 0
         puffAt = []
@@ -146,6 +147,7 @@ enum VoiceSnapshot {
       daily["logged"] = logged
       daily["puffAt"] = puffAt
       root["dailyLog"] = daily
+      upsertOpenDay(root: &root, dateKey: today, logged: logged)
 
       let out = try JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted])
       try out.write(to: url, options: .atomic)
@@ -153,5 +155,40 @@ enum VoiceSnapshot {
     } catch {
       return .failed
     }
+  }
+
+  static func archiveClosedDay(root: inout [String: Any], dateKey: String, logged: Int) {
+    upsertProgressDay(root: &root, dateKey: dateKey, logged: logged)
+  }
+
+  static func upsertOpenDay(root: inout [String: Any], dateKey: String, logged: Int) {
+    upsertProgressDay(root: &root, dateKey: dateKey, logged: logged)
+  }
+
+  static func upsertProgressDay(root: inout [String: Any], dateKey: String, logged: Int) {
+    guard !dateKey.isEmpty else { return }
+    var progress = root["progress"] as? [String: Any] ?? [:]
+    var days = progress["days"] as? [[String: Any]] ?? []
+    let lastGoal = (progress["lastGoal"] as? NSNumber)?.intValue ?? logged
+    let lastUsual = (progress["lastUsual"] as? NSNumber)?.intValue ?? 0
+    let row: [String: Any] = [
+      "dateKey": dateKey,
+      "logged": logged,
+      "goal": lastGoal,
+      "usual": lastUsual,
+      "met": lastGoal > 0 && logged <= lastGoal,
+    ]
+    if let index = days.firstIndex(where: { ($0["dateKey"] as? String) == dateKey }) {
+      days[index] = row
+    } else {
+      days.append(row)
+    }
+    if days.count > 400 {
+      days = Array(days.suffix(400))
+    }
+    progress["days"] = days
+    progress["lastGoal"] = lastGoal
+    progress["lastUsual"] = lastUsual
+    root["progress"] = progress
   }
 }

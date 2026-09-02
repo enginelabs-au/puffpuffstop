@@ -7,6 +7,7 @@ export type SettingsState = {
   stakePerPuff: number | null;
   timeZone: string;
   theme: ThemeName;
+  lastNotificationResponseKey: string | null;
 };
 
 function emptySettings(): SettingsState {
@@ -15,6 +16,7 @@ function emptySettings(): SettingsState {
     stakePerPuff: null,
     timeZone: deviceTimeZone(),
     theme: DEFAULT_THEME,
+    lastNotificationResponseKey: null,
   };
 }
 

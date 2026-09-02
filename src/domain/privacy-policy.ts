@@ -7,7 +7,7 @@ export const PRIVACY_POLICY_SECTIONS = [
   },
   {
     heading: "What we store",
-    body: "Your nickname, plan answers, daily puff log (counts and local log times), settings, and estimated puff savings stay on this device as a local snapshot. If you connect Apple Health, Health Connect, or Fitbit, we keep heart rate, HRV, breathing rate, and blood oxygen around a puff log when the watch shares them. This build does not upload that data.",
+    body: "Your nickname, plan answers, daily puff log (counts and local log times), goal-day history, settings, and estimated puff savings stay on this device as a local snapshot. If you connect Apple Health, Health Connect, or Fitbit, we keep heart rate, HRV, breathing rate, and blood oxygen around a puff log when the watch shares them. This build does not upload that data.",
   },
   {
     heading: "Health and watches",
@@ -19,6 +19,6 @@ export const PRIVACY_POLICY_SECTIONS = [
   },
   {
     heading: "Your choices",
-    body: "You can export a JSON copy of your local data or delete everything from Settings. Choosing under 16 at the age gate also clears local data and does not start a profile.",
+    body: "You can export a JSON copy of your local data or delete everything from Settings. Optional local reminders (daily check-in or unused-puff interval lapses) stay on this device. We do not send remote or marketing push. Choosing under 16 at the age gate also clears local data and does not start a profile.",
   },
 ] as const;

@@ -43,7 +43,7 @@ npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
 
 Do not uninstall first — that wipes local snapshot data. `expo run:ios` overwrites the existing app.
 
-Verified 2026-09-02: Release build 10 installed at `Build/Products/Release-iphoneos/PuffPuffStop.app`. Metro may still start after install; it is not required. Unplug and open the app.
+Verified 2026-09-02: Release build 23 installed at `Build/Products/Release-iphoneos/PuffPuffStop.app`. Bump both `app.json` `ios.buildNumber` and `ios/PuffPuffStop/Info.plist` `CFBundleVersion` — Expo does not sync the generated plist. Metro may still start after install; it is not required. Unplug and open the app.
 
 ## Caveats
 

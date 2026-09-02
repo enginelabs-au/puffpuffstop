@@ -15,7 +15,9 @@ import { getDraft, replaceDraft } from "./onboarding-store";
 import { getSavings, replaceSavings, type SavingsState } from "./savings-store";
 import type { HealthState } from "../domain/health";
 import { getHealth, parseHealthState, replaceHealth } from "./health-store";
+import { getProgress, parseProgressState, replaceProgress } from "./progress-store";
 import { getSettings, replaceSettings, type SettingsState } from "./settings-store";
+import type { ProgressState } from "../domain/progress";
 
 export const SNAPSHOT_VERSION = 1;
 
@@ -26,6 +28,7 @@ export type AppSnapshot = {
   settings: SettingsState;
   savings: SavingsState;
   health: HealthState;
+  progress: ProgressState;
 };
 
 function asFiniteNumber(value: unknown, fallback: number): number {
@@ -120,7 +123,37 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
         : base.quitOtherPeriod,
     quitExactDate: asString(value.quitExactDate, ""),
     cutDownPerDay: asFiniteNumber(value.cutDownPerDay, 0),
+    intervalPacing: parseIntervalPacing(
+      value.intervalPacing,
+      asFiniteNumber(value.durationCount, base.durationCount),
+      asFiniteNumber(value.frequencyCount, base.frequencyCount),
+    ),
+    intervalPacingReminders: parseIntervalPacingReminders(
+      value.intervalPacingReminders,
+      asFiniteNumber(value.durationCount, base.durationCount),
+      asFiniteNumber(value.frequencyCount, base.frequencyCount),
+    ),
   };
+}
+
+function parseIntervalPacing(
+  raw: unknown,
+  durationCount: number,
+  frequencyCount: number,
+): boolean | null {
+  if (raw === true) return true;
+  if (raw === false) return false;
+  return durationCount > 0 && frequencyCount > 0 ? true : null;
+}
+
+function parseIntervalPacingReminders(
+  raw: unknown,
+  durationCount: number,
+  frequencyCount: number,
+): boolean | null {
+  if (raw === true) return true;
+  if (raw === false) return false;
+  return durationCount > 0 && frequencyCount > 0 ? false : null;
 }
 
 function parseDailyLog(raw: unknown): DailyLogState | null {
@@ -150,6 +183,10 @@ function parseSettings(raw: unknown): SettingsState | null {
     stakePerPuff: asNullNumber(value.stakePerPuff),
     timeZone: resolveTimeZone(asString(value.timeZone, deviceTimeZone())),
     theme: resolveTheme(value.theme),
+    lastNotificationResponseKey: asString(
+      value.lastNotificationResponseKey ?? "",
+      "",
+    ) || null,
   };
 }
 
@@ -167,6 +204,7 @@ export function captureSnapshot(): AppSnapshot {
     settings: getSettings(),
     savings: getSavings(),
     health: getHealth(),
+    progress: getProgress(),
   };
 }
 
@@ -203,6 +241,7 @@ export function parseSnapshot(raw: unknown): AppSnapshot | null {
     settings,
     savings,
     health: parseHealthState(value.health),
+    progress: parseProgressState(value.progress),
   };
 }
 
@@ -214,5 +253,6 @@ export function restoreSnapshot(raw: unknown): boolean {
   replaceSettings(parsed.settings);
   replaceSavings(parsed.savings);
   replaceHealth(parsed.health);
+  replaceProgress(parsed.progress);
   return true;
 }

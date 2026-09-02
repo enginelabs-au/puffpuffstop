@@ -1,4 +1,4 @@
-import { Redirect } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,19 +9,23 @@ import {
   undoPuff,
   type DailyLogState,
 } from "../src/data/daily-log-store";
-import { applyDayCycle } from "../src/data/day-cycle";
+import { applyDayCycle, syncOpenProgressDay } from "../src/data/day-cycle";
+import { getProgress } from "../src/data/progress-store";
 import { getDraft } from "../src/data/onboarding-store";
+import { syncPaceReminders } from "../src/data/pace-reminders";
 import { getSettings } from "../src/data/settings-store";
 import { getSavings } from "../src/data/savings-store";
-import { canShowHome } from "../src/domain/onboarding";
+import { canShowHome, intervalPacingStartsOpen } from "../src/domain/onboarding";
 import {
-  ORGAN_IDS,
   isGoalCelebration,
   isOnTrack,
+  localDateKey,
   organBaselines,
   organScores,
 } from "../src/domain/organs";
+import { detectUsageSurge } from "../src/domain/usage-surge";
 import { PLAN_DISCLAIMER, summarizePlan } from "../src/domain/plan-summary";
+import { profileScore } from "../src/domain/progress";
 import { formatCurrency } from "../src/domain/savings";
 import { minTapTarget, radius, space, type, type ColorTokens } from "../src/theme/tokens";
 import { useThemedStyles } from "../src/ui/use-themed-styles";
@@ -40,9 +44,10 @@ import {
 import { refreshHealthAfterLog } from "../src/data/health-sync";
 import { AppTabs } from "../src/ui/AppTabs";
 import { AppText } from "../src/ui/AppText";
-import { OrganCard } from "../src/ui/OrganCard";
-import { GoalResetRow } from "../src/ui/GoalResetRow";
+import { OrganFold } from "../src/ui/OrganFold";
 import { PacingMeter } from "../src/ui/PacingMeter";
+import { ProfileScoreButton } from "../src/ui/ProfileScoreButton";
+import { UsageSurgeBanner } from "../src/ui/UsageSurgeBanner";
 import { WatchShiftBanner } from "../src/ui/WatchShiftBanner";
 
 const UNDO_MS = 5000;
@@ -58,6 +63,7 @@ export default function HomeScreen() {
 
   const [boot] = useState(() => {
     const result = applyDayCycle(summary.commitment);
+    syncOpenProgressDay(summary.commitment);
     return {
       log: getDailyLog(),
       pot: getSavings().pot,
@@ -69,9 +75,11 @@ export default function HomeScreen() {
   const [justSucceeded, setJustSucceeded] = useState(boot.justSucceeded);
   const [pot, setPot] = useState(boot.pot);
   const [health, setHealth] = useState(getHealth);
+  const [dismissedSurgeKey, setDismissedSurgeKey] = useState<string | null>(null);
 
   useEffect(() => {
     const result = applyDayCycle(summary.commitment);
+    syncOpenProgressDay(summary.commitment);
     setLog(getDailyLog());
     setPot(getSavings().pot);
     if (result.rolled && result.recovered) {
@@ -94,6 +102,13 @@ export default function HomeScreen() {
       setLog(getDailyLog());
     });
   }, []);
+
+  useEffect(() => {
+    const surge = detectUsageSurge(log.puffAt);
+    if (!surge.active || dismissedSurgeKey === surge.key) return undefined;
+    const timer = setTimeout(() => setDismissedSurgeKey(surge.key), 8000);
+    return () => clearTimeout(timer);
+  }, [log.puffAt, dismissedSurgeKey]);
 
   useEffect(() => {
     void syncHealthFromDisk().then(() => setHealth(getHealth()));
@@ -145,11 +160,14 @@ export default function HomeScreen() {
   const healthEffectRows = visibleLogEffects(health.effects, lastPuffAt);
   const watchFeedLive = isWatchFeedLive(health);
   const watchReadings = watchFeedLive ? visibleHealthRows(health.summary) : [];
+  const surge = detectUsageSurge(log.puffAt);
+  const showSurge = surge.active && dismissedSurgeKey !== surge.key;
 
   function onLog() {
     setLog(logPuff(summary.commitment));
     setSnackVisible(true);
     void playLogHaptic();
+    void syncPaceReminders();
     void refreshHealthAfterLog().then(() => setHealth(getHealth()));
   }
 
@@ -157,6 +175,7 @@ export default function HomeScreen() {
     setLog(undoPuff(summary.commitment));
     setSnackVisible(false);
     void playUndoHaptic();
+    void syncPaceReminders();
   }
 
   return (
@@ -170,13 +189,27 @@ export default function HomeScreen() {
           <AppText style={styles.hello} accessibilityRole="header">
             Hey {summary.displayName}
           </AppText>
+          <ProfileScoreButton
+            score={profileScore(
+              getProgress().days,
+              localDateKey(new Date(), getSettings().timeZone),
+            )}
+            onPress={() => router.push("/stats")}
+          />
         </View>
-        <GoalResetRow
-          logged={log.logged}
+        <PacingMeter
+          averagePuffsPerDay={summary.puffsPerDay}
           goalPuffsPerDay={summary.commitment}
+          puffAt={log.puffAt}
+          logged={log.logged}
           timeZone={getSettings().timeZone}
+          showGoal
           overCap={overCap}
+          defaultOpen={intervalPacingStartsOpen(draft)}
         />
+        {showSurge ? (
+          <UsageSurgeBanner onDismiss={() => setDismissedSurgeKey(surge.key)} />
+        ) : null}
         {watchFeedLive || healthEffectRows.length > 0 ? (
           <WatchShiftBanner
             rows={healthEffectRows}
@@ -184,23 +217,11 @@ export default function HomeScreen() {
             watching={watchFeedLive && isWatchLiveWindow(lastPuffAt)}
           />
         ) : null}
-        <PacingMeter
-          averagePuffsPerDay={summary.puffsPerDay}
-          goalPuffsPerDay={summary.commitment}
-          puffAt={log.puffAt}
-          timeZone={getSettings().timeZone}
+        <OrganFold
+          scores={scores}
+          recovering={recovering}
+          celebrating={celebrating}
         />
-        <View style={styles.grid}>
-          {ORGAN_IDS.map((id) => (
-            <OrganCard
-              key={id}
-              id={id}
-              score={scores[id]}
-              recovering={recovering}
-              celebrating={celebrating}
-            />
-          ))}
-        </View>
         {celebrating || justSucceeded ? (
           <AppText style={styles.success} accessibilityLiveRegion="polite">
             {justSucceeded
@@ -287,12 +308,6 @@ function homeStyles(color: ColorTokens) {
       ...type.title,
       color: color.ink,
       flex: 1,
-    },
-    grid: {
-      flexDirection: "row" as const,
-      flexWrap: "wrap" as const,
-      gap: space.sm,
-      justifyContent: "flex-start" as const,
     },
     caption: {
       ...type.caption,

@@ -15,6 +15,7 @@ export const ONBOARDING_STEPS = [
   "motivation",
   "quit-window",
   "cut-down",
+  "interval-pacing",
   "quick-log",
   "wearables",
 ] as const;
@@ -92,6 +93,8 @@ export type OnboardingDraft = {
   quitOtherPeriod: Period;
   quitExactDate: string;
   cutDownPerDay: number;
+  intervalPacing: boolean | null;
+  intervalPacingReminders: boolean | null;
 };
 
 export function emptyDraft(): OnboardingDraft {
@@ -120,7 +123,17 @@ export function emptyDraft(): OnboardingDraft {
     quitOtherPeriod: "weeks",
     quitExactDate: "",
     cutDownPerDay: 0,
+    intervalPacing: null,
+    intervalPacingReminders: null,
   };
+}
+
+export function intervalPacingStartsOpen(draft: OnboardingDraft): boolean {
+  return draft.intervalPacing !== false;
+}
+
+export function intervalPacingRemindersEnabled(draft: OnboardingDraft): boolean {
+  return draft.intervalPacing !== false && draft.intervalPacingReminders === true;
 }
 
 export function displayName(draft: OnboardingDraft): string {
@@ -269,5 +282,10 @@ export function canContinue(step: OnboardingStep, draft: OnboardingDraft): boole
     case "quick-log":
     case "wearables":
       return true;
+    case "interval-pacing":
+      if (draft.intervalPacing === false) return true;
+      return (
+        draft.intervalPacing === true && draft.intervalPacingReminders !== null
+      );
   }
 }

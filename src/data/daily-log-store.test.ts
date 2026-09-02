@@ -9,6 +9,7 @@ import {
   undoPuff,
 } from "./daily-log-store";
 import { applyTimeZonePreference } from "./time-zone-preference";
+import { getProgress, resetProgress } from "./progress-store";
 import { resetSettings } from "./settings-store";
 
 describe("daily log store", () => {
@@ -36,12 +37,17 @@ describe("daily log store", () => {
     const monday = new Date(2026, 7, 17, 21);
     const tuesday = new Date(2026, 7, 18, 1);
     resetDailyLog(monday);
+    resetProgress();
     logPuff(2, monday);
     logPuff(2, monday);
+    const mondayKey = getDailyLog().dateKey;
     const recovered = applyDayRollover(2, tuesday);
     assert.equal(recovered.logged, 0);
     assert.equal(recovered.recoveryTicks, 1);
     assert.equal(recovered.dateKey, "2026-08-18");
+    const days = getProgress().days;
+    assert.equal(days.find((day) => day.dateKey === mondayKey)?.logged, 2);
+    assert.equal(days.find((day) => day.dateKey === mondayKey)?.met, true);
   });
 
   it("skips recovery when yesterday went over the cap", () => {

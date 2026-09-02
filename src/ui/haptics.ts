@@ -24,3 +24,12 @@ export async function playSuccessHaptic(): Promise<void> {
     // Node tests and unsupported platforms stay silent.
   }
 }
+
+export async function playPaceResetHaptic(): Promise<void> {
+  try {
+    const Haptics = await import("expo-haptics");
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  } catch {
+    // Node tests and unsupported platforms stay silent.
+  }
+}

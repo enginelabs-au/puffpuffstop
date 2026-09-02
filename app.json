@@ -12,7 +12,7 @@
       "bundleIdentifier": "au.com.enginelabs.puffpuffstop",
       "appleTeamId": "256U2M55W7",
       "supportsTablet": false,
-      "buildNumber": "22",
+      "buildNumber": "29",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSHealthShareUsageDescription": "PuffPuffStop reads heart rate, HRV, oxygen, and breathing around a puff log you approve. This is wellness context, not medical advice.",

@@ -21,6 +21,9 @@ import {
 } from "../../src/domain/quick-log";
 import { HealthConnectControls } from "../../src/ui/HealthConnectControls";
 import { commitmentPuffs, puffsPerDay, type Period } from "../../src/domain/estimation";
+import { INTERVAL_PACING_REMINDER_HELPER } from "../../src/domain/pace-reminders";
+import { INTERVAL_PACING_HELPER } from "../../src/domain/pacing";
+import { applyPaceReminderPreference } from "../../src/data/pace-reminders";
 import { GoalPacingBreakdown } from "../../src/ui/GoalPacingBreakdown";
 import {
   PUFF_DIAL_MAX,
@@ -66,6 +69,11 @@ const DEVICES: { value: DeviceType; label: string }[] = [
   { value: "disposable", label: "Disposable" },
   { value: "pod", label: "Pod" },
   { value: "refillable", label: "Refillable" },
+];
+
+const INTERVAL_PACING_CHOICES: { value: "yes" | "no"; label: string }[] = [
+  { value: "yes", label: "Yes" },
+  { value: "no", label: "No" },
 ];
 
 const TRIGGERS: { value: Trigger; label: string }[] = [
@@ -501,6 +509,72 @@ export default function OnboardingStepScreen() {
         </>
       ) : null}
 
+      {step === "interval-pacing" ? (
+        <>
+          <GoalPacingBreakdown
+            averagePuffsPerDay={puffsPerDay(
+              draft.frequencyCount,
+              draft.frequencyPeriod,
+            )}
+            goalPuffsPerDay={commitmentPuffs(
+              puffsPerDay(draft.frequencyCount, draft.frequencyPeriod),
+              draft.cutDownPerDay,
+            )}
+          />
+          <ChipGroup
+            options={INTERVAL_PACING_CHOICES}
+            selected={
+              draft.intervalPacing === true
+                ? "yes"
+                : draft.intervalPacing === false
+                  ? "no"
+                  : null
+            }
+            onChange={(value) => {
+              if (value === "no") {
+                patch({
+                  intervalPacing: false,
+                  intervalPacingReminders: false,
+                });
+                void applyPaceReminderPreference(false);
+                return;
+              }
+              patch({ intervalPacing: true });
+            }}
+          />
+          {draft.intervalPacing === true ? (
+            <>
+              <AppText style={styles.caption}>
+                Unused-puff reminders when a slot ends?
+              </AppText>
+              <AppText style={styles.caption}>
+                {INTERVAL_PACING_REMINDER_HELPER}
+              </AppText>
+              <ChipGroup
+                options={INTERVAL_PACING_CHOICES}
+                selected={
+                  draft.intervalPacingReminders === true
+                    ? "yes"
+                    : draft.intervalPacingReminders === false
+                      ? "no"
+                      : null
+                }
+                onChange={(value) => {
+                  if (value === "no") {
+                    patch({ intervalPacingReminders: false });
+                    void applyPaceReminderPreference(false);
+                    return;
+                  }
+                  void applyPaceReminderPreference(true).then((applied) => {
+                    patch({ intervalPacingReminders: applied });
+                  });
+                }}
+              />
+            </>
+          ) : null}
+        </>
+      ) : null}
+
       {step === "quick-log" ? (
         <View style={styles.examples}>
           <AppText style={styles.example}>{VOICE_EXAMPLE_LOG}</AppText>
@@ -543,6 +617,8 @@ function titleFor(step: OnboardingStep): string {
       return "How long until you’ve completely stopped?";
     case "cut-down":
       return "By how many puffs will you cut down a day?";
+    case "interval-pacing":
+      return "Track puffs by the hour?";
     case "quick-log":
       return "Log a puff with your voice?";
     case "wearables":
@@ -585,6 +661,8 @@ function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undef
       return "Choose a listed option, an exact date, or Other.";
     case "cut-down":
       return "We’ll subtract this from your estimated daily puffs. If the goal is lower, you’ll see an hourly pace. That only tracks logs — it does not ask you to vape.";
+    case "interval-pacing":
+      return INTERVAL_PACING_HELPER;
     case "quick-log":
       return `${VOICE_EXAMPLE_HINT} You can read this again in Settings.`;
     case "wearables":

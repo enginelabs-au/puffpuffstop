@@ -38,6 +38,9 @@ import { getSettings, updateSettings } from "../src/data/settings-store";
 import { applyTimeZonePreference } from "../src/data/time-zone-preference";
 import { DAY_RESET_CAPTION, timeZoneOptions } from "../src/domain/timezones";
 import { getDailyLog } from "../src/data/daily-log-store";
+import { applyPaceReminderPreference } from "../src/data/pace-reminders";
+import { INTERVAL_PACING_REMINDER_HELPER } from "../src/domain/pace-reminders";
+import { intervalPacingStartsOpen } from "../src/domain/onboarding";
 import { summarizePlan } from "../src/domain/plan-summary";
 import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
 import { PacingMeter } from "../src/ui/PacingMeter";
@@ -156,8 +159,72 @@ export default function SettingsScreen() {
           averagePuffsPerDay={summary.puffsPerDay}
           goalPuffsPerDay={summary.commitment}
           puffAt={getDailyLog().puffAt}
+          logged={getDailyLog().logged}
           timeZone={settings.timeZone}
+          defaultOpen={intervalPacingStartsOpen(draft)}
         />
+        <AppText style={styles.caption}>Track puffs by the hour?</AppText>
+        <ChipGroup
+          options={[
+            { value: "yes", label: "Yes" },
+            { value: "no", label: "No" },
+          ]}
+          selected={
+            draft.intervalPacing === true
+              ? "yes"
+              : draft.intervalPacing === false
+                ? "no"
+                : null
+          }
+          onChange={(value) => {
+            if (value === "no") {
+              patchDraft({
+                intervalPacing: false,
+                intervalPacingReminders: false,
+              });
+              void applyPaceReminderPreference(false);
+              return;
+            }
+            patchDraft({ intervalPacing: true });
+          }}
+        />
+        <AppText style={styles.caption}>
+          Yes keeps the hourly pace menu open on Home. No starts it folded.
+        </AppText>
+        {draft.intervalPacing !== false ? (
+          <>
+            <AppText style={styles.caption}>
+              Unused-puff reminders when a slot ends?
+            </AppText>
+            <ChipGroup
+              options={[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+              ]}
+              selected={
+                draft.intervalPacingReminders === true
+                  ? "yes"
+                  : draft.intervalPacingReminders === false
+                    ? "no"
+                    : null
+              }
+              onChange={(value) => {
+                void applyPaceReminderPreference(value === "yes").then(
+                  (applied) => {
+                    setDraft(getDraft());
+                    if (value === "yes" && !applied) {
+                      patchDraft({ intervalPacingReminders: false });
+                    }
+                  },
+                );
+              }}
+            />
+            <AppText style={styles.caption}>
+              {INTERVAL_PACING_REMINDER_HELPER} Permission is asked only if you
+              choose Yes.
+            </AppText>
+          </>
+        ) : null}
 
         <AppText style={styles.section}>Brand</AppText>
         <AppText style={styles.caption}>
@@ -189,6 +256,9 @@ export default function SettingsScreen() {
           onChange={(timeZone) => {
             applyTimeZonePreference(timeZone);
             setSettings(getSettings());
+            void applyPaceReminderPreference(
+              getDraft().intervalPacingReminders === true,
+            ).then(() => setDraft(getDraft()));
           }}
         />
         <AppText style={styles.caption}>{DAY_RESET_CAPTION}</AppText>
@@ -211,6 +281,26 @@ export default function SettingsScreen() {
           Optional 7pm reminder on this device. We ask for notification
           permission only if you turn this on. No remote or marketing push.
         </AppText>
+        {draft.intervalPacing !== false ? (
+          <>
+            <View style={styles.row}>
+              <AppText style={styles.bodyText}>Unused puff intervals</AppText>
+              <Switch
+                accessibilityLabel="Unused puff interval reminders"
+                value={draft.intervalPacingReminders === true}
+                onValueChange={(on) => {
+                  void applyPaceReminderPreference(on).then(() => {
+                    setDraft(getDraft());
+                  });
+                }}
+              />
+            </View>
+            <AppText style={styles.caption}>
+              Closed-device notice plus a short buzz when a 15, 30, or 60 minute
+              slot ends with leftover puffs. Off unless you turn this on.
+            </AppText>
+          </>
+        ) : null}
 
         <AppText style={styles.section}>Watch and Fitbit</AppText>
         <HealthConnectControls />

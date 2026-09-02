@@ -1,4 +1,11 @@
 import {
+  PACE_LOG_ACTION,
+  PACE_LOG_ACTION_TITLE,
+  PACE_REMINDER_CATEGORY,
+  PACE_REMINDER_CHANNEL,
+  PACE_REMINDER_ID_PREFIX,
+} from "../domain/pace-reminders";
+import {
   dailyReminder,
   shouldEnableReminders,
   type DailyReminder,
@@ -6,21 +13,32 @@ import {
 } from "../domain/reminders";
 import { getSettings, updateSettings } from "./settings-store";
 
+export type DateReminder = {
+  identifier: string;
+  date: Date;
+  title: string;
+  body: string;
+  categoryIdentifier: string;
+};
+
 export type ReminderDriver = {
   getPermission(): Promise<ReminderPermission>;
   requestPermission(): Promise<ReminderPermission>;
   scheduleDaily(schedule: DailyReminder): Promise<void>;
+  scheduleDate(schedule: DateReminder): Promise<void>;
+  preparePaceNotifications(): Promise<void>;
   cancel(identifier: string): Promise<void>;
 };
 
 export type MemoryReminderDriver = ReminderDriver & {
   permission: ReminderPermission;
   scheduled: DailyReminder[];
+  pace: DateReminder[];
 };
 
 type ExpoNotificationsModule = {
   AndroidImportance?: { DEFAULT: number };
-  SchedulableTriggerInputTypes: { DAILY: string };
+  SchedulableTriggerInputTypes: { DAILY: string; DATE: string };
   cancelScheduledNotificationAsync(identifier: string): Promise<void>;
   getPermissionsAsync(): Promise<{ status?: string; granted?: boolean }>;
   requestPermissionsAsync(options?: unknown): Promise<{
@@ -29,13 +47,46 @@ type ExpoNotificationsModule = {
   }>;
   scheduleNotificationAsync(request: {
     identifier?: string;
-    content: { title: string; body: string };
-    trigger: { type: string; hour: number; minute: number };
+    content: {
+      title: string;
+      body: string;
+      categoryIdentifier?: string;
+      sound?: boolean | string;
+      vibrate?: number[];
+      data?: Record<string, unknown>;
+    };
+    trigger:
+      | { type: string; hour: number; minute: number }
+      | { type: string; date: Date };
   }): Promise<string>;
   setNotificationChannelAsync?(
     channelId: string,
-    options: { name: string; importance?: number },
+    options: {
+      name: string;
+      importance?: number;
+      vibrationPattern?: number[];
+      enableVibrate?: boolean;
+    },
   ): Promise<unknown>;
+  setNotificationCategoryAsync?(
+    identifier: string,
+    actions: {
+      identifier: string;
+      buttonTitle: string;
+      options?: { opensAppToForeground?: boolean };
+    }[],
+  ): Promise<unknown>;
+  setNotificationHandler?(handler: {
+    handleNotification: (notification: {
+      request: { identifier: string };
+    }) => Promise<{
+      shouldShowAlert?: boolean;
+      shouldShowBanner?: boolean;
+      shouldShowList?: boolean;
+      shouldPlaySound: boolean;
+      shouldSetBadge: boolean;
+    }>;
+  }): void;
 };
 
 function normalizePermission(
@@ -52,6 +103,7 @@ export function createMemoryReminderDriver(
   const driver: MemoryReminderDriver = {
     permission,
     scheduled: [],
+    pace: [],
     async getPermission() {
       return driver.permission;
     },
@@ -64,10 +116,20 @@ export function createMemoryReminderDriver(
     async scheduleDaily(schedule) {
       driver.scheduled = [schedule];
     },
+    async scheduleDate(schedule) {
+      driver.pace = driver.pace.filter(
+        (item) => item.identifier !== schedule.identifier,
+      );
+      driver.pace.push(schedule);
+    },
+    async preparePaceNotifications() {
+      return;
+    },
     async cancel(identifier) {
       driver.scheduled = driver.scheduled.filter(
         (item) => item.identifier !== identifier,
       );
+      driver.pace = driver.pace.filter((item) => item.identifier !== identifier);
     },
   };
   return driver;
@@ -107,6 +169,59 @@ export function createExpoReminderDriver(
         },
       });
     },
+    async scheduleDate(schedule) {
+      await Notifications.cancelScheduledNotificationAsync(
+        schedule.identifier,
+      ).catch(() => undefined);
+      await Notifications.scheduleNotificationAsync({
+        identifier: schedule.identifier,
+        content: {
+          title: schedule.title,
+          body: schedule.body,
+          categoryIdentifier: schedule.categoryIdentifier,
+          sound: true,
+          vibrate: [0, 50],
+          data: { type: "pace-unused" },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: schedule.date,
+        },
+      });
+    },
+    async preparePaceNotifications() {
+      Notifications.setNotificationHandler?.({
+        handleNotification: async (notification) => {
+          const isPace = notification.request.identifier.startsWith(
+            PACE_REMINDER_ID_PREFIX,
+          );
+          return {
+            shouldShowAlert: !isPace,
+            shouldShowBanner: !isPace,
+            shouldShowList: !isPace,
+            shouldPlaySound: !isPace,
+            shouldSetBadge: false,
+          };
+        },
+      });
+      if (Notifications.setNotificationChannelAsync) {
+        await Notifications.setNotificationChannelAsync(PACE_REMINDER_CHANNEL, {
+          name: "Unused puff intervals",
+          importance: Notifications.AndroidImportance?.DEFAULT,
+          vibrationPattern: [0, 50],
+          enableVibrate: true,
+        }).catch(() => undefined);
+      }
+      if (Notifications.setNotificationCategoryAsync) {
+        await Notifications.setNotificationCategoryAsync(PACE_REMINDER_CATEGORY, [
+          {
+            identifier: PACE_LOG_ACTION,
+            buttonTitle: PACE_LOG_ACTION_TITLE,
+            options: { opensAppToForeground: true },
+          },
+        ]).catch(() => undefined);
+      }
+    },
     async cancel(identifier) {
       await Notifications.cancelScheduledNotificationAsync(identifier).catch(
         () => undefined,
@@ -127,6 +242,26 @@ export function resetReminderDriver(): void {
 
 export async function cancelDailyReminder(): Promise<void> {
   await driver.cancel(dailyReminder().identifier);
+}
+
+export async function reminderPermission(): Promise<ReminderPermission> {
+  return driver.getPermission();
+}
+
+export async function requestReminderPermission(): Promise<ReminderPermission> {
+  return driver.requestPermission();
+}
+
+export async function scheduleDateReminder(item: DateReminder): Promise<void> {
+  await driver.scheduleDate(item);
+}
+
+export async function cancelReminder(identifier: string): Promise<void> {
+  await driver.cancel(identifier);
+}
+
+export async function preparePaceNotifications(): Promise<void> {
+  await driver.preparePaceNotifications();
 }
 
 export async function applyReminderPreference(
@@ -167,4 +302,34 @@ export async function bootReminders(): Promise<boolean> {
     // Node tests and unsupported platforms keep the memory driver.
   }
   return syncRemindersFromSettings();
+}
+
+export async function bootNotificationListeners(
+  onReceived: () => void,
+  onResponse: (response: {
+    actionIdentifier: string;
+    notification: { request: { identifier: string } };
+  }) => void,
+): Promise<void> {
+  try {
+    const Notifications = (await import("expo-notifications")) as ExpoNotificationsModule & {
+      addNotificationReceivedListener(listener: () => void): { remove(): void };
+      addNotificationResponseReceivedListener(
+        listener: (response: {
+          actionIdentifier: string;
+          notification: { request: { identifier: string } };
+        }) => void,
+      ): { remove(): void };
+      getLastNotificationResponseAsync(): Promise<{
+        actionIdentifier: string;
+        notification: { request: { identifier: string } };
+      } | null>;
+    };
+    Notifications.addNotificationReceivedListener(onReceived);
+    Notifications.addNotificationResponseReceivedListener(onResponse);
+    const last = await Notifications.getLastNotificationResponseAsync();
+    if (last) onResponse(last);
+  } catch {
+    // Node tests and unsupported platforms stay silent.
+  }
 }

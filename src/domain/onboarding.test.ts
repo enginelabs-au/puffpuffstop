@@ -5,6 +5,8 @@ import {
   canContinue,
   canShowHome,
   clampDial,
+  intervalPacingRemindersEnabled,
+  intervalPacingStartsOpen,
   frequencyCaption,
   previousStep,
   PUFF_DIAL_MAX,
@@ -38,7 +40,8 @@ describe("onboarding", () => {
     assert.equal(isOnboardingStep("home"), false);
     assert.equal(nextStep("nickname"), "timezone");
     assert.equal(nextStep("timezone"), "duration");
-    assert.equal(nextStep("cut-down"), "quick-log");
+    assert.equal(nextStep("cut-down"), "interval-pacing");
+    assert.equal(nextStep("interval-pacing"), "quick-log");
     assert.equal(nextStep("quick-log"), "wearables");
     assert.equal(nextStep("wearables"), "plan");
     assert.equal(canContinue("wearables", emptyDraft()), true);
@@ -79,6 +82,37 @@ describe("onboarding", () => {
         mlPerPuff: 0.05,
       }),
       true,
+    );
+    assert.equal(canContinue("interval-pacing", draft), false);
+    assert.equal(
+      canContinue("interval-pacing", { ...draft, intervalPacing: true }),
+      false,
+    );
+    assert.equal(
+      canContinue("interval-pacing", {
+        ...draft,
+        intervalPacing: true,
+        intervalPacingReminders: false,
+      }),
+      true,
+    );
+    assert.equal(
+      canContinue("interval-pacing", { ...draft, intervalPacing: false }),
+      true,
+    );
+    assert.equal(intervalPacingStartsOpen(draft), true);
+    assert.equal(intervalPacingRemindersEnabled(draft), false);
+    assert.equal(
+      intervalPacingRemindersEnabled({
+        ...draft,
+        intervalPacing: true,
+        intervalPacingReminders: true,
+      }),
+      true,
+    );
+    assert.equal(
+      intervalPacingStartsOpen({ ...draft, intervalPacing: false }),
+      false,
     );
   });
 

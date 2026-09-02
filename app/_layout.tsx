@@ -9,9 +9,11 @@ import { handleFitbitUrl, syncHealthFromDisk } from "../src/data/health-sync";
 import { handleQuickLogUrl, syncVoiceLogFromDisk } from "../src/data/quick-log";
 import { parseQuickLogUrl } from "../src/domain/quick-log";
 import { consumePendingVoiceLog } from "../src/data/voice-pending";
+import { bootPaceReminders, syncPaceReminders } from "../src/data/pace-reminders";
 import { bootReminders } from "../src/data/reminders";
 import { color as tokenColor, darkColor } from "../src/theme/tokens";
 import { ThemeProvider, useTheme } from "../src/ui/ThemeProvider";
+import { usePaceResetHaptic } from "../src/ui/use-pace-reset-haptic";
 
 function useVoiceLogSync(ready: boolean) {
   useEffect(() => {
@@ -19,7 +21,8 @@ function useVoiceLogSync(ready: boolean) {
     const pull = () => {
       void syncVoiceLogFromDisk()
         .then(() => consumePendingVoiceLog())
-        .then(() => syncHealthFromDisk());
+        .then(() => syncHealthFromDisk())
+        .then(() => syncPaceReminders());
     };
     pull();
     const timer = setInterval(pull, 2000);
@@ -59,12 +62,14 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   useVoiceLogSync(ready);
   useVoiceLogUrl(ready);
+  usePaceResetHaptic(ready);
 
   useEffect(() => {
     let cancelled = false;
     void bootPersist()
       .then(() => consumePendingVoiceLog())
       .then(() => bootReminders())
+      .then(() => bootPaceReminders())
       .finally(() => {
         if (!cancelled) setReady(true);
       });

@@ -63,6 +63,37 @@ npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
 - Hour unused now also raises 30/15 from that hour (4 → 2 / 1). Watch banner only if Health is on and vitals are in the snapshot. Release build 21.
 - Disconnect was overwritten by the next Health sync. It now persists off, clears samples, and sync cannot turn it back on until Connect. Settings has Show watch metrics. Release build 22.
 - Owner asked to commit and push this work as `Cursor Agent <cursoragent@cursor.com>`.
+- Pace 15/30/60 countdown lapse now vibrates when any lapsed window is green (yellow→green or green→green). Domain: `shouldVibrateOnPaceLapse`. Hook: `usePaceResetHaptic` in `app/_layout.tsx` so Science/Settings still buzz. No vibrate on first mount, daily-goal-exhausted yellow, or a log-only color flip. Tests 97/97. Release build 23.
+- Unused leftovers now roll on each 15/30/60 lapse from the last three same-length windows. Numerator is only current-window logs. 15/30 stay inside the open hour. Daily remaining uses `logged` (untimed counts). Snapshot 2026-09-02 17:54 Sydney: hour 1/4, 30 0/3, 15 0/3; 18:00 lapse → 0/5, 0/3, 0/4. Tests 98/98. Release build 24.
+
+## Folded pace intervals
+
+- Home goal row toggles 1 Hour / 30 Min / 15 Min. Counts read `(used) 1/4 (unused)` on a second line so the chip stays uncrowded. One-line hint: unused puffs roll to the next slot. Settings uses the same fold under Pace. Release build 26.
+
+## Interval pacing onboarding and organ fold
+
+- New onboarding step `interval-pacing` after cut-down: Yes/No for hourly interval tracking. Copy describes 15/30/60 slots, unused roll, log-only tracking. Yes opens the Home pace menu; No starts it folded.
+- Existing snapshots without the field stay open if a plan already exists (`duration` + `frequency`). Fresh drafts stay unanswered until the step.
+- Organs fold like Pace, open by default. Closed header shows `totalOrganScore` (average of the five organ scores), which moves on logs and recovery days.
+- Settings Goals has the same Yes/No so the owner can flip without Redo setup.
+- Validation: `npm test` 106/106, typecheck 0, lint 0. Release build 27 on Free Malware. Not a store submit.
+
+## Unused-puff interval reminders
+
+- Onboarding interval-pacing step asks a second Yes/No after Yes to hourly tracking. Settings Goals + Reminders expose the same opt-in. Existing plans default off.
+- When on and OS permission is granted, local DATE notifications are scheduled for upcoming 15/30/60 lapses that still have unused puffs (coalesced to the longest window at the same timestamp, max 48). Body includes the leftover count. Action `Log puff` records one timed puff. Short Light haptic in-app on lapse; notification uses a short vibrate. No notify if unused is 0 or the setting is off.
+- Validation: `npm test` 113/113, typecheck 0, lint 0. Release build 28 on Free Malware. Not a store submit.
+
+## Usage surge banner
+
+- Home shows an amber in-app notice when timed logs in the last 60 minutes pick up vs the hour before: at least 3, at least +2, and at least double if the prior hour was not empty. Copy: “Your usage has increased in the last hour.” Tap or 8s to dismiss; once per clock hour.
+- Validation: `npm test` 116/116, typecheck 0, lint 0. Release build 29 on Free Malware. Not a store submit.
+
+## Profile score and multi-day stats
+
+- Home top-right circle opens `/stats`. Score is 7-day goal-day adherence (met / counted). Ranges: 7 days, 30 days, 12 weeks.
+- Persist `progress.days` in the snapshot. Rollover and voice writers archive the closed day. No invented past days; today seeds from the current log.
+- Wellness only: `PROGRESS_DISCLAIMER`. Tests 103/103. Release build 25.
 
 ## Daily reset countdown
 
