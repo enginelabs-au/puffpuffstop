@@ -12,9 +12,11 @@
       "bundleIdentifier": "au.com.enginelabs.puffpuffstop",
       "appleTeamId": "256U2M55W7",
       "supportsTablet": false,
-      "buildNumber": "8",
+      "buildNumber": "22",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "NSHealthShareUsageDescription": "PuffPuffStop reads heart rate, HRV, oxygen, and breathing around a puff log you approve. This is wellness context, not medical advice.",
+        "NSHealthUpdateUsageDescription": "PuffPuffStop does not write workout or vape data to Apple Health.",
         "CFBundleSpokenName": "Puff Puff Stop",
         "INAlternativeAppNames": [
           {
@@ -43,6 +45,7 @@
     },
     "plugins": [
       "./plugins/with-quick-log",
+      "./plugins/with-health",
       "expo-file-system",
       [
         "expo-notifications",

@@ -236,3 +236,10 @@
 - Owner also says “to” when adding or removing.
 - Build 8 donates to on one-puff and counted add/remove. Installed and launched. Did not uninstall.
 - Owner confirmed add/remove is working well and asked to push. Blocker moved to `blockers-fixed/`.
+- Pushed `905a06f` to `origin/main` as Cursor Agent. Did not store-submit.
+
+## Phase 12 health wearables
+
+- Owner asked to connect Fitbit/smartwatches during onboarding and Settings, capturing as much device data as allowed.
+- Implemented Apple Health / Health Connect reads (HR, HRV, rest HR, breathing, SpO2, sleep, steps, energy, exercise, VO2, wrist temp) plus Fitbit OAuth wiring behind `EXPO_PUBLIC_FITBIT_CLIENT_ID`.
+- Local snapshot only. Wellness copy, not medical. Tests 81/81, lint 0, typecheck 0.

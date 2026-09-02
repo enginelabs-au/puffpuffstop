@@ -13,12 +13,15 @@ import { getDraft, updateDraft } from "../../src/data/onboarding-store";
 import { getSettings } from "../../src/data/settings-store";
 import { applyTimeZonePreference } from "../../src/data/time-zone-preference";
 import { timeZoneOptions } from "../../src/domain/timezones";
+import { HEALTH_ONBOARDING_HELPER } from "../../src/domain/health";
 import {
   VOICE_EXAMPLE_HINT,
   VOICE_EXAMPLE_LOG,
   VOICE_EXAMPLE_REMOVE,
 } from "../../src/domain/quick-log";
-import type { Period } from "../../src/domain/estimation";
+import { HealthConnectControls } from "../../src/ui/HealthConnectControls";
+import { commitmentPuffs, puffsPerDay, type Period } from "../../src/domain/estimation";
+import { GoalPacingBreakdown } from "../../src/ui/GoalPacingBreakdown";
 import {
   PUFF_DIAL_MAX,
   canContinue,
@@ -479,11 +482,23 @@ export default function OnboardingStepScreen() {
       ) : null}
 
       {step === "cut-down" ? (
-        <RotaryDial
-          accessibilityLabel="Puffs to cut down each day"
-          value={draft.cutDownPerDay}
-          onChange={(cutDownPerDay) => patch({ cutDownPerDay })}
-        />
+        <>
+          <RotaryDial
+            accessibilityLabel="Puffs to cut down each day"
+            value={draft.cutDownPerDay}
+            onChange={(cutDownPerDay) => patch({ cutDownPerDay })}
+          />
+          <GoalPacingBreakdown
+            averagePuffsPerDay={puffsPerDay(
+              draft.frequencyCount,
+              draft.frequencyPeriod,
+            )}
+            goalPuffsPerDay={commitmentPuffs(
+              puffsPerDay(draft.frequencyCount, draft.frequencyPeriod),
+              draft.cutDownPerDay,
+            )}
+          />
+        </>
       ) : null}
 
       {step === "quick-log" ? (
@@ -492,6 +507,8 @@ export default function OnboardingStepScreen() {
           <AppText style={styles.example}>{VOICE_EXAMPLE_REMOVE}</AppText>
         </View>
       ) : null}
+
+      {step === "wearables" ? <HealthConnectControls /> : null}
     </OnboardingFrame>
   );
 }
@@ -528,6 +545,8 @@ function titleFor(step: OnboardingStep): string {
       return "By how many puffs will you cut down a day?";
     case "quick-log":
       return "Log a puff with your voice?";
+    case "wearables":
+      return "Connect a watch?";
   }
 }
 
@@ -565,9 +584,11 @@ function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undef
     case "quit-window":
       return "Choose a listed option, an exact date, or Other.";
     case "cut-down":
-      return "We’ll subtract this from your estimated daily puffs.";
+      return "We’ll subtract this from your estimated daily puffs. If the goal is lower, you’ll see an hourly pace. That only tracks logs — it does not ask you to vape.";
     case "quick-log":
       return `${VOICE_EXAMPLE_HINT} You can read this again in Settings.`;
+    case "wearables":
+      return HEALTH_ONBOARDING_HELPER;
     default:
       return undefined;
   }

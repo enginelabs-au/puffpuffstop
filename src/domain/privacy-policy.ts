@@ -7,7 +7,11 @@ export const PRIVACY_POLICY_SECTIONS = [
   },
   {
     heading: "What we store",
-    body: "Your nickname, plan answers, daily puff log, settings, and estimated puff savings stay on this device as a local snapshot. This build does not upload that data.",
+    body: "Your nickname, plan answers, daily puff log (counts and local log times), settings, and estimated puff savings stay on this device as a local snapshot. If you connect Apple Health, Health Connect, or Fitbit, we keep heart rate, HRV, breathing rate, and blood oxygen around a puff log when the watch shares them. This build does not upload that data.",
+  },
+  {
+    heading: "Health and watches",
+    body: "Watch data is optional wellness context, not a diagnosis. We only read Health types you approve. We do not write vape events into Health. A direct Fitbit login stays on this device and is removed from exports.",
   },
   {
     heading: "What we do not do",

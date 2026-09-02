@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getDraft } from "../src/data/onboarding-store";
 import { formatCount, summarizePlan } from "../src/domain/plan-summary";
+import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
 import { minTapTarget, radius, space, type, type ColorTokens } from "../src/theme/tokens";
 import { AppText } from "../src/ui/AppText";
 import { useThemedStyles } from "../src/ui/use-themed-styles";
@@ -59,6 +60,10 @@ export default function PlanScreen() {
         <AppText style={styles.highlight}>
           We’ll aim for {formatCount(summary.commitment)} puffs today.
         </AppText>
+        <GoalPacingBreakdown
+          averagePuffsPerDay={summary.puffsPerDay}
+          goalPuffsPerDay={summary.commitment}
+        />
         <AppText style={styles.bodyText}>
           {tone} You’re aiming for {window}.
         </AppText>

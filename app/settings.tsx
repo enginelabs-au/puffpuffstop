@@ -37,7 +37,10 @@ import {
 import { getSettings, updateSettings } from "../src/data/settings-store";
 import { applyTimeZonePreference } from "../src/data/time-zone-preference";
 import { DAY_RESET_CAPTION, timeZoneOptions } from "../src/domain/timezones";
+import { getDailyLog } from "../src/data/daily-log-store";
 import { summarizePlan } from "../src/domain/plan-summary";
+import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
+import { PacingMeter } from "../src/ui/PacingMeter";
 import {
   SAVINGS_DISCLAIMER,
   defaultStakePerPuff,
@@ -54,6 +57,7 @@ import {
 } from "../src/theme/tokens";
 import { AppTabs } from "../src/ui/AppTabs";
 import { AppText } from "../src/ui/AppText";
+import { HealthConnectControls } from "../src/ui/HealthConnectControls";
 import { ChipGroup } from "../src/ui/ChipGroup";
 import { SelectField } from "../src/ui/SelectField";
 import { useTheme } from "../src/ui/ThemeProvider";
@@ -144,6 +148,16 @@ export default function SettingsScreen() {
           }}
           style={styles.input}
         />
+        <GoalPacingBreakdown
+          averagePuffsPerDay={summary.puffsPerDay}
+          goalPuffsPerDay={summary.commitment}
+        />
+        <PacingMeter
+          averagePuffsPerDay={summary.puffsPerDay}
+          goalPuffsPerDay={summary.commitment}
+          puffAt={getDailyLog().puffAt}
+          timeZone={settings.timeZone}
+        />
 
         <AppText style={styles.section}>Brand</AppText>
         <AppText style={styles.caption}>
@@ -197,6 +211,9 @@ export default function SettingsScreen() {
           Optional 7pm reminder on this device. We ask for notification
           permission only if you turn this on. No remote or marketing push.
         </AppText>
+
+        <AppText style={styles.section}>Watch and Fitbit</AppText>
+        <HealthConnectControls />
 
         <AppText style={styles.section}>Voice log</AppText>
         <View style={styles.examples}>

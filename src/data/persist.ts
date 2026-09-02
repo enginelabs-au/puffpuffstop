@@ -1,5 +1,6 @@
 import { createFilePersistDriver } from "./file-driver";
 import {
+  markPersistReady,
   persistNow,
   registerPersistSaver,
   setHydrating,
@@ -40,6 +41,7 @@ export function setPersistDriver(next: PersistDriver): void {
 export function resetPersistDriver(): void {
   memory.clear();
   driver = createMemoryPersistDriver();
+  markPersistReady();
 }
 
 export async function hydrateFromDriver(): Promise<boolean> {
@@ -56,11 +58,17 @@ export async function hydrateFromDriver(): Promise<boolean> {
 }
 
 export async function bootPersist(): Promise<boolean> {
-  const fileDriver = await createFilePersistDriver();
-  if (fileDriver) {
-    setPersistDriver(fileDriver);
+  setHydrating(true);
+  try {
+    const fileDriver = await createFilePersistDriver();
+    if (fileDriver) {
+      setPersistDriver(fileDriver);
+    }
+    return await hydrateFromDriver();
+  } finally {
+    setHydrating(false);
+    markPersistReady();
   }
-  return hydrateFromDriver();
 }
 
 export { persistNow };

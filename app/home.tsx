@@ -11,6 +11,7 @@ import {
 } from "../src/data/daily-log-store";
 import { applyDayCycle } from "../src/data/day-cycle";
 import { getDraft } from "../src/data/onboarding-store";
+import { getSettings } from "../src/data/settings-store";
 import { getSavings } from "../src/data/savings-store";
 import { canShowHome } from "../src/domain/onboarding";
 import {
@@ -26,9 +27,23 @@ import { minTapTarget, radius, space, type, type ColorTokens } from "../src/them
 import { useThemedStyles } from "../src/ui/use-themed-styles";
 import { playLogHaptic, playSuccessHaptic, playUndoHaptic } from "../src/ui/haptics";
 import { subscribeQuickLog } from "../src/data/quick-log";
+import { getHealth } from "../src/data/health-store";
+import { subscribeHealth, syncHealthFromDisk } from "../src/data/health-sync";
+import {
+  HEALTH_LIVE_BURST_MS,
+  HEALTH_LIVE_POLL_MS,
+  isWatchFeedLive,
+  isWatchLiveWindow,
+  visibleHealthRows,
+  visibleLogEffects,
+} from "../src/domain/health";
+import { refreshHealthAfterLog } from "../src/data/health-sync";
 import { AppTabs } from "../src/ui/AppTabs";
 import { AppText } from "../src/ui/AppText";
 import { OrganCard } from "../src/ui/OrganCard";
+import { GoalResetRow } from "../src/ui/GoalResetRow";
+import { PacingMeter } from "../src/ui/PacingMeter";
+import { WatchShiftBanner } from "../src/ui/WatchShiftBanner";
 
 const UNDO_MS = 5000;
 
@@ -53,6 +68,7 @@ export default function HomeScreen() {
   const [snackVisible, setSnackVisible] = useState(false);
   const [justSucceeded, setJustSucceeded] = useState(boot.justSucceeded);
   const [pot, setPot] = useState(boot.pot);
+  const [health, setHealth] = useState(getHealth);
 
   useEffect(() => {
     const result = applyDayCycle(summary.commitment);
@@ -79,6 +95,35 @@ export default function HomeScreen() {
     });
   }, []);
 
+  useEffect(() => {
+    void syncHealthFromDisk().then(() => setHealth(getHealth()));
+    return subscribeHealth(() => setHealth(getHealth()));
+  }, []);
+
+  useEffect(() => {
+    const last = log.puffAt.at(-1);
+    if (
+      !isWatchLiveWindow(last) ||
+      !health.watchMetricsEnabled ||
+      !(health.healthEnabled || health.fitbitEnabled)
+    ) {
+      return undefined;
+    }
+    const started = Date.now();
+    const tick = () => {
+      void refreshHealthAfterLog().then(() => setHealth(getHealth()));
+    };
+    tick();
+    const timer = setInterval(() => {
+      if (Date.now() - started > HEALTH_LIVE_BURST_MS) {
+        clearInterval(timer);
+        return;
+      }
+      tick();
+    }, HEALTH_LIVE_POLL_MS);
+    return () => clearInterval(timer);
+  }, [log.puffAt, health.healthEnabled, health.fitbitEnabled, health.watchMetricsEnabled]);
+
   if (!canShowHome(draft)) {
     return <Redirect href="/onboarding/nickname" />;
   }
@@ -96,11 +141,16 @@ export default function HomeScreen() {
     summary.commitment,
   );
   const recovering = celebrating;
+  const lastPuffAt = log.puffAt.at(-1);
+  const healthEffectRows = visibleLogEffects(health.effects, lastPuffAt);
+  const watchFeedLive = isWatchFeedLive(health);
+  const watchReadings = watchFeedLive ? visibleHealthRows(health.summary) : [];
 
   function onLog() {
     setLog(logPuff(summary.commitment));
     setSnackVisible(true);
     void playLogHaptic();
+    void refreshHealthAfterLog().then(() => setHealth(getHealth()));
   }
 
   function onUndo() {
@@ -121,12 +171,25 @@ export default function HomeScreen() {
             Hey {summary.displayName}
           </AppText>
         </View>
-        <AppText
-          style={[styles.strip, overCap ? styles.stripOver : null]}
-          accessibilityLabel={`${log.logged} of ${summary.commitment} puffs today`}
-        >
-          {log.logged} / {summary.commitment}
-        </AppText>
+        <GoalResetRow
+          logged={log.logged}
+          goalPuffsPerDay={summary.commitment}
+          timeZone={getSettings().timeZone}
+          overCap={overCap}
+        />
+        {watchFeedLive || healthEffectRows.length > 0 ? (
+          <WatchShiftBanner
+            rows={healthEffectRows}
+            readings={watchReadings}
+            watching={watchFeedLive && isWatchLiveWindow(lastPuffAt)}
+          />
+        ) : null}
+        <PacingMeter
+          averagePuffsPerDay={summary.puffsPerDay}
+          goalPuffsPerDay={summary.commitment}
+          puffAt={log.puffAt}
+          timeZone={getSettings().timeZone}
+        />
         <View style={styles.grid}>
           {ORGAN_IDS.map((id) => (
             <OrganCard
@@ -224,14 +287,6 @@ function homeStyles(color: ColorTokens) {
       ...type.title,
       color: color.ink,
       flex: 1,
-    },
-    strip: {
-      ...type.body,
-      color: color.ink,
-      fontWeight: "700" as const,
-    },
-    stripOver: {
-      color: color.amber,
     },
     grid: {
       flexDirection: "row" as const,

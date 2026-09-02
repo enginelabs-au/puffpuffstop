@@ -4,6 +4,7 @@ export type PersistDriver = {
 };
 
 let hydrating = false;
+let persistReady = true;
 let saver: (() => void) | null = null;
 
 export function setHydrating(value: boolean): void {
@@ -14,7 +15,11 @@ export function registerPersistSaver(fn: () => void): void {
   saver = fn;
 }
 
+export function markPersistReady(): void {
+  persistReady = true;
+}
+
 export function persistNow(): void {
-  if (hydrating) return;
+  if (hydrating || !persistReady) return;
   saver?.();
 }

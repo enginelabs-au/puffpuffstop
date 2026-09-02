@@ -115,19 +115,36 @@ enum VoiceSnapshot {
       if let number = daily["logged"] as? NSNumber {
         logged = number.intValue
       }
+      var puffAt = (daily["puffAt"] as? [Any] ?? []).compactMap { item -> Int in
+        if let number = item as? NSNumber { return number.intValue }
+        return 0
+      }.filter { $0 > 0 }
       if dateKey != today {
         daily["dateKey"] = today
         logged = 0
+        puffAt = []
       }
+      let nowMs = Int(Date().timeIntervalSince1970 * 1000)
       if direction == "clear" {
         added = logged
         logged = 0
+        puffAt = []
       } else if direction == "down" {
+        let remove = min(added, logged)
         logged = max(0, logged - added)
+        if puffAt.count > remove {
+          puffAt = Array(puffAt.dropLast(remove))
+        } else {
+          puffAt = []
+        }
       } else {
         logged += added
+        for _ in 0..<added {
+          puffAt.append(nowMs)
+        }
       }
       daily["logged"] = logged
+      daily["puffAt"] = puffAt
       root["dailyLog"] = daily
 
       let out = try JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted])

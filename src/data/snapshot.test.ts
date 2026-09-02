@@ -50,6 +50,7 @@ describe("snapshot persist", () => {
     assert.equal(next.version, SNAPSHOT_VERSION);
     assert.equal(next.draft.nickname, "Sam");
     assert.equal(next.dailyLog.logged, 1);
+    assert.equal(next.dailyLog.puffAt.length, 1);
     assert.equal(next.settings.stakePerPuff, 0.2);
     assert.equal(next.savings.pot, 1.4);
   });
@@ -84,6 +85,21 @@ describe("snapshot persist", () => {
     });
     assert.ok(parsed);
     assert.ok(parsed.settings.timeZone.length > 0);
+  });
+
+  it("defaults a missing puff timestamp list to empty", () => {
+    const current = captureSnapshot();
+    const parsed = parseSnapshot({
+      ...current,
+      dailyLog: {
+        dateKey: current.dailyLog.dateKey,
+        logged: 3,
+        recoveryTicks: 0,
+      },
+    });
+    assert.ok(parsed);
+    assert.equal(parsed.dailyLog.logged, 3);
+    assert.deepEqual(parsed.dailyLog.puffAt, []);
   });
 
   it("defaults a missing appearance to dark", () => {

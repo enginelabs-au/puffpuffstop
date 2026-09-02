@@ -6,6 +6,7 @@ export type DailyLogState = {
   dateKey: string;
   logged: number;
   recoveryTicks: number;
+  puffAt: number[];
 };
 
 export type RolloverResult = DailyLogState & {
@@ -18,23 +19,35 @@ function todayKey(now: Date = new Date()): string {
   return localDateKey(now, getSettings().timeZone);
 }
 
+function normalizePuffAt(logged: number, puffAt?: readonly number[]): number[] {
+  if (logged <= 0) return [];
+  const times = (puffAt ?? []).filter((at) => Number.isFinite(at) && at > 0);
+  return times.length > logged ? times.slice(-logged) : times;
+}
+
 let state: DailyLogState = {
   dateKey: todayKey(),
   logged: 0,
   recoveryTicks: 0,
+  puffAt: [],
 };
 
 export function getDailyLog(): DailyLogState {
-  return { ...state };
+  return { ...state, puffAt: [...state.puffAt] };
 }
 
 export function replaceDailyLog(next: DailyLogState): DailyLogState {
-  state = { ...next };
+  state = {
+    dateKey: next.dateKey,
+    logged: Math.max(0, next.logged),
+    recoveryTicks: Math.max(0, next.recoveryTicks),
+    puffAt: normalizePuffAt(next.logged, next.puffAt),
+  };
   return getDailyLog();
 }
 
 export function resetDailyLog(now: Date = new Date()): DailyLogState {
-  state = { dateKey: todayKey(now), logged: 0, recoveryTicks: 0 };
+  state = { dateKey: todayKey(now), logged: 0, recoveryTicks: 0, puffAt: [] };
   persistNow();
   return getDailyLog();
 }
@@ -67,6 +80,7 @@ export function applyDayRollover(
     dateKey: today,
     logged: 0,
     recoveryTicks: state.recoveryTicks + (recovered ? 1 : 0),
+    puffAt: [],
   };
   persistNow();
   return {
@@ -92,7 +106,15 @@ export function adjustPuffs(
 ): DailyLogState {
   applyDayRollover(commitment, now);
   const next = Number.isFinite(delta) ? Math.round(delta) : 0;
-  state = { ...state, logged: Math.max(0, state.logged + next) };
+  const logged = Math.max(0, state.logged + next);
+  let puffAt = [...state.puffAt];
+  if (next > 0) {
+    const at = now.getTime();
+    for (let i = 0; i < next; i += 1) puffAt.push(at);
+  } else if (next < 0) {
+    puffAt = puffAt.slice(0, Math.max(0, puffAt.length + next));
+  }
+  state = { ...state, logged, puffAt: normalizePuffAt(logged, puffAt) };
   persistNow();
   return getDailyLog();
 }
@@ -102,7 +124,7 @@ export function clearTodayPuffs(
   now: Date = new Date(),
 ): DailyLogState {
   applyDayRollover(commitment, now);
-  state = { ...state, logged: 0 };
+  state = { ...state, logged: 0, puffAt: [] };
   persistNow();
   return getDailyLog();
 }

@@ -5,6 +5,7 @@ import { AppState, Linking, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { bootPersist } from "../src/data/persist";
+import { handleFitbitUrl, syncHealthFromDisk } from "../src/data/health-sync";
 import { handleQuickLogUrl, syncVoiceLogFromDisk } from "../src/data/quick-log";
 import { parseQuickLogUrl } from "../src/domain/quick-log";
 import { consumePendingVoiceLog } from "../src/data/voice-pending";
@@ -12,10 +13,13 @@ import { bootReminders } from "../src/data/reminders";
 import { color as tokenColor, darkColor } from "../src/theme/tokens";
 import { ThemeProvider, useTheme } from "../src/ui/ThemeProvider";
 
-function useVoiceLogSync() {
+function useVoiceLogSync(ready: boolean) {
   useEffect(() => {
+    if (!ready) return;
     const pull = () => {
-      void syncVoiceLogFromDisk().then(() => consumePendingVoiceLog());
+      void syncVoiceLogFromDisk()
+        .then(() => consumePendingVoiceLog())
+        .then(() => syncHealthFromDisk());
     };
     pull();
     const timer = setInterval(pull, 2000);
@@ -26,7 +30,7 @@ function useVoiceLogSync() {
       clearInterval(timer);
       appState.remove();
     };
-  }, []);
+  }, [ready]);
 }
 
 function useVoiceLogUrl(ready: boolean) {
@@ -34,6 +38,7 @@ function useVoiceLogUrl(ready: boolean) {
     if (!ready) return;
     const applyUrl = (url: string | null, source: "initial" | "event") => {
       if (!url) return;
+      if (source === "event") void handleFitbitUrl(url);
       const parsed = parseQuickLogUrl(url);
       if (!parsed) return;
       // Tokenless cold-start URLs are iOS replaying the last open. Skip those.
@@ -52,7 +57,7 @@ function useVoiceLogUrl(ready: boolean) {
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
-  useVoiceLogSync();
+  useVoiceLogSync(ready);
   useVoiceLogUrl(ready);
 
   useEffect(() => {

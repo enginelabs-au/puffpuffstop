@@ -43,7 +43,8 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - Runbooks: `/memory/runbooks/`
 - Agent workspace layout: `/memory/runbooks/agent-workspace.md`
 - Bootstrap procedure: `/memory/runbooks/agent-config-bootstrap.md`
-- iOS device debug build: `/memory/runbooks/ios-device-debug-build.md`
+- iOS device debug / offline Release build: `/memory/runbooks/ios-device-debug-build.md`
+- Latest continuation: `/memory/memories/2026-09-02-continuation.md`
 
 ## Product architecture (PuffPuffStop)
 
@@ -51,7 +52,7 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - 16+ wellness habit coach (not medical, not a kids app). v1 money is a local estimate ledger only.
 - Stack: Expo + TypeScript + Expo Router, local versioned JSON snapshot persist (`expo-file-system`), Supabase Auth/Postgres/RLS later.
 - Canonical blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
-- Phase 0–10 verified locally. Phase 11 is Siri/Gemini voice log (not volume buttons). Bundle ID `au.com.enginelabs.puffpuffstop`. Opt-in local 19:00 reminder; JSON snapshot persist. Organ scores use a 50-year horizon; Science tab cites peer-reviewed links.
+- Phase 0–11 verified locally. Phase 12 is optional Apple Health / Health Connect / Fitbit context (not medical). Bundle ID `au.com.enginelabs.puffpuffstop`. Opt-in local 19:00 reminder; JSON snapshot persist. Organ scores use a 50-year horizon; Science tab cites peer-reviewed links.
 - Closure list: `docs/plans/final_implementation_checklist.md`
 - Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
 

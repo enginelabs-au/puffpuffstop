@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { envNames, readAppEnv, readPrivacyPolicyUrl } from "./env";
+import { envNames, readAppEnv, readFitbitClientId, readPrivacyPolicyUrl } from "./env";
 
 describe("env wiring", () => {
   it("registers public environment-variable names", () => {
@@ -29,6 +29,15 @@ describe("env wiring", () => {
         EXPO_PUBLIC_PRIVACY_POLICY_URL: "https://example.com/privacy",
       }),
       "https://example.com/privacy",
+    );
+  });
+
+  it("reads an optional Fitbit client id and never requires a secret", () => {
+    assert.equal(envNames.fitbitClientId, "EXPO_PUBLIC_FITBIT_CLIENT_ID");
+    assert.equal(readFitbitClientId({}), null);
+    assert.equal(
+      readFitbitClientId({ EXPO_PUBLIC_FITBIT_CLIENT_ID: " fitbit-app " }),
+      "fitbit-app",
     );
   });
 });

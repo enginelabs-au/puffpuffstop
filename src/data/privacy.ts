@@ -3,6 +3,8 @@ import { resetDraft, getDraft } from "./onboarding-store";
 import { persistNow, setHydrating } from "./persist-hook";
 import { cancelDailyReminder } from "./reminders";
 import { getSavings, resetSavings } from "./savings-store";
+import { redactHealthSecrets } from "../domain/health";
+import { getHealth, resetHealth } from "./health-store";
 import { getSettings, resetSettings } from "./settings-store";
 
 export type PrivacyExport = {
@@ -11,6 +13,7 @@ export type PrivacyExport = {
   dailyLog: ReturnType<typeof getDailyLog>;
   settings: ReturnType<typeof getSettings>;
   savings: ReturnType<typeof getSavings>;
+  health: ReturnType<typeof redactHealthSecrets>;
 };
 
 export function exportLocalData(now: Date = new Date()): PrivacyExport {
@@ -20,12 +23,13 @@ export function exportLocalData(now: Date = new Date()): PrivacyExport {
     dailyLog: getDailyLog(),
     settings: getSettings(),
     savings: getSavings(),
+    health: redactHealthSecrets(getHealth()),
   };
 }
 
 export const DELETE_LOCAL_TITLE = "Delete all local data?";
 export const DELETE_LOCAL_BODY =
-  "This removes your plan, puff log, settings, and puff savings on this device. It cannot be undone.";
+  "This removes your plan, puff log, settings, puff savings, and connected watch data on this device. It cannot be undone.";
 export const DELETE_LOCAL_KEEP = "Keep data";
 export const DELETE_LOCAL_CONFIRM = "Delete";
 
@@ -40,6 +44,7 @@ export function deleteLocalData(now: Date = new Date()): Promise<void> {
     resetDailyLog(now);
     resetSettings();
     resetSavings();
+    resetHealth();
   } finally {
     setHydrating(false);
   }

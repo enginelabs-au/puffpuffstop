@@ -16,6 +16,7 @@ export const ONBOARDING_STEPS = [
   "quit-window",
   "cut-down",
   "quick-log",
+  "wearables",
 ] as const;
 
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
@@ -266,6 +267,7 @@ export function canContinue(step: OnboardingStep, draft: OnboardingDraft): boole
       return draft.quitWindow !== null;
     case "cut-down":
     case "quick-log":
+    case "wearables":
       return true;
   }
 }

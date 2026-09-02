@@ -11,5 +11,7 @@ describe("privacy policy copy", () => {
     assert.match(text, /not a kids app/i);
     assert.match(text, /this device/i);
     assert.match(text, /do not show ads/i);
+    assert.match(text, /Apple Health/i);
+    assert.match(text, /Fitbit/i);
   });
 });

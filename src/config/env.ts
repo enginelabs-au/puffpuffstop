@@ -5,6 +5,7 @@ export const envNames = {
   supabaseProjectRef: "SUPABASE_PROJECT_REF",
   easProjectId: "EAS_PROJECT_ID",
   privacyPolicyUrl: "EXPO_PUBLIC_PRIVACY_POLICY_URL",
+  fitbitClientId: "EXPO_PUBLIC_FITBIT_CLIENT_ID",
 } as const;
 
 export function readAppEnv(
@@ -28,4 +29,11 @@ export function readPrivacyPolicyUrl(
   } catch {
     return null;
   }
+}
+
+export function readFitbitClientId(
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  const value = env[envNames.fitbitClientId]?.trim();
+  return value && value.length > 0 ? value : null;
 }

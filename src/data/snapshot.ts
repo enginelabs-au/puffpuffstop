@@ -13,6 +13,8 @@ import { isCurrencyCode } from "./currencies";
 import { getDailyLog, replaceDailyLog, type DailyLogState } from "./daily-log-store";
 import { getDraft, replaceDraft } from "./onboarding-store";
 import { getSavings, replaceSavings, type SavingsState } from "./savings-store";
+import type { HealthState } from "../domain/health";
+import { getHealth, parseHealthState, replaceHealth } from "./health-store";
 import { getSettings, replaceSettings, type SettingsState } from "./settings-store";
 
 export const SNAPSHOT_VERSION = 1;
@@ -23,6 +25,7 @@ export type AppSnapshot = {
   dailyLog: DailyLogState;
   settings: SettingsState;
   savings: SavingsState;
+  health: HealthState;
 };
 
 function asFiniteNumber(value: unknown, fallback: number): number {
@@ -124,10 +127,17 @@ function parseDailyLog(raw: unknown): DailyLogState | null {
   if (!raw || typeof raw !== "object") return null;
   const value = raw as Record<string, unknown>;
   if (typeof value.dateKey !== "string") return null;
+  const logged = Math.max(0, asFiniteNumber(value.logged, 0));
+  const puffAt = Array.isArray(value.puffAt)
+    ? value.puffAt.filter(
+        (at): at is number => typeof at === "number" && Number.isFinite(at) && at > 0,
+      )
+    : [];
   return {
     dateKey: value.dateKey,
-    logged: Math.max(0, asFiniteNumber(value.logged, 0)),
+    logged,
     recoveryTicks: Math.max(0, asFiniteNumber(value.recoveryTicks, 0)),
+    puffAt: puffAt.length > logged ? puffAt.slice(-logged) : puffAt,
   };
 }
 
@@ -156,6 +166,7 @@ export function captureSnapshot(): AppSnapshot {
     dailyLog: getDailyLog(),
     settings: getSettings(),
     savings: getSavings(),
+    health: getHealth(),
   };
 }
 
@@ -185,7 +196,14 @@ export function parseSnapshot(raw: unknown): AppSnapshot | null {
   const settings = parseSettings(value.settings);
   const savings = parseSavings(value.savings);
   if (!draft || !dailyLog || !settings || !savings) return null;
-  return { version: SNAPSHOT_VERSION, draft, dailyLog, settings, savings };
+  return {
+    version: SNAPSHOT_VERSION,
+    draft,
+    dailyLog,
+    settings,
+    savings,
+    health: parseHealthState(value.health),
+  };
 }
 
 export function restoreSnapshot(raw: unknown): boolean {
@@ -195,5 +213,6 @@ export function restoreSnapshot(raw: unknown): boolean {
   replaceDailyLog(parsed.dailyLog);
   replaceSettings(parsed.settings);
   replaceSavings(parsed.savings);
+  replaceHealth(parsed.health);
   return true;
 }

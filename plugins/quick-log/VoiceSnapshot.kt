@@ -65,16 +65,33 @@ object VoiceSnapshot {
       val today = todayKey(root.optJSONObject("settings")?.optString("timeZone"))
       val dateKey = daily.optString("dateKey", "")
       var logged = daily.optInt("logged", 0)
+      val puffAt = daily.optJSONArray("puffAt") ?: org.json.JSONArray()
+      val times = mutableListOf<Long>()
+      for (i in 0 until puffAt.length()) {
+        val at = puffAt.optLong(i, 0)
+        if (at > 0) times.add(at)
+      }
       if (dateKey != today) {
         daily.put("dateKey", today)
         logged = 0
+        times.clear()
       }
+      val nowMs = System.currentTimeMillis()
       if (direction == "clear") {
         logged = 0
+        times.clear()
+      } else if (direction == "down") {
+        val remove = minOf(added, logged)
+        logged = maxOf(0, logged - added)
+        repeat(minOf(remove, times.size)) { times.removeLast() }
       } else {
-        logged = if (direction == "down") maxOf(0, logged - added) else logged + added
+        logged += added
+        repeat(added) { times.add(nowMs) }
       }
+      val nextAt = org.json.JSONArray()
+      times.forEach { nextAt.put(it) }
       daily.put("logged", logged)
+      daily.put("puffAt", nextAt)
       root.put("dailyLog", daily)
       file.writeText(root.toString(2))
       Result("ok", logged, added)

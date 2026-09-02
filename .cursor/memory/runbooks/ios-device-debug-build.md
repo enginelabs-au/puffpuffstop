@@ -31,9 +31,23 @@ Device used 2026-09-01: iPhone 16 Pro “Free Malware”, hardware UDID `0000814
 - `devicectl device info apps` lists `au.com.enginelabs.puffpuffstop`
 - App launches and Metro serves the JS bundle
 
+## Offline Release (unplug the cable)
+
+Debug needs Metro. For a build that stays up after the cable is pulled, install Release so the JS bundle is embedded:
+
+```bash
+export PATH="/opt/homebrew/bin:$PATH"
+# Copy plugin Swift into ios/PuffPuffStop/ first (intents + HealthSnapshot).
+npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
+```
+
+Do not uninstall first — that wipes local snapshot data. `expo run:ios` overwrites the existing app.
+
+Verified 2026-09-02: Release build 10 installed at `Build/Products/Release-iphoneos/PuffPuffStop.app`. Metro may still start after install; it is not required. Unplug and open the app.
+
 ## Caveats
 
 - Generated `ios/` is gitignored
 - First launch may require trusting the developer cert on the phone
 - Debug builds need Metro running (this install used port 8082)
-- Copy `plugins/quick-log/*.swift` into `ios/PuffPuffStop/` before a native rebuild so Siri intents match the plugin sources
+- Copy `plugins/quick-log/*.swift` and `plugins/health/*.swift` into `ios/PuffPuffStop/` before a native rebuild so Siri and HealthKit match the plugin sources

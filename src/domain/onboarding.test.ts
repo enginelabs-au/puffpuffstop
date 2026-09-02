@@ -39,7 +39,9 @@ describe("onboarding", () => {
     assert.equal(nextStep("nickname"), "timezone");
     assert.equal(nextStep("timezone"), "duration");
     assert.equal(nextStep("cut-down"), "quick-log");
-    assert.equal(nextStep("quick-log"), "plan");
+    assert.equal(nextStep("quick-log"), "wearables");
+    assert.equal(nextStep("wearables"), "plan");
+    assert.equal(canContinue("wearables", emptyDraft()), true);
     assert.equal(previousStep("nickname"), null);
     assert.equal(previousStep("timezone"), "nickname");
     assert.equal(previousStep("duration"), "timezone");

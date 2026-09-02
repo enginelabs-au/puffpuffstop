@@ -20,6 +20,16 @@ describe("daily log store", () => {
     assert.equal(undoPuff(12, now).logged, 1);
     assert.equal(undoPuff(12, now).logged, 0);
     assert.equal(undoPuff(12, now).logged, 0);
+    assert.deepEqual(getDailyLog().puffAt, []);
+  });
+
+  it("stores a timestamp for each logged puff and drops it on undo", () => {
+    const now = new Date(2026, 7, 18, 10, 15);
+    resetDailyLog(now);
+    assert.deepEqual(logPuff(12, now).puffAt, [now.getTime()]);
+    const later = new Date(2026, 7, 18, 10, 40);
+    assert.deepEqual(logPuff(12, later).puffAt, [now.getTime(), later.getTime()]);
+    assert.deepEqual(undoPuff(12, later).puffAt, [now.getTime()]);
   });
 
   it("recovers only when yesterday stayed at or under the commitment", () => {

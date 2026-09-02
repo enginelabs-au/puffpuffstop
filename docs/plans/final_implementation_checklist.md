@@ -52,6 +52,7 @@ Never include secret values.
 | EAS_PROJECT_ID | Expo | EAS, not git secrets | Build profiles | No | `eas init` then preview build |
 | EXPO_PUBLIC_PRIVACY_POLICY_URL | Owner web | EAS / `.env` | HTTPS hosted policy | No | Settings shows hosted link |
 | EXPO_PUBLIC_SENTRY_DSN | Sentry (optional) | Reserved unused | Crash reporting later | No | Leave empty until approved |
+| EXPO_PUBLIC_FITBIT_CLIENT_ID | Fitbit developer app | EAS / local `.env` | Direct Fitbit OAuth; Health still works without it | No | Connect Fitbit in Settings exchanges a PKCE code |
 
 ## 5. Human-only account, permission, billing, or legal actions
 
@@ -65,6 +66,8 @@ Never include secret values.
 | Create/link Supabase project | Supabase | Owner credentials | Project ref; no remote push until RLS |
 | `eas init` + store credentials | Expo | Owner login | Preview build exists |
 | Paid ads / UA spend | Ads platforms | Unauthorized and paid | Do not start unless separately approved |
+| Enable HealthKit on the App ID | Apple Developer | Capability + provisioning | Connect Apple Health on device without codesign failure |
+| Create Fitbit developer app | Fitbit | Owner login; redirect `puffpuffstop://fitbit` | Set `EXPO_PUBLIC_FITBIT_CLIENT_ID` |
 
 ## 6. Production integrations and dashboard actions
 

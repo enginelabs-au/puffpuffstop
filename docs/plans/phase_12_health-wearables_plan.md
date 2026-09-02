@@ -1,6 +1,6 @@
 ---
 plan: phase_12_health-wearables
-status: planned
+status: implementing
 created: 2026-09-01
 updated: 2026-09-01
 owner: lead-agent
@@ -11,7 +11,7 @@ source_phase: docs/plans/phase_11_quick-log-hardware_plan.md
 
 ## 1. Objective
 
-Let the owner opt in to read heart and recovery signals from Apple Health / Google Health Connect, and show them next to the local puff log as wellness context. Stay 16+ wellness, not a medical device. No Fitbit cloud OAuth in this phase.
+Let the owner opt in during onboarding and Settings to read watch signals from Apple Health / Health Connect, and optionally a direct Fitbit login when `EXPO_PUBLIC_FITBIT_CLIENT_ID` is set. Stay 16+ wellness, not a medical device.
 
 ## 2. Why not Fitbit or a watch app first
 
@@ -36,13 +36,13 @@ Do **not** claim diagnosis, withdrawal treatment, or that HRV between puffs is a
 
 ## 4. Non-goals this phase
 
-Fitbit OAuth, watchOS/Wear apps, writing vape events into Health, remote upload, ads, medical claims.
+watchOS/Wear apps, writing vape events into Health, remote upload, ads, medical claims, Fitbit developer-console signup.
 
 ## 5. Acceptance (when implemented)
 
 - Opt-in Settings toggle. Permission copy says wellness context, not medical.
-- iOS HealthKit + Android Health Connect read of HR (and HRV when present).
-- Home or Science shows today’s last HR / resting HR next to the puff count when permission is granted.
+- iOS HealthKit + Android Health Connect read of HR, HRV, oxygen, and breathing around a puff (Wear / Pixel / Fitbit via Health Connect; no Wear app).
+- Home shows a large live banner when those signals move around a log. Silent `health-refresh` on both OS.
 - Denied / unavailable states do not block logging.
 - Privacy policy names the Health types. Local snapshot only.
 

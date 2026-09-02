@@ -2,7 +2,7 @@
 
 ## Current Objective
 
-- Phase 11 voice log: Siri / Gemini instead of volume buttons. Identity stays `Cursor Agent <cursoragent@cursor.com>`.
+- Phase 12 health wearables (in progress) plus hourly puff-goal pacing on onboarding, Settings, and Home.
 
 ## Current Status
 
@@ -15,19 +15,20 @@
 
 ## Active Plan
 
-- `docs/plans/phase_11_quick-log-hardware_plan.md` (status: verified locally after voice pivot)
+- `docs/plans/phase_12_health-wearables_plan.md` (status: implementing)
+- Prior: `docs/plans/phase_11_quick-log-hardware_plan.md` (status: verified)
 - Prior: `docs/plans/phase_10_friendly-science-onboarding_plan.md` (status: verified)
 - Closure: `docs/plans/final_implementation_checklist.md` (status: open)
 
 ## Active Workstream
 
-- `docs/workstreams/20260901-quick-log-hardware/manifest.md`
-- Task ID: `20260901-quick-log-hardware`
+- `docs/workstreams/20260901-health-wearables/manifest.md`
+- Task ID: `20260901-health-wearables`
 
 ## Active Role and Gate
 
 - Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm run lint` 0; `npm test` 77/77; `npm run typecheck` 0. Debug build 8 installed. Owner confirmed Siri add/remove works.
+- Last integrated validation: `npm test` 95/95; `npm run typecheck` 0; `npm run lint` 0. Release build 22 on Free Malware.
 
 ## Predecessor Handoff
 
@@ -63,8 +64,9 @@
 - `/TOOLS.md`
 - `/memory/MEMORY.md`
 - `/memory/memories/git-identity.md`
-- `/memory/memories/2026-09-01-continuation.md`
-- `docs/plans/phase_11_quick-log-hardware_plan.md`
+- `/memory/memories/2026-09-02-continuation.md`
+- `docs/plans/phase_12_health-wearables_plan.md`
+- `src/domain/pacing.ts`, `src/ui/PacingMeter.tsx`, `src/ui/GoalResetRow.tsx`, `src/ui/WatchShiftBanner.tsx`, `plugins/health/`
 - `app/`, `src/`, `plugins/quick-log/`
 
 ## Open Blockers
@@ -81,21 +83,24 @@
 - VapeFree is a visual-tone reference, not a cloned pet.
 - In-app age-gate screen removed; 16+ remains the store rating.
 - Siri App Intents can write the snapshot with the app closed. Gemini has no public equivalent; Android uses a headless shortcut / Routine.
+- Goal pacing: hourly allowance is ceil(goal / 24). Unused from the previous hour adds onto this hour (used 1 of 2 → 3; unused hour → 4) and the 30/15 rows split from that hour (4 → 2 / 1). Capped by remaining daily goal. No “Credits” label. Home watch banner only appears when Health is enabled and samples are actually arriving.
 
 ## Current Working State
 
 - Settings has Redo setup (keeps today’s log and savings).
 - Appearance defaults to dark. Settings → Appearance switches Dark / Light.
 - Theme style factories now take a `palette` argument and keep a module-level `color` fallback so Fast Refresh cannot crash on a missing `color` binding.
-- Device Metro on 8082 was dead and serving a stale mix; rebuilt and relaunched on Free Malware. Fresh bundle had no `ReferenceError`.
 - Timezone: onboarding after nickname + Settings → Day.
-- Phase 12 health wearables is planned only. No HealthKit/Fitbit code yet.
+- Phase 12: onboarding + Settings connect Health/Fitbit. Fitbit callback route is `app/fitbit.tsx`.
+- 2026-09-02: Release build 10 installed on Free Malware (`0.0.1` / `10`). JS bundle is embedded. Unplug is safe.
+- Goal pacing stacked on Home. Unused hourly puffs raise this hour and split into 30/15. Watch banner only if Health is on and samples are arriving.
 
 ## Next Actions
 
-1. Do not store-submit. Do not uninstall.
-2. Phase 12 wearables stays planned only.
+1. Owner can log a puff with Health connected and check whether a heart/oxygen/breathing shift appears. Unplug is still safe.
+2. Owner: in Google Health, share heart rate / oxygen / breathing to Apple Health, then Sync Apple Health in PuffPuffStop and log a puff. Direct Fitbit login stays off until a Fitbit app id exists.
+3. Do not store-submit.
 
 ## Last Updated
 
-- 2026-09-01 — Owner confirmed Siri add/remove. Committing and pushing phases 10–11.
+- 2026-09-02 — Owner asked to commit and push phase 12 health, pacing, and watch-metric toggle as Cursor Agent.
