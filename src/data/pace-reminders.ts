@@ -31,7 +31,20 @@ export async function cancelPaceReminders(): Promise<void> {
   await Promise.all(paceIdentifiers().map((id) => cancelReminder(id)));
 }
 
+export function repairLeftoverNoticePreference(): boolean {
+  if (getSettings().leftoverNoticeRepair) return false;
+  const draft = getDraft();
+  let changed = false;
+  if (draft.intervalPacing !== false && draft.intervalPacingReminders !== true) {
+    updateDraft({ intervalPacingReminders: true });
+    changed = true;
+  }
+  updateSettings({ leftoverNoticeRepair: true });
+  return changed;
+}
+
 export async function syncPaceReminders(): Promise<boolean> {
+  repairLeftoverNoticePreference();
   const draft = getDraft();
   const wanted = shouldSchedulePaceReminders(
     draft.intervalPacing,
@@ -48,9 +61,6 @@ export async function syncPaceReminders(): Promise<boolean> {
   }
   if (permission !== "granted") {
     await cancelPaceReminders();
-    if (draft.intervalPacingReminders !== false) {
-      updateDraft({ intervalPacingReminders: false });
-    }
     return false;
   }
 
@@ -89,7 +99,11 @@ export async function applyPaceReminderPreference(
     return false;
   }
   updateDraft({ intervalPacingReminders: true });
-  return syncPaceReminders();
+  const applied = await syncPaceReminders();
+  if (!applied) {
+    updateDraft({ intervalPacingReminders: false });
+  }
+  return applied;
 }
 
 export async function bootPaceReminders(): Promise<boolean> {

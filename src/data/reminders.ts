@@ -3,6 +3,7 @@ import {
   PACE_REMINDER_CATEGORY,
   PACE_REMINDER_CHANNEL,
   PACE_REMINDER_ID_PREFIX,
+  secondsUntilPaceReminder,
 } from "../domain/pace-reminders";
 import {
   dailyReminder,
@@ -38,7 +39,11 @@ export type MemoryReminderDriver = ReminderDriver & {
 type ExpoNotificationsModule = {
   AndroidImportance?: { DEFAULT: number; HIGH: number };
   AndroidNotificationVisibility?: { PUBLIC: number };
-  SchedulableTriggerInputTypes: { DAILY: string; DATE: string };
+  SchedulableTriggerInputTypes: {
+    DAILY: string;
+    DATE: string;
+    TIME_INTERVAL?: string;
+  };
   cancelScheduledNotificationAsync(identifier: string): Promise<void>;
   getPermissionsAsync(): Promise<{ status?: string; granted?: boolean }>;
   requestPermissionsAsync(options?: unknown): Promise<{
@@ -59,7 +64,8 @@ type ExpoNotificationsModule = {
     };
     trigger:
       | { type: string; hour: number; minute: number }
-      | { type: string; date: Date };
+      | { type: string; date: Date }
+      | { type: string; seconds: number; repeats?: boolean };
   }): Promise<string>;
   setNotificationChannelAsync?(
     channelId: string,
@@ -148,7 +154,12 @@ export function createExpoReminderDriver(
     async requestPermission() {
       return normalizePermission(
         await Notifications.requestPermissionsAsync({
-          ios: { allowAlert: true, allowBadge: false, allowSound: true },
+          ios: {
+            allowAlert: true,
+            allowBadge: false,
+            allowSound: true,
+            allowTimeSensitive: true,
+          },
         }),
       );
     },
@@ -176,6 +187,8 @@ export function createExpoReminderDriver(
       await Notifications.cancelScheduledNotificationAsync(
         schedule.identifier,
       ).catch(() => undefined);
+      const intervalType =
+        Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL;
       await Notifications.scheduleNotificationAsync({
         identifier: schedule.identifier,
         content: {
@@ -184,14 +197,19 @@ export function createExpoReminderDriver(
           categoryIdentifier: schedule.categoryIdentifier,
           sound: true,
           vibrate: [0, 50],
-          interruptionLevel: "active",
+          interruptionLevel: "timeSensitive",
           channelId: PACE_REMINDER_CHANNEL,
           data: { type: "pace-unused" },
         },
-        trigger: {
-          type: Notifications.SchedulableTriggerInputTypes.DATE,
-          date: schedule.date,
-        },
+        trigger: intervalType
+          ? {
+              type: intervalType,
+              seconds: secondsUntilPaceReminder(schedule.date.getTime()),
+            }
+          : {
+              type: Notifications.SchedulableTriggerInputTypes.DATE,
+              date: schedule.date,
+            },
       });
     },
     async preparePaceNotifications() {
@@ -305,6 +323,7 @@ export async function bootReminders(): Promise<boolean> {
   try {
     const Notifications = (await import("expo-notifications")) as ExpoNotificationsModule;
     setReminderDriver(createExpoReminderDriver(Notifications));
+    await preparePaceNotifications();
   } catch {
     // Node tests and unsupported platforms keep the memory driver.
   }

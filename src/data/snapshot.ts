@@ -187,6 +187,7 @@ function parseSettings(raw: unknown): SettingsState | null {
       value.lastNotificationResponseKey ?? "",
       "",
     ) || null,
+    leftoverNoticeRepair: value.leftoverNoticeRepair === true,
   };
 }
 

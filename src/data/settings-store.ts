@@ -8,6 +8,7 @@ export type SettingsState = {
   timeZone: string;
   theme: ThemeName;
   lastNotificationResponseKey: string | null;
+  leftoverNoticeRepair: boolean;
 };
 
 function emptySettings(): SettingsState {
@@ -17,6 +18,7 @@ function emptySettings(): SettingsState {
     timeZone: deviceTimeZone(),
     theme: DEFAULT_THEME,
     lastNotificationResponseKey: null,
+    leftoverNoticeRepair: false,
   };
 }
 

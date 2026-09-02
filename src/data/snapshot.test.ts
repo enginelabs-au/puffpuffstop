@@ -154,5 +154,6 @@ describe("snapshot persist", () => {
     });
     assert.ok(parsed);
     assert.equal(parsed.settings.theme, "dark");
+    assert.equal(parsed.settings.leftoverNoticeRepair, false);
   });
 });

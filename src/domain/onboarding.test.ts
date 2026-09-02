@@ -101,7 +101,7 @@ describe("onboarding", () => {
       true,
     );
     assert.equal(intervalPacingStartsOpen(draft), true);
-    assert.equal(intervalPacingRemindersEnabled(draft), false);
+    assert.equal(intervalPacingRemindersEnabled(draft), true);
     assert.equal(
       intervalPacingRemindersEnabled({
         ...draft,

@@ -102,6 +102,13 @@ npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
 - Lock-screen notice when a 15/30/60 slot ends with leftover puffs. Banner tap does not log. Action `Log puff` records one timed puff. Handler presents banners so a locked phone still shows them.
 - Validation: `npm test` 119/119, typecheck 0, lint 0. Release build 30.
 
+## Leftover notices not arriving
+
+- Owner: still no lock-screen interval notices after build 30.
+- Causes: first opt-in stored `intervalPacingReminders: false`; sync required `=== true`. The 2s voice poll cancelled any notice inside 1s of fire. DATE triggers were less reliable on lock screen.
+- Fix: one-time repair enables leftover notices when hourly pacing is on. Schedule with TIME_INTERVAL + timeSensitive. Register the presentation handler at boot. Only resync leftover notices when a voice log actually changes. Settings shows the next leftover clock time. User can still turn them off after the repair.
+- Validation: `npm test` 121/121, typecheck 0, lint 0. Release build 31.
+
 ## Profile score and multi-day stats
 
 - Home top-right circle opens `/stats`. Score is 7-day goal-day adherence (met / counted). Ranges: 7 days, 30 days, 12 weeks.

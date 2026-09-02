@@ -14,7 +14,6 @@ export const PACE_REMINDER_CATEGORY = "pace-unused";
 export const PACE_REMINDER_ACTION_LOG = "pace-log-puff";
 export const PACE_REMINDER_CHANNEL = "pace-reminders";
 export const PACE_REMINDER_MAX = 48;
-export const PACE_REMINDER_MIN_LEAD_MS = 1_000;
 export const INTERVAL_PACING_REMINDER_HELPER =
   "When a 15, 30, or 60 minute slot ends with leftover puffs, the lock screen can show that unused count and a Log puff action. That leftover notice does not ask you to vape. Turn this on or off here, or later in Settings.";
 
@@ -31,7 +30,7 @@ export function shouldSchedulePaceReminders(
   intervalPacing: boolean | null,
   intervalPacingReminders: boolean | null,
 ): boolean {
-  return intervalPacing !== false && intervalPacingReminders === true;
+  return intervalPacing !== false && intervalPacingReminders !== false;
 }
 
 export function paceWindowEndMs(window: PaceWindow): number {
@@ -56,7 +55,7 @@ export function upcomingPaceLapseTimes(now: Date, timeZone: string): number[] {
   const dayEnd = startOfNextZonedDay(now, timeZone);
   const times: number[] = [];
   for (let at = dayStart + 15 * 60_000; at <= dayEnd; at += 15 * 60_000) {
-    if (at - nowMs >= PACE_REMINDER_MIN_LEAD_MS) times.push(at);
+    if (at > nowMs) times.push(at);
   }
   return times;
 }
@@ -74,6 +73,18 @@ export function paceReminderTitle(kind: PaceWindowKind, unused: number): string 
 
 export function paceReminderBody(): string {
   return `Leftover room in that slot. ${PACING_TRACKER_DISCLAIMER}`;
+}
+
+export function formatPaceReminderClock(fireAt: number, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-AU", {
+    timeZone,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(fireAt));
+}
+
+export function secondsUntilPaceReminder(fireAt: number, nowMs = Date.now()): number {
+  return Math.max(1, Math.ceil((fireAt - nowMs) / 1000));
 }
 
 export function upcomingPaceReminders(

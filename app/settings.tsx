@@ -38,8 +38,13 @@ import { getSettings, updateSettings } from "../src/data/settings-store";
 import { applyTimeZonePreference } from "../src/data/time-zone-preference";
 import { DAY_RESET_CAPTION, timeZoneOptions } from "../src/domain/timezones";
 import { getDailyLog } from "../src/data/daily-log-store";
-import { applyPaceReminderPreference } from "../src/data/pace-reminders";
-import { INTERVAL_PACING_REMINDER_HELPER } from "../src/domain/pace-reminders";
+import { applyPaceReminderPreference, syncPaceReminders } from "../src/data/pace-reminders";
+import {
+  INTERVAL_PACING_REMINDER_HELPER,
+  formatPaceReminderClock,
+  upcomingPaceReminders,
+} from "../src/domain/pace-reminders";
+import { goalPacing } from "../src/domain/pacing";
 import { intervalPacingStartsOpen } from "../src/domain/onboarding";
 import { summarizePlan } from "../src/domain/plan-summary";
 import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
@@ -77,6 +82,17 @@ export default function SettingsScreen() {
   const summary = useMemo(() => summarizePlan(draft), [draft]);
   const zoneOptions = useMemo(() => timeZoneOptions(), []);
   const stake = settings.stakePerPuff ?? defaultStakePerPuff(draft);
+  const nextLeftover = useMemo(() => {
+    const log = getDailyLog();
+    return upcomingPaceReminders(
+      goalPacing(summary.puffsPerDay, summary.commitment),
+      log.puffAt,
+      new Date(),
+      settings.timeZone,
+      log.logged,
+      1,
+    )[0];
+  }, [summary.commitment, summary.puffsPerDay, settings.timeZone]);
 
   function patchDraft(partial: Parameters<typeof updateDraft>[0]) {
     setDraft(updateDraft(partial));
@@ -256,9 +272,7 @@ export default function SettingsScreen() {
           onChange={(timeZone) => {
             applyTimeZonePreference(timeZone);
             setSettings(getSettings());
-            void applyPaceReminderPreference(
-              getDraft().intervalPacingReminders === true,
-            ).then(() => setDraft(getDraft()));
+            void syncPaceReminders().then(() => setDraft(getDraft()));
           }}
         />
         <AppText style={styles.caption}>{DAY_RESET_CAPTION}</AppText>
@@ -287,10 +301,11 @@ export default function SettingsScreen() {
               <AppText style={styles.bodyText}>Lock-screen leftover</AppText>
               <Switch
                 accessibilityLabel="Lock-screen leftover puff notice"
-                value={draft.intervalPacingReminders === true}
+                value={draft.intervalPacingReminders !== false}
                 onValueChange={(on) => {
                   void applyPaceReminderPreference(on).then(() => {
                     setDraft(getDraft());
+                    setSettings(getSettings());
                   });
                 }}
               />
@@ -299,6 +314,12 @@ export default function SettingsScreen() {
               Lock-screen leftover count when a 15, 30, or 60 minute slot ends
               unused, with a Log puff action. That is not a prompt to vape.
               Turn off anytime.
+              {nextLeftover
+                ? ` Next leftover notice around ${formatPaceReminderClock(
+                    nextLeftover.fireAt,
+                    settings.timeZone,
+                  )}.`
+                : ""}
             </AppText>
           </>
         ) : null}

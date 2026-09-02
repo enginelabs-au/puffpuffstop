@@ -6,7 +6,7 @@ import {
   PACE_REMINDER_ID_PREFIX,
 } from "../domain/pace-reminders";
 import { getDailyLog, resetDailyLog } from "./daily-log-store";
-import { resetDraft, updateDraft } from "./onboarding-store";
+import { getDraft, resetDraft, updateDraft } from "./onboarding-store";
 import {
   applyPaceReminderPreference,
   handlePaceNotificationResponse,
@@ -39,6 +39,29 @@ describe("pace reminder preference", () => {
     assert.ok(driver.pace[0]?.identifier.startsWith(PACE_REMINDER_ID_PREFIX));
     assert.match(driver.pace[0]?.title ?? "", /unused/);
     assert.equal(driver.pace[0]?.categoryIdentifier, "pace-unused");
+  });
+
+  it("turns leftover notices back on once for an existing plan", async () => {
+    const driver = createMemoryReminderDriver("granted");
+    setReminderDriver(driver);
+    resetSettings();
+    resetDraft();
+    resetDailyLog(new Date("2026-09-02T00:10:00.000Z"));
+    updateDraft({
+      durationCount: 8,
+      frequencyCount: 50,
+      frequencyPeriod: "days",
+      cutDownPerDay: 25,
+      intervalPacing: true,
+      intervalPacingReminders: false,
+    });
+    assert.equal(await syncPaceReminders(), true);
+    assert.equal(getDraft().intervalPacingReminders, true);
+    assert.ok(driver.pace.length > 0);
+    updateDraft({ intervalPacingReminders: false });
+    assert.equal(await syncPaceReminders(), false);
+    assert.equal(getDraft().intervalPacingReminders, false);
+    resetReminderDriver();
   });
 
   it("stays off when permission is denied", async () => {

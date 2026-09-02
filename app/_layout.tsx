@@ -19,10 +19,16 @@ function useVoiceLogSync(ready: boolean) {
   useEffect(() => {
     if (!ready) return;
     const pull = () => {
-      void syncVoiceLogFromDisk()
-        .then(() => consumePendingVoiceLog())
-        .then(() => syncHealthFromDisk())
-        .then(() => syncPaceReminders());
+      void syncVoiceLogFromDisk().then(async (fromDisk) => {
+        const pending = await consumePendingVoiceLog();
+        await syncHealthFromDisk();
+        const voiceChanged =
+          fromDisk ||
+          pending === "logged" ||
+          pending === "undone" ||
+          pending === "cleared";
+        if (voiceChanged) await syncPaceReminders();
+      });
     };
     pull();
     const timer = setInterval(pull, 2000);
