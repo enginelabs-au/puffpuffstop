@@ -153,7 +153,7 @@ function parseIntervalPacingReminders(
 ): boolean | null {
   if (raw === true) return true;
   if (raw === false) return false;
-  return durationCount > 0 && frequencyCount > 0 ? false : null;
+  return durationCount > 0 && frequencyCount > 0 ? true : null;
 }
 
 function parseDailyLog(raw: unknown): DailyLogState | null {

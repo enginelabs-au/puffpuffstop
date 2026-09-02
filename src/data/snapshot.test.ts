@@ -113,7 +113,7 @@ describe("snapshot persist", () => {
     assert.equal(parsed.draft.intervalPacing, true);
   });
 
-  it("defaults missing unused-puff reminders to off for an existing plan", () => {
+  it("defaults missing unused-puff leftover notices to on for an existing plan", () => {
     const current = captureSnapshot();
     const { intervalPacingReminders: _ignored, ...draft } = current.draft;
     const parsed = parseSnapshot({
@@ -121,7 +121,7 @@ describe("snapshot persist", () => {
       draft: { ...draft, durationCount: 8, frequencyCount: 12 },
     });
     assert.ok(parsed);
-    assert.equal(parsed.draft.intervalPacingReminders, false);
+    assert.equal(parsed.draft.intervalPacingReminders, true);
   });
 
   it("keeps interval pacing unanswered on a fresh draft", () => {

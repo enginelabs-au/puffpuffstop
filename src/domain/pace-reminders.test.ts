@@ -3,21 +3,20 @@ import { describe, it } from "node:test";
 
 import {
   INTERVAL_PACING_REMINDER_HELPER,
-  PACE_LOG_ACTION_TITLE,
   upcomingPaceReminders,
   shouldSchedulePaceReminders,
 } from "./pace-reminders";
 import { goalPacing, windowBounds } from "./pacing";
 
 describe("pace reminders", () => {
-  it("schedules only when the user opts in", () => {
+  it("schedules leftover notices unless the user turns them off", () => {
     assert.equal(shouldSchedulePaceReminders(true, true), true);
     assert.equal(shouldSchedulePaceReminders(true, false), false);
-    assert.equal(shouldSchedulePaceReminders(true, null), false);
+    assert.equal(shouldSchedulePaceReminders(true, null), true);
     assert.equal(shouldSchedulePaceReminders(false, true), false);
     assert.equal(shouldSchedulePaceReminders(null, true), true);
-    assert.match(INTERVAL_PACING_REMINDER_HELPER, /unused/);
-    assert.equal(PACE_LOG_ACTION_TITLE, "Log puff");
+    assert.match(INTERVAL_PACING_REMINDER_HELPER, /lock screen/i);
+    assert.match(INTERVAL_PACING_REMINDER_HELPER, /does not ask you to vape/);
   });
 
   it("notifies the next 15-minute lapse when that slot still has unused puffs", () => {
@@ -27,7 +26,7 @@ describe("pace reminders", () => {
     assert.equal(slots[0]?.fireAt, windowBounds(now, "UTC", 15).endMs);
     assert.equal(slots[0]?.kind, "15 minutes");
     assert.ok((slots[0]?.unused ?? 0) > 0);
-    assert.match(slots[0]?.title ?? "", /1 unused puff this 15 minutes/);
+    assert.match(slots[0]?.title ?? "", /You have 1 unused puff this 15 minutes/);
     assert.match(slots[0]?.body ?? "", /does not ask you to vape/);
     const hour = slots.find((slot) => slot.kind === "hour");
     assert.ok(hour);

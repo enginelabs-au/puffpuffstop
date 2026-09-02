@@ -1,7 +1,4 @@
 import {
-  PACE_LOG_ACTION,
-  PACE_LOG_ACTION_TITLE,
-  PACE_REMINDER_CATEGORY,
   PACE_REMINDER_CHANNEL,
   PACE_REMINDER_ID_PREFIX,
 } from "../domain/pace-reminders";
@@ -18,7 +15,7 @@ export type DateReminder = {
   date: Date;
   title: string;
   body: string;
-  categoryIdentifier: string;
+  categoryIdentifier?: string;
 };
 
 export type ReminderDriver = {
@@ -37,7 +34,8 @@ export type MemoryReminderDriver = ReminderDriver & {
 };
 
 type ExpoNotificationsModule = {
-  AndroidImportance?: { DEFAULT: number };
+  AndroidImportance?: { DEFAULT: number; HIGH: number };
+  AndroidNotificationVisibility?: { PUBLIC: number };
   SchedulableTriggerInputTypes: { DAILY: string; DATE: string };
   cancelScheduledNotificationAsync(identifier: string): Promise<void>;
   getPermissionsAsync(): Promise<{ status?: string; granted?: boolean }>;
@@ -53,6 +51,8 @@ type ExpoNotificationsModule = {
       categoryIdentifier?: string;
       sound?: boolean | string;
       vibrate?: number[];
+      interruptionLevel?: "active" | "timeSensitive" | "passive";
+      channelId?: string;
       data?: Record<string, unknown>;
     };
     trigger:
@@ -66,6 +66,7 @@ type ExpoNotificationsModule = {
       importance?: number;
       vibrationPattern?: number[];
       enableVibrate?: boolean;
+      lockscreenVisibility?: number;
     },
   ): Promise<unknown>;
   setNotificationCategoryAsync?(
@@ -178,9 +179,10 @@ export function createExpoReminderDriver(
         content: {
           title: schedule.title,
           body: schedule.body,
-          categoryIdentifier: schedule.categoryIdentifier,
           sound: true,
           vibrate: [0, 50],
+          interruptionLevel: "active",
+          channelId: PACE_REMINDER_CHANNEL,
           data: { type: "pace-unused" },
         },
         trigger: {
@@ -196,30 +198,25 @@ export function createExpoReminderDriver(
             PACE_REMINDER_ID_PREFIX,
           );
           return {
-            shouldShowAlert: !isPace,
-            shouldShowBanner: !isPace,
-            shouldShowList: !isPace,
-            shouldPlaySound: !isPace,
+            shouldShowAlert: true,
+            shouldShowBanner: true,
+            shouldShowList: true,
+            shouldPlaySound: isPace,
             shouldSetBadge: false,
           };
         },
       });
       if (Notifications.setNotificationChannelAsync) {
         await Notifications.setNotificationChannelAsync(PACE_REMINDER_CHANNEL, {
-          name: "Unused puff intervals",
-          importance: Notifications.AndroidImportance?.DEFAULT,
+          name: "Unused puff leftover",
+          importance:
+            Notifications.AndroidImportance?.HIGH ??
+            Notifications.AndroidImportance?.DEFAULT,
           vibrationPattern: [0, 50],
           enableVibrate: true,
+          lockscreenVisibility:
+            Notifications.AndroidNotificationVisibility?.PUBLIC,
         }).catch(() => undefined);
-      }
-      if (Notifications.setNotificationCategoryAsync) {
-        await Notifications.setNotificationCategoryAsync(PACE_REMINDER_CATEGORY, [
-          {
-            identifier: PACE_LOG_ACTION,
-            buttonTitle: PACE_LOG_ACTION_TITLE,
-            options: { opensAppToForeground: true },
-          },
-        ]).catch(() => undefined);
       }
     },
     async cancel(identifier) {

@@ -539,13 +539,16 @@ export default function OnboardingStepScreen() {
                 void applyPaceReminderPreference(false);
                 return;
               }
-              patch({ intervalPacing: true });
+              patch({
+                intervalPacing: true,
+                intervalPacingReminders: draft.intervalPacingReminders ?? true,
+              });
             }}
           />
           {draft.intervalPacing === true ? (
             <>
               <AppText style={styles.caption}>
-                Unused-puff reminders when a slot ends?
+                Lock-screen leftover notice when a slot ends unused?
               </AppText>
               <AppText style={styles.caption}>
                 {INTERVAL_PACING_REMINDER_HELPER}

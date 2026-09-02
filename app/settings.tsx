@@ -185,7 +185,10 @@ export default function SettingsScreen() {
               void applyPaceReminderPreference(false);
               return;
             }
-            patchDraft({ intervalPacing: true });
+            patchDraft({
+              intervalPacing: true,
+              intervalPacingReminders: draft.intervalPacingReminders ?? true,
+            });
           }}
         />
         <AppText style={styles.caption}>
@@ -194,7 +197,7 @@ export default function SettingsScreen() {
         {draft.intervalPacing !== false ? (
           <>
             <AppText style={styles.caption}>
-              Unused-puff reminders when a slot ends?
+              Lock-screen leftover notice when a slot ends unused?
             </AppText>
             <ChipGroup
               options={[
@@ -202,11 +205,7 @@ export default function SettingsScreen() {
                 { value: "no", label: "No" },
               ]}
               selected={
-                draft.intervalPacingReminders === true
-                  ? "yes"
-                  : draft.intervalPacingReminders === false
-                    ? "no"
-                    : null
+                draft.intervalPacingReminders === false ? "no" : "yes"
               }
               onChange={(value) => {
                 void applyPaceReminderPreference(value === "yes").then(
@@ -284,10 +283,10 @@ export default function SettingsScreen() {
         {draft.intervalPacing !== false ? (
           <>
             <View style={styles.row}>
-              <AppText style={styles.bodyText}>Unused puff intervals</AppText>
+              <AppText style={styles.bodyText}>Lock-screen leftover</AppText>
               <Switch
-                accessibilityLabel="Unused puff interval reminders"
-                value={draft.intervalPacingReminders === true}
+                accessibilityLabel="Lock-screen leftover puff notice"
+                value={draft.intervalPacingReminders !== false}
                 onValueChange={(on) => {
                   void applyPaceReminderPreference(on).then(() => {
                     setDraft(getDraft());
@@ -296,8 +295,8 @@ export default function SettingsScreen() {
               />
             </View>
             <AppText style={styles.caption}>
-              Closed-device notice plus a short buzz when a 15, 30, or 60 minute
-              slot ends with leftover puffs. Off unless you turn this on.
+              Lock-screen leftover count when a 15, 30, or 60 minute slot ends
+              unused. That is not a prompt to vape. Turn off anytime.
             </AppText>
           </>
         ) : null}

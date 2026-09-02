@@ -11,13 +11,11 @@ import {
 
 export const PACE_REMINDER_ID_PREFIX = "puffpuffstop-pace-";
 export const PACE_REMINDER_CATEGORY = "pace-unused";
-export const PACE_LOG_ACTION = "log-puff";
-export const PACE_LOG_ACTION_TITLE = "Log puff";
 export const PACE_REMINDER_CHANNEL = "pace-reminders";
 export const PACE_REMINDER_MAX = 48;
 export const PACE_REMINDER_MIN_LEAD_MS = 1_000;
 export const INTERVAL_PACING_REMINDER_HELPER =
-  "When a 15, 30, or 60 minute slot ends with unused puffs, this phone can buzz and show that leftover even if the app is closed. Log puff records one as used. This only tracks what you log — it does not ask you to vape.";
+  "When a 15, 30, or 60 minute slot ends with leftover puffs, the lock screen can show that unused count. That is a leftover notice only — it does not ask you to vape.";
 
 export type PaceReminderSlot = {
   identifier: string;
@@ -32,7 +30,7 @@ export function shouldSchedulePaceReminders(
   intervalPacing: boolean | null,
   intervalPacingReminders: boolean | null,
 ): boolean {
-  return intervalPacing !== false && intervalPacingReminders === true;
+  return intervalPacing !== false && intervalPacingReminders !== false;
 }
 
 export function paceWindowEndMs(window: PaceWindow): number {
@@ -70,11 +68,11 @@ export function paceReminderTitle(kind: PaceWindowKind, unused: number): string 
       : kind === "30 minutes"
         ? "this 30 minutes"
         : "this 15 minutes";
-  return `${unused} unused ${noun} ${slot}`;
+  return `You have ${unused} unused ${noun} ${slot}.`;
 }
 
 export function paceReminderBody(): string {
-  return `Log puff records one as used. ${PACING_TRACKER_DISCLAIMER}`;
+  return `Leftover room in that slot. ${PACING_TRACKER_DISCLAIMER}`;
 }
 
 export function upcomingPaceReminders(

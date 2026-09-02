@@ -95,6 +95,12 @@ npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
 - Yellow = slot used up. Red = this slot exceeded or the daily goal is exceeded. Daily goal count uses danger red too.
 - Validation: `npm test` 118/118, typecheck 0, lint 0.
 
+## Lock-screen leftover notices
+
+- Owner: notify unused puffs on the lock screen when an interval lapses; do not advocate vaping.
+- Copy is leftover-only (`You have N unused puffs this hour`). Removed the Log puff action. Notices default on when hourly pacing is on. The in-app handler now presents banners so a locked phone still shows them.
+- Validation: `npm test` 118/118, typecheck 0, lint 0.
+
 ## Profile score and multi-day stats
 
 - Home top-right circle opens `/stats`. Score is 7-day goal-day adherence (met / counted). Ranges: 7 days, 30 days, 12 weeks.

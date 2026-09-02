@@ -1,6 +1,4 @@
 import {
-  PACE_LOG_ACTION,
-  PACE_REMINDER_CATEGORY,
   PACE_REMINDER_ID_PREFIX,
   PACE_REMINDER_MAX,
   shouldSchedulePaceReminders,
@@ -8,10 +6,8 @@ import {
 } from "../domain/pace-reminders";
 import { goalPacing } from "../domain/pacing";
 import { summarizePlan } from "../domain/plan-summary";
-import { playLogHaptic } from "../ui/haptics";
 import { getDailyLog } from "./daily-log-store";
 import { getDraft, updateDraft } from "./onboarding-store";
-import { applyQuickLog } from "./quick-log";
 import {
   bootNotificationListeners,
   cancelReminder,
@@ -49,7 +45,7 @@ export async function syncPaceReminders(): Promise<boolean> {
   }
   if (permission !== "granted") {
     await cancelPaceReminders();
-    if (draft.intervalPacingReminders) {
+    if (draft.intervalPacingReminders !== false) {
       updateDraft({ intervalPacingReminders: false });
     }
     return false;
@@ -74,7 +70,6 @@ export async function syncPaceReminders(): Promise<boolean> {
         date: new Date(slot.fireAt),
         title: slot.title,
         body: slot.body,
-        categoryIdentifier: PACE_REMINDER_CATEGORY,
       }),
     ),
   );
@@ -115,10 +110,6 @@ export function handlePaceNotificationResponse(response: {
   const key = `${identifier}:${response.actionIdentifier}`;
   if (getSettings().lastNotificationResponseKey === key) return false;
   updateSettings({ lastNotificationResponseKey: key });
-  if (response.actionIdentifier === PACE_LOG_ACTION) {
-    applyQuickLog("up", 1);
-    void playLogHaptic();
-  }
   void syncPaceReminders();
   return true;
 }

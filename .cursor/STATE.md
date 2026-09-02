@@ -86,7 +86,7 @@
 - Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Unused leftover still rolls (lookback 3). Overage is a debt: 3 of 2 last hour → 0/1 next; more overage can hold 0/0 until baseline returns. Extra puffs never become credit. Yellow = slot used up; red = this slot or the daily goal is exceeded. Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. No “Credits” label.
 - Pace timers vibrate once when a 15/30/60 window lapses and that window is green (yellow→green or green→green). No vibrate if the new window is yellow or if a log only flips the color.
 - Onboarding asks Yes/No for hourly interval pacing after cut-down. Yes opens the Home pace fold on first use; No starts it closed. Missing field on an existing plan defaults to Yes/open. Organs use the same fold, open by default; closed header shows the average of all five organ scores.
-- Unused-puff interval reminders are opt-in (onboarding + Settings). Existing plans default off. When on, local notifications fire at a 15/30/60 lapse only if that slot still has leftover puffs, include the unused count, offer Log puff, and use a short buzz. In-app pace haptic is gated on the same setting.
+- Unused-puff leftover notices default on with hourly pacing (Settings can turn them off). Lock-screen local notification when a 15/30/60 slot ends with leftover puffs: “You have N unused puffs this hour.” Copy is leftover-only — no Log puff action, not a prompt to vape. Handler now presents banners so a locked phone still shows them.
 - Home shows a one-shot amber banner when timed logs in the last 60 minutes jump vs the hour before (at least 3, +2, and double if the prior hour was not empty). Copy: “Your usage has increased in the last hour.” Tap or 8s dismiss; once per clock hour.
 
 ## Current Working State
@@ -108,4 +108,4 @@
 
 ## Last Updated
 
-- 2026-09-02 — Overage cuts next pace slot and turns timers red.
+- 2026-09-02 — Lock-screen leftover notices; no Log puff action.
