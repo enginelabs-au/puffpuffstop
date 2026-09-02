@@ -1,4 +1,6 @@
 import {
+  PACE_REMINDER_ACTION_LOG,
+  PACE_REMINDER_CATEGORY,
   PACE_REMINDER_CHANNEL,
   PACE_REMINDER_ID_PREFIX,
 } from "../domain/pace-reminders";
@@ -179,6 +181,7 @@ export function createExpoReminderDriver(
         content: {
           title: schedule.title,
           body: schedule.body,
+          categoryIdentifier: schedule.categoryIdentifier,
           sound: true,
           vibrate: [0, 50],
           interruptionLevel: "active",
@@ -206,6 +209,13 @@ export function createExpoReminderDriver(
           };
         },
       });
+      await Notifications.setNotificationCategoryAsync?.(PACE_REMINDER_CATEGORY, [
+        {
+          identifier: PACE_REMINDER_ACTION_LOG,
+          buttonTitle: "Log puff",
+          options: { opensAppToForeground: false },
+        },
+      ]).catch(() => undefined);
       if (Notifications.setNotificationChannelAsync) {
         await Notifications.setNotificationChannelAsync(PACE_REMINDER_CHANNEL, {
           name: "Unused puff leftover",

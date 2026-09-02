@@ -185,10 +185,7 @@ export default function SettingsScreen() {
               void applyPaceReminderPreference(false);
               return;
             }
-            patchDraft({
-              intervalPacing: true,
-              intervalPacingReminders: draft.intervalPacingReminders ?? true,
-            });
+            patchDraft({ intervalPacing: true });
           }}
         />
         <AppText style={styles.caption}>
@@ -205,7 +202,11 @@ export default function SettingsScreen() {
                 { value: "no", label: "No" },
               ]}
               selected={
-                draft.intervalPacingReminders === false ? "no" : "yes"
+                draft.intervalPacingReminders === true
+                  ? "yes"
+                  : draft.intervalPacingReminders === false
+                    ? "no"
+                    : null
               }
               onChange={(value) => {
                 void applyPaceReminderPreference(value === "yes").then(
@@ -286,7 +287,7 @@ export default function SettingsScreen() {
               <AppText style={styles.bodyText}>Lock-screen leftover</AppText>
               <Switch
                 accessibilityLabel="Lock-screen leftover puff notice"
-                value={draft.intervalPacingReminders !== false}
+                value={draft.intervalPacingReminders === true}
                 onValueChange={(on) => {
                   void applyPaceReminderPreference(on).then(() => {
                     setDraft(getDraft());
@@ -296,7 +297,8 @@ export default function SettingsScreen() {
             </View>
             <AppText style={styles.caption}>
               Lock-screen leftover count when a 15, 30, or 60 minute slot ends
-              unused. That is not a prompt to vape. Turn off anytime.
+              unused, with a Log puff action. That is not a prompt to vape.
+              Turn off anytime.
             </AppText>
           </>
         ) : null}

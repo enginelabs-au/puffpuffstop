@@ -11,11 +11,12 @@ import {
 
 export const PACE_REMINDER_ID_PREFIX = "puffpuffstop-pace-";
 export const PACE_REMINDER_CATEGORY = "pace-unused";
+export const PACE_REMINDER_ACTION_LOG = "pace-log-puff";
 export const PACE_REMINDER_CHANNEL = "pace-reminders";
 export const PACE_REMINDER_MAX = 48;
 export const PACE_REMINDER_MIN_LEAD_MS = 1_000;
 export const INTERVAL_PACING_REMINDER_HELPER =
-  "When a 15, 30, or 60 minute slot ends with leftover puffs, the lock screen can show that unused count. That is a leftover notice only — it does not ask you to vape.";
+  "When a 15, 30, or 60 minute slot ends with leftover puffs, the lock screen can show that unused count and a Log puff action. That leftover notice does not ask you to vape. Turn this on or off here, or later in Settings.";
 
 export type PaceReminderSlot = {
   identifier: string;
@@ -30,7 +31,7 @@ export function shouldSchedulePaceReminders(
   intervalPacing: boolean | null,
   intervalPacingReminders: boolean | null,
 ): boolean {
-  return intervalPacing !== false && intervalPacingReminders !== false;
+  return intervalPacing !== false && intervalPacingReminders === true;
 }
 
 export function paceWindowEndMs(window: PaceWindow): number {

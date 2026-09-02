@@ -133,7 +133,7 @@ export function intervalPacingStartsOpen(draft: OnboardingDraft): boolean {
 }
 
 export function intervalPacingRemindersEnabled(draft: OnboardingDraft): boolean {
-  return draft.intervalPacing !== false && draft.intervalPacingReminders !== false;
+  return draft.intervalPacing !== false && draft.intervalPacingReminders === true;
 }
 
 export function displayName(draft: OnboardingDraft): string {

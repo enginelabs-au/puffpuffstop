@@ -1,4 +1,6 @@
 import {
+  PACE_REMINDER_ACTION_LOG,
+  PACE_REMINDER_CATEGORY,
   PACE_REMINDER_ID_PREFIX,
   PACE_REMINDER_MAX,
   shouldSchedulePaceReminders,
@@ -8,6 +10,7 @@ import { goalPacing } from "../domain/pacing";
 import { summarizePlan } from "../domain/plan-summary";
 import { getDailyLog } from "./daily-log-store";
 import { getDraft, updateDraft } from "./onboarding-store";
+import { applyQuickLog } from "./quick-log";
 import {
   bootNotificationListeners,
   cancelReminder,
@@ -70,6 +73,7 @@ export async function syncPaceReminders(): Promise<boolean> {
         date: new Date(slot.fireAt),
         title: slot.title,
         body: slot.body,
+        categoryIdentifier: PACE_REMINDER_CATEGORY,
       }),
     ),
   );
@@ -110,6 +114,9 @@ export function handlePaceNotificationResponse(response: {
   const key = `${identifier}:${response.actionIdentifier}`;
   if (getSettings().lastNotificationResponseKey === key) return false;
   updateSettings({ lastNotificationResponseKey: key });
+  if (response.actionIdentifier === PACE_REMINDER_ACTION_LOG) {
+    applyQuickLog("up");
+  }
   void syncPaceReminders();
   return true;
 }

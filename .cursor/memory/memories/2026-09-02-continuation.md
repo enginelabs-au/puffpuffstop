@@ -97,9 +97,10 @@ npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
 
 ## Lock-screen leftover notices
 
-- Owner: notify unused puffs on the lock screen when an interval lapses; do not advocate vaping.
-- Copy is leftover-only (`You have N unused puffs this hour`). Removed the Log puff action. Notices default on when hourly pacing is on. The in-app handler now presents banners so a locked phone still shows them.
-- Validation: `npm test` 118/118, typecheck 0, lint 0.
+- Owner: notify unused puffs on the lock screen when an interval lapses; do not advocate vaping. Later: enable/disable from Settings, ask during onboarding, put Log puff back, deploy Release, push.
+- Onboarding interval-pacing asks Yes/No for leftover notices after Yes to hourly tracking. Settings Goals chips and Reminders switch toggle the same flag. Scheduling requires an explicit true. Existing snapshots missing the field still default on.
+- Lock-screen notice when a 15/30/60 slot ends with leftover puffs. Banner tap does not log. Action `Log puff` records one timed puff. Handler presents banners so a locked phone still shows them.
+- Validation: `npm test` 119/119, typecheck 0, lint 0. Release build 30.
 
 ## Profile score and multi-day stats
 

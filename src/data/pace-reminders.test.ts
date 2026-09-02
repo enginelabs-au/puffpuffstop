@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { PACE_REMINDER_ID_PREFIX } from "../domain/pace-reminders";
+import {
+  PACE_REMINDER_ACTION_LOG,
+  PACE_REMINDER_ID_PREFIX,
+} from "../domain/pace-reminders";
 import { getDailyLog, resetDailyLog } from "./daily-log-store";
 import { resetDraft, updateDraft } from "./onboarding-store";
 import {
@@ -35,6 +38,7 @@ describe("pace reminder preference", () => {
     assert.ok(driver.pace.length > 0);
     assert.ok(driver.pace[0]?.identifier.startsWith(PACE_REMINDER_ID_PREFIX));
     assert.match(driver.pace[0]?.title ?? "", /unused/);
+    assert.equal(driver.pace[0]?.categoryIdentifier, "pace-unused");
   });
 
   it("stays off when permission is denied", async () => {
@@ -47,7 +51,7 @@ describe("pace reminder preference", () => {
     resetReminderDriver();
   });
 
-  it("does not log a puff from a leftover notice", () => {
+  it("does not log a puff from a leftover notice tap", () => {
     resetSettings();
     resetDraft();
     resetDailyLog(new Date("2026-09-02T00:10:00.000Z"));
@@ -59,5 +63,18 @@ describe("pace reminder preference", () => {
     assert.equal(handlePaceNotificationResponse(response), true);
     assert.equal(getDailyLog().logged, 0);
     assert.equal(handlePaceNotificationResponse(response), false);
+  });
+
+  it("logs one puff from the leftover notice action", () => {
+    resetSettings();
+    resetDraft();
+    resetDailyLog(new Date("2026-09-02T00:10:00.000Z"));
+    updateDraft({ durationCount: 8, frequencyCount: 12, cutDownPerDay: 1 });
+    const response = {
+      actionIdentifier: PACE_REMINDER_ACTION_LOG,
+      notification: { request: { identifier: `${PACE_REMINDER_ID_PREFIX}00` } },
+    };
+    assert.equal(handlePaceNotificationResponse(response), true);
+    assert.equal(getDailyLog().logged, 1);
   });
 });

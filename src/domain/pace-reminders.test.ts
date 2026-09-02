@@ -9,10 +9,10 @@ import {
 import { goalPacing, windowBounds } from "./pacing";
 
 describe("pace reminders", () => {
-  it("schedules leftover notices unless the user turns them off", () => {
+  it("schedules leftover notices only after an explicit Yes", () => {
     assert.equal(shouldSchedulePaceReminders(true, true), true);
     assert.equal(shouldSchedulePaceReminders(true, false), false);
-    assert.equal(shouldSchedulePaceReminders(true, null), true);
+    assert.equal(shouldSchedulePaceReminders(true, null), false);
     assert.equal(shouldSchedulePaceReminders(false, true), false);
     assert.equal(shouldSchedulePaceReminders(null, true), true);
     assert.match(INTERVAL_PACING_REMINDER_HELPER, /lock screen/i);

@@ -28,7 +28,7 @@
 ## Active Role and Gate
 
 - Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm test` 118/118; `npm run typecheck` 0; `npm run lint` 0. Release build 29 on Free Malware (pacing debt/red not yet reinstalled).
+- Last integrated validation: `npm test` 119/119; `npm run typecheck` 0; `npm run lint` 0. Release build 30 installed on Free Malware.
 
 ## Predecessor Handoff
 
@@ -86,7 +86,7 @@
 - Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Unused leftover still rolls (lookback 3). Overage is a debt: 3 of 2 last hour → 0/1 next; more overage can hold 0/0 until baseline returns. Extra puffs never become credit. Yellow = slot used up; red = this slot or the daily goal is exceeded. Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. No “Credits” label.
 - Pace timers vibrate once when a 15/30/60 window lapses and that window is green (yellow→green or green→green). No vibrate if the new window is yellow or if a log only flips the color.
 - Onboarding asks Yes/No for hourly interval pacing after cut-down. Yes opens the Home pace fold on first use; No starts it closed. Missing field on an existing plan defaults to Yes/open. Organs use the same fold, open by default; closed header shows the average of all five organ scores.
-- Unused-puff leftover notices default on with hourly pacing (Settings can turn them off). Lock-screen local notification when a 15/30/60 slot ends with leftover puffs: “You have N unused puffs this hour.” Copy is leftover-only — no Log puff action, not a prompt to vape. Handler now presents banners so a locked phone still shows them.
+- Unused-puff leftover notices are asked on onboarding (Yes/No after hourly pacing) and can be toggled in Settings Goals and Reminders. Existing plans missing the field default on. When on, a lock-screen notice fires if a 15/30/60 slot ends with leftover puffs and includes a Log puff action. Copy does not ask anyone to vape. Tapping the banner does not log; Log puff does.
 - Home shows a one-shot amber banner when timed logs in the last 60 minutes jump vs the hour before (at least 3, +2, and double if the prior hour was not empty). Copy: “Your usage has increased in the last hour.” Tap or 8s dismiss; once per clock hour.
 
 ## Current Working State
@@ -98,7 +98,7 @@
 - Phase 12: onboarding + Settings connect Health/Fitbit. Fitbit callback route is `app/fitbit.tsx`.
 - 2026-09-02: Release build 10 installed on Free Malware (`0.0.1` / `10`). JS bundle is embedded. Unplug is safe.
 - Goal pacing stacked on Home. Unused hourly puffs raise this hour and split into 30/15. Watch banner only if Health is on and samples are arriving.
-- Release build 29: in-app usage-surge banner on Home.
+- Release build 30: leftover notices with Log puff, onboarding Yes/No, Settings toggle.
 
 ## Next Actions
 
@@ -108,4 +108,4 @@
 
 ## Last Updated
 
-- 2026-09-02 — Lock-screen leftover notices; no Log puff action.
+- 2026-09-02 — Leftover notices: onboarding + Settings toggle, Log puff action, Release 30.

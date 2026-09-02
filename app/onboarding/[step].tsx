@@ -539,10 +539,7 @@ export default function OnboardingStepScreen() {
                 void applyPaceReminderPreference(false);
                 return;
               }
-              patch({
-                intervalPacing: true,
-                intervalPacingReminders: draft.intervalPacingReminders ?? true,
-              });
+              patch({ intervalPacing: true });
             }}
           />
           {draft.intervalPacing === true ? (
