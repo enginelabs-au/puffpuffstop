@@ -4,10 +4,17 @@ import { Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { applyDayCycle, syncOpenProgressDay } from "../src/data/day-cycle";
+import { getDailyLog } from "../src/data/daily-log-store";
 import { getDraft } from "../src/data/onboarding-store";
 import { getProgress } from "../src/data/progress-store";
 import { getSettings } from "../src/data/settings-store";
 import { localDateKey } from "../src/domain/organs";
+import {
+  USAGE_TREND_DISCLAIMER,
+  dayHourUsageTrend,
+  usageHourCounts,
+  usageTrendLabel,
+} from "../src/domain/usage-surge";
 import { summarizePlan } from "../src/domain/plan-summary";
 import {
   PROGRESS_DISCLAIMER,
@@ -38,6 +45,12 @@ export default function StatsScreen() {
   }, [range, summary.commitment, todayKey]);
   const rangeLabel =
     range === "7d" ? "last 7 days" : range === "30d" ? "last 30 days" : "last 12 weeks";
+  const usageHours = usageHourCounts(getDailyLog().puffAt);
+  const usageDay = dayHourUsageTrend(
+    getDailyLog().puffAt,
+    new Date(),
+    getSettings().timeZone,
+  );
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -86,6 +99,14 @@ export default function StatsScreen() {
               ? "Today starts your score. Stay under your daily goal and this fills in."
               : `${totals.met} of ${totals.counted} goal days ${rangeLabel}`}
           </AppText>
+        </View>
+
+        <View style={styles.card}>
+          <AppText style={styles.cardTitle}>Hourly usage</AppText>
+          <AppText style={styles.cardValue}>
+            {`${usageHours.lastHour} this hour · ${usageHours.previousHour} last hour · today ${usageTrendLabel(usageDay.trend)}`}
+          </AppText>
+          <AppText style={styles.heroCaption}>{USAGE_TREND_DISCLAIMER}</AppText>
         </View>
 
         <View style={styles.card}>

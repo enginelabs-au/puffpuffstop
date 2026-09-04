@@ -100,6 +100,7 @@ describe("snapshot persist", () => {
     assert.ok(parsed);
     assert.equal(parsed.dailyLog.logged, 3);
     assert.deepEqual(parsed.dailyLog.puffAt, []);
+    assert.equal(parsed.dailyLog.easeTicks, 0);
   });
 
   it("defaults missing interval pacing to on for an existing plan", () => {

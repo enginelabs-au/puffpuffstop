@@ -19,6 +19,7 @@ export const PUFF_DAMAGE = 0.01;
 export const OVER_CAP_EXTRA = 0.004;
 export const GOAL_BONUS = 1.2;
 export const DAY_RECOVERY = GOAL_BONUS;
+export const HOUR_EASE_RECOVERY = 0.12;
 export const SCORE_MIN = 1;
 export const SCORE_MAX = 100;
 
@@ -112,6 +113,15 @@ export function isGoalCelebration(
   return recoveryTicks > 0 && isOnTrack(logged, commitment);
 }
 
+export function isOrganRecovering(
+  hourlyEase: boolean,
+  recoveryTicks: number,
+  logged: number,
+  commitment: number,
+): boolean {
+  return hourlyEase || isGoalCelebration(recoveryTicks, logged, commitment);
+}
+
 /** One successful day undoes that day's puffs and then some. */
 export function dayRecovery(commitment: number): number {
   return Math.max(0, commitment) * PUFF_DAMAGE + GOAL_BONUS;
@@ -122,10 +132,12 @@ export function organScore(
   logged: number,
   commitment: number,
   recoveryTicks: number,
+  easeTicks = 0,
 ): number {
   const extra = overCapPuffs(logged, commitment);
   const damage = logged * PUFF_DAMAGE + extra * OVER_CAP_EXTRA;
-  const recover = recoveryTicks * dayRecovery(commitment);
+  const recover =
+    recoveryTicks * dayRecovery(commitment) + easeTicks * HOUR_EASE_RECOVERY;
   return clampScore(baseline - damage + recover);
 }
 
@@ -134,13 +146,14 @@ export function organScores(
   logged: number,
   commitment: number,
   recoveryTicks: number,
+  easeTicks = 0,
 ): Record<OrganId, number> {
   return {
-    lungs: organScore(baselines.lungs, logged, commitment, recoveryTicks),
-    heart: organScore(baselines.heart, logged, commitment, recoveryTicks),
-    brain: organScore(baselines.brain, logged, commitment, recoveryTicks),
-    liver: organScore(baselines.liver, logged, commitment, recoveryTicks),
-    mouth: organScore(baselines.mouth, logged, commitment, recoveryTicks),
+    lungs: organScore(baselines.lungs, logged, commitment, recoveryTicks, easeTicks),
+    heart: organScore(baselines.heart, logged, commitment, recoveryTicks, easeTicks),
+    brain: organScore(baselines.brain, logged, commitment, recoveryTicks, easeTicks),
+    liver: organScore(baselines.liver, logged, commitment, recoveryTicks, easeTicks),
+    mouth: organScore(baselines.mouth, logged, commitment, recoveryTicks, easeTicks),
   };
 }
 

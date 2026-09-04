@@ -170,6 +170,8 @@ function parseDailyLog(raw: unknown): DailyLogState | null {
     dateKey: value.dateKey,
     logged,
     recoveryTicks: Math.max(0, asFiniteNumber(value.recoveryTicks, 0)),
+    easeTicks: Math.max(0, asFiniteNumber(value.easeTicks, 0)),
+    easeHourKey: asString(value.easeHourKey ?? "", "") || null,
     puffAt: puffAt.length > logged ? puffAt.slice(-logged) : puffAt,
   };
 }

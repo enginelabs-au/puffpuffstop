@@ -492,9 +492,10 @@ export default function OnboardingStepScreen() {
       {step === "cut-down" ? (
         <>
           <RotaryDial
-            accessibilityLabel="Puffs to cut down each day"
+            accessibilityLabel="Puffs to reduce by each day"
             value={draft.cutDownPerDay}
             onChange={(cutDownPerDay) => patch({ cutDownPerDay })}
+            max={PUFF_DIAL_MAX}
           />
           <GoalPacingBreakdown
             averagePuffsPerDay={puffsPerDay(
@@ -616,7 +617,7 @@ function titleFor(step: OnboardingStep): string {
     case "quit-window":
       return "How long until you’ve completely stopped?";
     case "cut-down":
-      return "By how many puffs will you cut down a day?";
+      return "Reduce by how many puffs each day?";
     case "interval-pacing":
       return "Track puffs by the hour?";
     case "quick-log":
@@ -660,7 +661,7 @@ function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undef
     case "quit-window":
       return "Choose a listed option, an exact date, or Other.";
     case "cut-down":
-      return "We’ll subtract this from your estimated daily puffs. If the goal is lower, you’ll see an hourly pace. That only tracks logs — it does not ask you to vape.";
+      return "Pick 1 to 999,999. We’ll subtract this from your usual day until the date you chose. If the goal is lower, you’ll see an hourly pace. That only tracks logs — it does not ask you to vape.";
     case "interval-pacing":
       return INTERVAL_PACING_HELPER;
     case "quick-log":

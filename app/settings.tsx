@@ -45,7 +45,13 @@ import {
   upcomingPaceReminders,
 } from "../src/domain/pace-reminders";
 import { goalPacing } from "../src/domain/pacing";
-import { intervalPacingStartsOpen } from "../src/domain/onboarding";
+import {
+  PUFF_DIAL_MAX,
+  clampDial,
+  intervalPacingStartsOpen,
+} from "../src/domain/onboarding";
+import { SHADE_LOG_BODY } from "../src/domain/shade-log";
+import { RotaryDial } from "../src/ui/RotaryDial";
 import { summarizePlan } from "../src/domain/plan-summary";
 import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
 import { PacingMeter } from "../src/ui/PacingMeter";
@@ -152,20 +158,16 @@ export default function SettingsScreen() {
 
         <AppText style={styles.section}>Goals</AppText>
         <AppText style={styles.caption}>
-          Daily commitment is {summary.commitment} puffs. Cut down by:
+          Daily commitment is {summary.commitment} puffs. Reduce by how many
+          puffs each day? 1 to 999,999.
         </AppText>
-        <TextInput
-          {...scaledInput}
-          accessibilityLabel="Puffs to cut down each day"
-          keyboardType="number-pad"
-          value={String(draft.cutDownPerDay)}
-          onChangeText={(text) => {
-            const parsed = Number(text);
-            patchDraft({
-              cutDownPerDay: text === "" || Number.isNaN(parsed) ? 0 : parsed,
-            });
-          }}
-          style={styles.input}
+        <RotaryDial
+          accessibilityLabel="Puffs to reduce by each day"
+          value={draft.cutDownPerDay}
+          onChange={(cutDownPerDay) =>
+            patchDraft({ cutDownPerDay: clampDial(cutDownPerDay, PUFF_DIAL_MAX) })
+          }
+          max={PUFF_DIAL_MAX}
         />
         <GoalPacingBreakdown
           averagePuffsPerDay={summary.puffsPerDay}
@@ -294,6 +296,8 @@ export default function SettingsScreen() {
         <AppText style={styles.caption}>
           Optional 7pm reminder on this device. We ask for notification
           permission only if you turn this on. No remote or marketing push.
+          {SHADE_LOG_BODY} Pull down Notification Center and use Log puff or
+          Undo without unlocking, if this phone allows notification actions.
         </AppText>
         {draft.intervalPacing !== false ? (
           <>

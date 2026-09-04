@@ -3,22 +3,18 @@ import { Pressable, View } from "react-native";
 
 import {
   PACING_FOLD_HINT,
-  formatPaceCountdown,
+  PACING_INTERVALS_TITLE,
+  PACING_LENIENT_TIP,
   goalPacing,
   livePacing,
   paceWindowCaption,
   type PaceWindow,
 } from "../domain/pacing";
-import {
-  lightColor,
-  minTapTarget,
-  radius,
-  space,
-  type,
-  type ColorTokens,
-} from "../theme/tokens";
+import { minTapTarget, space, type, type ColorTokens } from "../theme/tokens";
 import { AppText } from "./AppText";
 import { GoalResetRow } from "./GoalResetRow";
+import { InfoTip } from "./InfoTip";
+import { PaceRing } from "./PaceRing";
 import { useThemedStyles } from "./use-themed-styles";
 
 type Props = {
@@ -88,50 +84,51 @@ export function PacingMeter({
 
   return (
     <View style={styles.stack}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ expanded: open }}
-        accessibilityLabel={
-          showGoal
-            ? `${logged} of ${goalPuffsPerDay} today. ${open ? "Hide" : "Show"} pace intervals`
-            : `${open ? "Hide" : "Show"} pace intervals`
-        }
-        onPress={() => setOpen((value) => !value)}
-        style={({ pressed }) => [styles.fold, pressed ? styles.pressed : null]}
-      >
-        <View style={styles.foldMain}>{header}</View>
-        <AppText style={styles.chevron}>{open ? "▾" : "▸"}</AppText>
-      </Pressable>
+      <View style={styles.fold}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: open }}
+          accessibilityLabel={
+            showGoal
+              ? `${logged} of ${goalPuffsPerDay} today. ${open ? "Hide" : "Show"} pace intervals`
+              : `${open ? "Hide" : "Show"} pace intervals`
+          }
+          onPress={() => setOpen((value) => !value)}
+          style={({ pressed }) => [styles.foldMain, pressed ? styles.pressed : null]}
+        >
+          {header}
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={open ? "Hide pace intervals" : "Show pace intervals"}
+          onPress={() => setOpen((value) => !value)}
+          style={({ pressed }) => [styles.chevronHit, pressed ? styles.pressed : null]}
+        >
+          <AppText style={styles.chevron}>{open ? "▾" : "▸"}</AppText>
+        </Pressable>
+      </View>
       {open ? (
         <View
           accessibilityRole="text"
           accessibilityLabel={`${PACING_FOLD_HINT} ${windows.map(paceWindowCaption).join(". ")}`}
           style={styles.detail}
         >
-          <AppText style={styles.hint}>{PACING_FOLD_HINT}</AppText>
-          {windows.map((window) => (
-            <View
-              key={window.kind}
-              style={[
-                styles.chip,
-                window.open
-                  ? styles.open
-                  : window.over
-                    ? styles.over
-                    : styles.wait,
-              ]}
-            >
-              <View style={styles.chipCopy}>
-                <AppText style={styles.chipName}>{windowLabel(window)}</AppText>
-                <AppText style={styles.chipCounts}>
-                  (used) {window.used}/{window.allowance} (unused)
-                </AppText>
-              </View>
-              <AppText style={styles.chipTime}>
-                ({formatPaceCountdown(window.msUntilReset)})
-              </AppText>
-            </View>
-          ))}
+          <View style={styles.sectionHead}>
+            <AppText style={styles.sectionTitle}>{PACING_INTERVALS_TITLE}</AppText>
+            <InfoTip
+              body={PACING_LENIENT_TIP}
+              accessibilityLabel="How pacing leftover and borrowed puffs work"
+            />
+          </View>
+          <View style={styles.rings}>
+            {windows.map((window) => (
+              <PaceRing
+                key={window.kind}
+                window={window}
+                label={windowLabel(window)}
+              />
+            ))}
+          </View>
         </View>
       ) : null}
     </View>
@@ -142,21 +139,33 @@ function meterStyles(color: ColorTokens) {
   return {
     stack: {
       gap: space.xs,
+      overflow: "visible" as const,
+      zIndex: 2,
     },
     fold: {
       minHeight: minTapTarget,
       flexDirection: "row" as const,
       alignItems: "center" as const,
       justifyContent: "space-between" as const,
-      gap: space.sm,
+      gap: space.xs,
+      overflow: "visible" as const,
+      zIndex: 3,
     },
     foldMain: {
       flex: 1,
+      minHeight: minTapTarget,
+      justifyContent: "center" as const,
     },
     foldLabel: {
       ...type.body,
       fontWeight: "700" as const,
       color: color.ink,
+    },
+    chevronHit: {
+      minWidth: minTapTarget,
+      minHeight: minTapTarget,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
     },
     chevron: {
       ...type.body,
@@ -164,48 +173,25 @@ function meterStyles(color: ColorTokens) {
       color: color.inkMuted,
     },
     detail: {
-      gap: space.xs,
+      gap: space.sm,
+      overflow: "visible" as const,
     },
-    hint: {
-      ...type.caption,
-      color: color.inkMuted,
-    },
-    chip: {
-      borderRadius: radius.sm,
-      paddingHorizontal: space.md,
-      paddingVertical: space.sm,
+    sectionHead: {
       flexDirection: "row" as const,
       alignItems: "center" as const,
       justifyContent: "space-between" as const,
-      gap: space.sm,
+      zIndex: 2,
     },
-    open: {
-      backgroundColor: color.accentMint,
-    },
-    wait: {
-      backgroundColor: color.amber,
-    },
-    over: {
-      backgroundColor: color.danger,
-    },
-    chipCopy: {
-      flex: 1,
-      gap: 2,
-    },
-    chipName: {
+    sectionTitle: {
       ...type.body,
       fontWeight: "700" as const,
-      color: lightColor.ink,
+      color: color.ink,
     },
-    chipCounts: {
-      ...type.caption,
-      fontWeight: "700" as const,
-      color: lightColor.ink,
-    },
-    chipTime: {
-      ...type.body,
-      fontWeight: "700" as const,
-      color: lightColor.ink,
+    rings: {
+      flexDirection: "row" as const,
+      alignItems: "flex-start" as const,
+      justifyContent: "space-between" as const,
+      gap: space.xs,
     },
     pressed: {
       opacity: 0.85,

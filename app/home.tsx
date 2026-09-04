@@ -4,6 +4,7 @@ import { Pressable, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  applyUsageEaseRecovery,
   getDailyLog,
   logPuff,
   undoPuff,
@@ -19,11 +20,16 @@ import { canShowHome, intervalPacingStartsOpen } from "../src/domain/onboarding"
 import {
   isGoalCelebration,
   isOnTrack,
+  isOrganRecovering,
   localDateKey,
   organBaselines,
   organScores,
 } from "../src/domain/organs";
-import { detectUsageSurge } from "../src/domain/usage-surge";
+import {
+  USAGE_EASE_MESSAGE,
+  detectUsageEase,
+  detectUsageSurge,
+} from "../src/domain/usage-surge";
 import { PLAN_DISCLAIMER, summarizePlan } from "../src/domain/plan-summary";
 import { profileScore } from "../src/domain/progress";
 import { formatCurrency } from "../src/domain/savings";
@@ -111,6 +117,15 @@ export default function HomeScreen() {
   }, [log.puffAt, dismissedSurgeKey]);
 
   useEffect(() => {
+    const tick = () => {
+      if (applyUsageEaseRecovery()) setLog(getDailyLog());
+    };
+    tick();
+    const timer = setInterval(tick, 15_000);
+    return () => clearInterval(timer);
+  }, [log.puffAt]);
+
+  useEffect(() => {
     void syncHealthFromDisk().then(() => setHealth(getHealth()));
     return subscribeHealth(() => setHealth(getHealth()));
   }, []);
@@ -148,6 +163,7 @@ export default function HomeScreen() {
     log.logged,
     summary.commitment,
     log.recoveryTicks,
+    log.easeTicks,
   );
   const overCap = !isOnTrack(log.logged, summary.commitment);
   const celebrating = isGoalCelebration(
@@ -155,7 +171,13 @@ export default function HomeScreen() {
     log.logged,
     summary.commitment,
   );
-  const recovering = celebrating;
+  const ease = detectUsageEase(log.puffAt);
+  const recovering = isOrganRecovering(
+    ease.active,
+    log.recoveryTicks,
+    log.logged,
+    summary.commitment,
+  );
   const lastPuffAt = log.puffAt.at(-1);
   const healthEffectRows = visibleLogEffects(health.effects, lastPuffAt);
   const watchFeedLive = isWatchFeedLive(health);
@@ -227,6 +249,10 @@ export default function HomeScreen() {
             {justSucceeded
               ? "You stayed under yesterday. Your organs are cheering."
               : "Goal streak on. Your organs are perking up."}
+          </AppText>
+        ) : ease.active ? (
+          <AppText style={styles.success} accessibilityLiveRegion="polite">
+            {USAGE_EASE_MESSAGE}
           </AppText>
         ) : null}
         {pot > 0 ? (

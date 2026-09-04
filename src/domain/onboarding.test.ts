@@ -83,6 +83,8 @@ describe("onboarding", () => {
       }),
       true,
     );
+    assert.equal(canContinue("cut-down", draft), false);
+    assert.equal(canContinue("cut-down", { ...draft, cutDownPerDay: 1 }), true);
     assert.equal(canContinue("interval-pacing", draft), false);
     assert.equal(
       canContinue("interval-pacing", { ...draft, intervalPacing: true }),

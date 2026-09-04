@@ -1,5 +1,6 @@
 import { localDateKey } from "../domain/organs";
 import { summarizePlan } from "../domain/plan-summary";
+import { detectUsageEase } from "../domain/usage-surge";
 import { persistNow } from "./persist-hook";
 import { getDraft } from "./onboarding-store";
 import { recordProgressDay } from "./progress-store";
@@ -9,6 +10,8 @@ export type DailyLogState = {
   dateKey: string;
   logged: number;
   recoveryTicks: number;
+  easeTicks: number;
+  easeHourKey: string | null;
   puffAt: number[];
 };
 
@@ -28,12 +31,18 @@ function normalizePuffAt(logged: number, puffAt?: readonly number[]): number[] {
   return times.length > logged ? times.slice(-logged) : times;
 }
 
-let state: DailyLogState = {
-  dateKey: todayKey(),
-  logged: 0,
-  recoveryTicks: 0,
-  puffAt: [],
-};
+function emptyLog(now: Date = new Date()): DailyLogState {
+  return {
+    dateKey: todayKey(now),
+    logged: 0,
+    recoveryTicks: 0,
+    easeTicks: 0,
+    easeHourKey: null,
+    puffAt: [],
+  };
+}
+
+let state: DailyLogState = emptyLog();
 
 export function getDailyLog(): DailyLogState {
   return { ...state, puffAt: [...state.puffAt] };
@@ -44,13 +53,15 @@ export function replaceDailyLog(next: DailyLogState): DailyLogState {
     dateKey: next.dateKey,
     logged: Math.max(0, next.logged),
     recoveryTicks: Math.max(0, next.recoveryTicks),
+    easeTicks: Math.max(0, next.easeTicks ?? 0),
+    easeHourKey: next.easeHourKey ?? null,
     puffAt: normalizePuffAt(next.logged, next.puffAt),
   };
   return getDailyLog();
 }
 
 export function resetDailyLog(now: Date = new Date()): DailyLogState {
-  state = { dateKey: todayKey(now), logged: 0, recoveryTicks: 0, puffAt: [] };
+  state = emptyLog(now);
   persistNow();
   return getDailyLog();
 }
@@ -91,6 +102,8 @@ export function applyDayRollover(
     dateKey: today,
     logged: 0,
     recoveryTicks: state.recoveryTicks + (recovered ? 1 : 0),
+    easeTicks: state.easeTicks,
+    easeHourKey: null,
     puffAt: [],
   };
   recordProgressDay({
@@ -142,7 +155,20 @@ export function adjustPuffs(
     met: commitment > 0 && logged <= commitment,
   });
   persistNow();
+  applyUsageEaseRecovery(now);
   return getDailyLog();
+}
+
+export function applyUsageEaseRecovery(now: Date = new Date()): boolean {
+  const ease = detectUsageEase(state.puffAt, now);
+  if (!ease.active || state.easeHourKey === ease.key) return false;
+  state = {
+    ...state,
+    easeTicks: state.easeTicks + 1,
+    easeHourKey: ease.key,
+  };
+  persistNow();
+  return true;
 }
 
 export function clearTodayPuffs(

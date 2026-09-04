@@ -6,6 +6,12 @@ import {
   secondsUntilPaceReminder,
 } from "../domain/pace-reminders";
 import {
+  SHADE_ACTION_LOG,
+  SHADE_ACTION_UNDO,
+  SHADE_LOG_CATEGORY,
+  SHADE_LOG_CHANNEL,
+} from "../domain/shade-log";
+import {
   dailyReminder,
   shouldEnableReminders,
   type DailyReminder,
@@ -19,6 +25,8 @@ export type DateReminder = {
   title: string;
   body: string;
   categoryIdentifier?: string;
+  sticky?: boolean;
+  silent?: boolean;
 };
 
 export type ReminderDriver = {
@@ -26,6 +34,7 @@ export type ReminderDriver = {
   requestPermission(): Promise<ReminderPermission>;
   scheduleDaily(schedule: DailyReminder): Promise<void>;
   scheduleDate(schedule: DateReminder): Promise<void>;
+  presentImmediate(schedule: DateReminder): Promise<void>;
   preparePaceNotifications(): Promise<void>;
   cancel(identifier: string): Promise<void>;
 };
@@ -45,6 +54,7 @@ type ExpoNotificationsModule = {
     TIME_INTERVAL?: string;
   };
   cancelScheduledNotificationAsync(identifier: string): Promise<void>;
+  dismissNotificationAsync?(identifier: string): Promise<void>;
   getPermissionsAsync(): Promise<{ status?: string; granted?: boolean }>;
   requestPermissionsAsync(options?: unknown): Promise<{
     status?: string;
@@ -61,11 +71,14 @@ type ExpoNotificationsModule = {
       interruptionLevel?: "active" | "timeSensitive" | "passive";
       channelId?: string;
       data?: Record<string, unknown>;
+      sticky?: boolean;
+      autoDismiss?: boolean;
     };
     trigger:
       | { type: string; hour: number; minute: number }
       | { type: string; date: Date }
-      | { type: string; seconds: number; repeats?: boolean };
+      | { type: string; seconds: number; repeats?: boolean }
+      | null;
   }): Promise<string>;
   setNotificationChannelAsync?(
     channelId: string,
@@ -82,8 +95,12 @@ type ExpoNotificationsModule = {
     actions: {
       identifier: string;
       buttonTitle: string;
-      options?: { opensAppToForeground?: boolean };
+      options?: {
+        opensAppToForeground?: boolean;
+        isAuthenticationRequired?: boolean;
+      };
     }[],
+    categoryOptions?: { showTitle?: boolean; showSubtitle?: boolean },
   ): Promise<unknown>;
   setNotificationHandler?(handler: {
     handleNotification: (notification: {
@@ -130,6 +147,9 @@ export function createMemoryReminderDriver(
         (item) => item.identifier !== schedule.identifier,
       );
       driver.pace.push(schedule);
+    },
+    async presentImmediate(schedule) {
+      await driver.scheduleDate(schedule);
     },
     async preparePaceNotifications() {
       return;
@@ -212,6 +232,29 @@ export function createExpoReminderDriver(
             },
       });
     },
+    async presentImmediate(schedule) {
+      await Notifications.dismissNotificationAsync?.(schedule.identifier).catch(
+        () => undefined,
+      );
+      await Notifications.cancelScheduledNotificationAsync(
+        schedule.identifier,
+      ).catch(() => undefined);
+      await Notifications.scheduleNotificationAsync({
+        identifier: schedule.identifier,
+        content: {
+          title: schedule.title,
+          body: schedule.body,
+          categoryIdentifier: schedule.categoryIdentifier,
+          sound: false,
+          interruptionLevel: schedule.silent ? "passive" : "active",
+          channelId: SHADE_LOG_CHANNEL,
+          sticky: schedule.sticky,
+          autoDismiss: false,
+          data: { type: "shade-log" },
+        },
+        trigger: null,
+      });
+    },
     async preparePaceNotifications() {
       Notifications.setNotificationHandler?.({
         handleNotification: async (notification) => {
@@ -219,8 +262,8 @@ export function createExpoReminderDriver(
             PACE_REMINDER_ID_PREFIX,
           );
           return {
-            shouldShowAlert: true,
-            shouldShowBanner: true,
+            shouldShowAlert: isPace,
+            shouldShowBanner: isPace,
             shouldShowList: true,
             shouldPlaySound: isPace,
             shouldSetBadge: false,
@@ -231,9 +274,34 @@ export function createExpoReminderDriver(
         {
           identifier: PACE_REMINDER_ACTION_LOG,
           buttonTitle: "Log puff",
-          options: { opensAppToForeground: false },
+          options: {
+            opensAppToForeground: false,
+            isAuthenticationRequired: false,
+          },
         },
       ]).catch(() => undefined);
+      await Notifications.setNotificationCategoryAsync?.(
+        SHADE_LOG_CATEGORY,
+        [
+          {
+            identifier: SHADE_ACTION_LOG,
+            buttonTitle: "Log puff",
+            options: {
+              opensAppToForeground: false,
+              isAuthenticationRequired: false,
+            },
+          },
+          {
+            identifier: SHADE_ACTION_UNDO,
+            buttonTitle: "Undo",
+            options: {
+              opensAppToForeground: false,
+              isAuthenticationRequired: false,
+            },
+          },
+        ],
+        { showTitle: true, showSubtitle: true },
+      ).catch(() => undefined);
       if (Notifications.setNotificationChannelAsync) {
         await Notifications.setNotificationChannelAsync(PACE_REMINDER_CHANNEL, {
           name: "Unused puff leftover",
@@ -245,9 +313,19 @@ export function createExpoReminderDriver(
           lockscreenVisibility:
             Notifications.AndroidNotificationVisibility?.PUBLIC,
         }).catch(() => undefined);
+        await Notifications.setNotificationChannelAsync(SHADE_LOG_CHANNEL, {
+          name: "Log from Notification Center",
+          importance: Notifications.AndroidImportance?.DEFAULT,
+          enableVibrate: false,
+          lockscreenVisibility:
+            Notifications.AndroidNotificationVisibility?.PUBLIC,
+        }).catch(() => undefined);
       }
     },
     async cancel(identifier) {
+      await Notifications.dismissNotificationAsync?.(identifier).catch(
+        () => undefined,
+      );
       await Notifications.cancelScheduledNotificationAsync(identifier).catch(
         () => undefined,
       );
@@ -279,6 +357,10 @@ export async function requestReminderPermission(): Promise<ReminderPermission> {
 
 export async function scheduleDateReminder(item: DateReminder): Promise<void> {
   await driver.scheduleDate(item);
+}
+
+export async function presentImmediateReminder(item: DateReminder): Promise<void> {
+  await driver.presentImmediate(item);
 }
 
 export async function cancelReminder(identifier: string): Promise<void> {
@@ -334,7 +416,7 @@ export async function bootNotificationListeners(
   onReceived: () => void,
   onResponse: (response: {
     actionIdentifier: string;
-    notification: { request: { identifier: string } };
+    notification: { date?: number; request: { identifier: string } };
   }) => void,
 ): Promise<void> {
   try {
@@ -343,12 +425,12 @@ export async function bootNotificationListeners(
       addNotificationResponseReceivedListener(
         listener: (response: {
           actionIdentifier: string;
-          notification: { request: { identifier: string } };
+          notification: { date?: number; request: { identifier: string } };
         }) => void,
       ): { remove(): void };
       getLastNotificationResponseAsync(): Promise<{
         actionIdentifier: string;
-        notification: { request: { identifier: string } };
+        notification: { date?: number; request: { identifier: string } };
       } | null>;
     };
     Notifications.addNotificationReceivedListener(onReceived);

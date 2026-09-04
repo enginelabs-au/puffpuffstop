@@ -11,6 +11,7 @@ import { summarizePlan } from "../domain/plan-summary";
 import { getDailyLog } from "./daily-log-store";
 import { getDraft, updateDraft } from "./onboarding-store";
 import { applyQuickLog } from "./quick-log";
+import { handleShadeNotificationResponse } from "./shade-log";
 import {
   bootNotificationListeners,
   cancelReminder,
@@ -113,6 +114,7 @@ export async function bootPaceReminders(): Promise<boolean> {
       void syncPaceReminders();
     },
     (response) => {
+      if (handleShadeNotificationResponse(response)) return;
       handlePaceNotificationResponse(response);
     },
   );

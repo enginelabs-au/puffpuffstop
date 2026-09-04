@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import {
   applyDayRollover,
+  applyUsageEaseRecovery,
   getDailyLog,
   logPuff,
   resetDailyLog,
@@ -82,5 +83,16 @@ describe("daily log store", () => {
     applyTimeZonePreference("Pacific/Auckland", new Date("2026-09-01T18:00:00.000Z"));
     assert.equal(getDailyLog().logged, 1);
     assert.equal(getDailyLog().dateKey, "2026-09-02");
+  });
+
+  it("awards one organ-ease tick when this hour is quieter than the last", () => {
+    const now = new Date("2026-09-02T18:10:00.000Z");
+    resetDailyLog(now);
+    logPuff(12, new Date(now.getTime() - 3_600_000 - 2_000));
+    logPuff(12, new Date(now.getTime() - 3_600_000 - 1_000));
+    assert.equal(applyUsageEaseRecovery(now), true);
+    assert.equal(getDailyLog().easeTicks, 1);
+    assert.equal(applyUsageEaseRecovery(now), false);
+    assert.equal(getDailyLog().easeTicks, 1);
   });
 });

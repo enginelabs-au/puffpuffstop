@@ -279,6 +279,7 @@ export function canContinue(step: OnboardingStep, draft: OnboardingDraft): boole
       }
       return draft.quitWindow !== null;
     case "cut-down":
+      return draft.cutDownPerDay >= 1 && draft.cutDownPerDay <= PUFF_DIAL_MAX;
     case "quick-log":
     case "wearables":
       return true;

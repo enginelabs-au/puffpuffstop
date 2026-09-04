@@ -28,7 +28,7 @@
 ## Active Role and Gate
 
 - Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm test` 121/121; `npm run typecheck` 0; `npm run lint` 0. Release build 31 installed on Free Malware.
+- Last integrated validation: `npm test` 128/128; `npm run typecheck` 0; `npm run lint` 0. Release build 35 installed on Free Malware.
 
 ## Predecessor Handoff
 
@@ -52,7 +52,7 @@
 
 ## Active Items
 
-- Owner asked to commit and push phases 10–11. Do not publish the app.
+- Owner asked to commit and push hourly ease, usage metric, reduce-by, and shade log. Do not publish the app.
 
 ## Files in Active Use
 
@@ -64,7 +64,7 @@
 - `/TOOLS.md`
 - `/memory/MEMORY.md`
 - `/memory/memories/git-identity.md`
-- `/memory/memories/2026-09-02-continuation.md`
+- `/memory/memories/2026-09-04-continuation.md`
 - `docs/plans/phase_12_health-wearables_plan.md`
 - `src/domain/pacing.ts`, `src/domain/organs.ts`, `src/ui/PacingMeter.tsx`, `src/ui/OrganFold.tsx`, `app/onboarding/[step].tsx`, `app/home.tsx`
 - `app/`, `src/`, `plugins/quick-log/`
@@ -83,11 +83,15 @@
 - VapeFree is a visual-tone reference, not a cloned pet.
 - In-app age-gate screen removed; 16+ remains the store rating.
 - Siri App Intents can write the snapshot with the app closed. Gemini has no public equivalent; Android uses a headless shortcut / Routine.
-- Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Unused leftover still rolls (lookback 3). Overage is a debt: 3 of 2 last hour → 0/1 next; more overage can hold 0/0 until baseline returns. Extra puffs never become credit. Yellow = slot used up; red = this slot or the daily goal is exceeded. Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. No “Credits” label.
+- Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Unused leftover still rolls (lookback 3). Overage is a debt: 3 of 2 last hour → 0/1 next; more overage can hold 0/0 until baseline returns. Extra puffs never become credit. Yellow = slot used up; red = this slot or the daily goal is exceeded. Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. No “Credits” label. Home copy may say leftover is “banked” and extra is “borrowed”; that is the same roll/debt math, not a midnight bank.
+- Home Pace fold: one info bubble on Pacing Intervals opens `PACING_LENIENT_TIP`. Interval chips are progress rings (`used/allowance`) with `Next window in: MM:SS`. Mint / amber / red still mean open / used up / over.
 - Pace timers vibrate once when a 15/30/60 window lapses and that window is green (yellow→green or green→green). No vibrate if the new window is yellow or if a log only flips the color.
 - Onboarding asks Yes/No for hourly interval pacing after cut-down. Yes opens the Home pace fold on first use; No starts it closed. Missing field on an existing plan defaults to Yes/open. Organs use the same fold, open by default; closed header shows the average of all five organ scores.
 - Leftover lock-screen notices default on with hourly pacing. A one-time repair turns them back on if an earlier opt-in default had stored them off. Scheduling uses iOS time-interval triggers and time-sensitive interruption. The 2s voice poll no longer cancels imminent notices. Settings shows the next leftover time. Log puff action remains. Onboarding still asks Yes/No.
 - Home shows a one-shot amber banner when timed logs in the last 60 minutes jump vs the hour before (at least 3, +2, and double if the prior hour was not empty). Copy: “Your usage has increased in the last hour.” Tap or 8s dismiss; once per clock hour.
+- Organ recovery also fires intra-day: if this rolling hour has fewer logs than the hour before, organs show recovering and one `easeTicks` is awarded per clock hour (smaller than a full goal day). Midnight under-goal ticks still apply. Profile → Hourly usage shows this hour / last hour and whether today’s clock hours are generally higher, easing, or steady.
+- Reduce-by is the cut-down step after quit-by: 1–999,999 puffs/day. Same control in Settings → Goals.
+- Notification Center shade card (`puffpuffstop-shade`) offers Log puff and Undo when notification permission is granted. iOS: long-press / swipe the card (lock-screen actions depend on iOS settings). Android: action buttons on the shade. Not a Control Center widget.
 
 ## Current Working State
 
@@ -98,7 +102,7 @@
 - Phase 12: onboarding + Settings connect Health/Fitbit. Fitbit callback route is `app/fitbit.tsx`.
 - 2026-09-02: Release build 10 installed on Free Malware (`0.0.1` / `10`). JS bundle is embedded. Unplug is safe.
 - Goal pacing stacked on Home. Unused hourly puffs raise this hour and split into 30/15. Watch banner only if Health is on and samples are arriving.
-- Release build 31: leftover notices actually schedule (repair + time-interval + no 2s cancel).
+- Release build 35: hourly ease recovery, profile usage, reduce-by, shade log/undo.
 
 ## Next Actions
 
@@ -108,4 +112,4 @@
 
 ## Last Updated
 
-- 2026-09-02 — Leftover lock-screen notices not arriving; Release 31 repair.
+- 2026-09-04 — Hourly ease recovery, profile usage, reduce-by, shade log.

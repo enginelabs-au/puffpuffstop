@@ -10,6 +10,7 @@ import { handleQuickLogUrl, syncVoiceLogFromDisk } from "../src/data/quick-log";
 import { parseQuickLogUrl } from "../src/domain/quick-log";
 import { consumePendingVoiceLog } from "../src/data/voice-pending";
 import { bootPaceReminders, syncPaceReminders } from "../src/data/pace-reminders";
+import { bootShadeLog } from "../src/data/shade-log";
 import { bootReminders } from "../src/data/reminders";
 import { color as tokenColor, darkColor } from "../src/theme/tokens";
 import { ThemeProvider, useTheme } from "../src/ui/ThemeProvider";
@@ -76,6 +77,7 @@ export default function RootLayout() {
       .then(() => consumePendingVoiceLog())
       .then(() => bootReminders())
       .then(() => bootPaceReminders())
+      .then(() => bootShadeLog())
       .finally(() => {
         if (!cancelled) setReady(true);
       });

@@ -108,6 +108,7 @@ npx expo run:ios --device 00008140-0016406C0CDB001C --configuration Release
 - Causes: first opt-in stored `intervalPacingReminders: false`; sync required `=== true`. The 2s voice poll cancelled any notice inside 1s of fire. DATE triggers were less reliable on lock screen.
 - Fix: one-time repair enables leftover notices when hourly pacing is on. Schedule with TIME_INTERVAL + timeSensitive. Register the presentation handler at boot. Only resync leftover notices when a voice log actually changes. Settings shows the next leftover clock time. User can still turn them off after the repair.
 - Validation: `npm test` 121/121, typecheck 0, lint 0. Release build 31.
+- After unlock, launched `au.com.enginelabs.puffpuffstop` with `devicectl` so boot can request notification permission and schedule leftover notices.
 
 ## Profile score and multi-day stats
 

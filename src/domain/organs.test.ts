@@ -5,6 +5,7 @@ import {
   BASELINE_MAX,
   BASELINE_MIN,
   GOAL_BONUS,
+  HOUR_EASE_RECOVERY,
   LIFETIME_YEARS,
   PUFF_DAMAGE,
   SCORE_MIN,
@@ -88,6 +89,15 @@ describe("organs", () => {
   it("never hits 0 from ordinary logging", () => {
     assert.equal(clampScore(-20), SCORE_MIN);
     assert.ok(organScore(90, 80, 80, 0) > 89);
+  });
+
+  it("heals a little when an hour eases, less than a full goal day", () => {
+    const idle = organScore(90, 2, 20, 0, 0);
+    const eased = organScore(90, 2, 20, 0, 1);
+    const goalDay = organScore(90, 2, 20, 1, 0);
+    assert.ok(eased > idle);
+    assert.ok(goalDay > eased);
+    assert.ok(Math.abs(eased - idle - HOUR_EASE_RECOVERY) < 1e-9);
   });
 
   it("recovers only via recovery ticks, not from being over cap", () => {

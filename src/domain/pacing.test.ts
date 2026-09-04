@@ -3,9 +3,12 @@ import { describe, it } from "node:test";
 
 import {
   PACING_FOLD_HINT,
+  PACING_LENIENT_TIP,
   allowanceAfterUnused,
   countPuffsInWindow,
+  formatNextWindowIn,
   formatPaceCountdown,
+  paceRingFill,
   goalPacing,
   goalPacingCaption,
   hourAllowanceAfterUnused,
@@ -26,6 +29,10 @@ describe("goal pacing", () => {
     assert.match(goalPacingCaption(pacing), /2 puffs an hour/);
     assert.match(goalPacingCaption(pacing), /does not ask you to vape/);
     assert.match(PACING_FOLD_HINT, /Unused puffs roll to the next slot/);
+    assert.match(PACING_LENIENT_TIP, /banked for upcoming windows/);
+    assert.match(PACING_LENIENT_TIP, /borrowed from the next window/);
+    assert.match(PACING_LENIENT_TIP, /long-term cut-down/);
+    assert.match(PACING_LENIENT_TIP, /does not ask you to vape/);
   });
 
   it("hides windows when the goal is not below the usual day", () => {
@@ -297,6 +304,10 @@ describe("live pacing windows", () => {
   it("formats a countdown without fractions", () => {
     assert.equal(formatPaceCountdown(90_000), "1:30");
     assert.equal(formatPaceCountdown(0), "0:00");
+    assert.equal(formatNextWindowIn(90_000), "Next window in: 1:30");
+    assert.equal(paceRingFill(1, 2), 0.5);
+    assert.equal(paceRingFill(3, 2), 1);
+    assert.equal(paceRingFill(0, 2), 0);
   });
 
   it("counts down to 11:59pm when the local day rolls", () => {

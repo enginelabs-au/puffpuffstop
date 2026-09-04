@@ -4,6 +4,9 @@ export const PACING_TRACKER_DISCLAIMER =
   "This only tracks what you log. It does not ask you to vape.";
 export const PACING_FOLD_HINT =
   "Intervals pace your daily goal. Unused puffs roll to the next slot. Extra puffs cut the next slot.";
+export const PACING_INTERVALS_TITLE = "Pacing Intervals";
+export const PACING_LENIENT_TIP =
+  "Unused puffs are not lost. They are banked for upcoming windows. Extra puffs are borrowed from the next window. Chase the long-term cut-down, not a perfect hour. This only tracks what you log. It does not ask you to vape.";
 export const INTERVAL_PACING_HELPER =
   "Interval pacing splits your daily goal into 1 hour, 30 minute, and 15 minute slots. Unused puffs roll into the next slot so we never invent extra. It only tracks what you log — it does not ask you to vape. Yes opens the pace menu on Home; No keeps it folded. You can also choose unused-puff reminders when a slot ends.";
 
@@ -75,6 +78,16 @@ export function formatPaceCountdown(ms: number): string {
   const ss = String(seconds).padStart(2, "0");
   if (hours > 0) return `${hours}:${mm}:${ss}`;
   return `${minutes}:${ss}`;
+}
+
+export function formatNextWindowIn(ms: number): string {
+  return `Next window in: ${formatPaceCountdown(ms)}`;
+}
+
+export function paceRingFill(used: number, allowance: number): number {
+  if (!Number.isFinite(used) || used <= 0) return 0;
+  if (!Number.isFinite(allowance) || allowance <= 0) return 1;
+  return Math.min(1, used / allowance);
 }
 
 function zonedClock(
