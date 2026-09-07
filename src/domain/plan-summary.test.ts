@@ -34,6 +34,22 @@ describe("plan summary", () => {
     assert.equal(summary.disclaimer, PLAN_DISCLAIMER);
   });
 
+  it("lowers the next day's goal by the reduce-by amount", () => {
+    const summary = summarizePlan(
+      {
+        ...emptyDraft(),
+        frequencyCount: 20,
+        frequencyPeriod: "days",
+        cutDownPerDay: 1,
+        cutDownPeriod: "days",
+        cutDownStartDate: "2026-09-01",
+        cutDownBase: 20,
+      },
+      "2026-09-02",
+    );
+    assert.equal(summary.commitment, 19);
+  });
+
   it("uses custom ml math when a device size is present", () => {
     const summary = summarizePlan({
       ...emptyDraft(),

@@ -20,12 +20,15 @@ import {
   VOICE_EXAMPLE_REMOVE,
 } from "../../src/domain/quick-log";
 import { HealthConnectControls } from "../../src/ui/HealthConnectControls";
-import { commitmentPuffs, puffsPerDay, type Period } from "../../src/domain/estimation";
+import { puffsPerDay, type Period } from "../../src/domain/estimation";
+import { planTodayKey } from "../../src/data/plan";
+import { summarizePlan } from "../../src/domain/plan-summary";
 import { INTERVAL_PACING_REMINDER_HELPER } from "../../src/domain/pace-reminders";
 import { INTERVAL_PACING_HELPER } from "../../src/domain/pacing";
 import { applyPaceReminderPreference } from "../../src/data/pace-reminders";
 import { GoalPacingBreakdown } from "../../src/ui/GoalPacingBreakdown";
 import {
+  PERIOD_CHOICES,
   PUFF_DIAL_MAX,
   canContinue,
   formatAuDateInput,
@@ -46,6 +49,7 @@ import { radius, scaledInput, space, type, type ColorTokens } from "../../src/th
 import { AppText } from "../../src/ui/AppText";
 import { ChipGroup } from "../../src/ui/ChipGroup";
 import { OnboardingFrame } from "../../src/ui/OnboardingFrame";
+import { ReduceByField } from "../../src/ui/ReduceByField";
 import { RotaryDial } from "../../src/ui/RotaryDial";
 import { SelectField } from "../../src/ui/SelectField";
 import { useTheme } from "../../src/ui/ThemeProvider";
@@ -401,6 +405,12 @@ export default function OnboardingStepScreen() {
             }}
             style={styles.input}
           />
+          <AppText style={styles.caption}>How often do you buy one?</AppText>
+          <ChipGroup
+            options={PERIOD_CHOICES}
+            selected={draft.deviceCostPeriod}
+            onChange={(deviceCostPeriod) => patch({ deviceCostPeriod })}
+          />
         </>
       ) : null}
 
@@ -491,21 +501,28 @@ export default function OnboardingStepScreen() {
 
       {step === "cut-down" ? (
         <>
-          <RotaryDial
-            accessibilityLabel="Puffs to reduce by each day"
-            value={draft.cutDownPerDay}
-            onChange={(cutDownPerDay) => patch({ cutDownPerDay })}
-            max={PUFF_DIAL_MAX}
+          <ReduceByField
+            count={draft.cutDownPerDay}
+            period={draft.cutDownPeriod}
+            onChange={(cutDownPerDay, cutDownPeriod) => {
+              const usual = puffsPerDay(
+                draft.frequencyCount,
+                draft.frequencyPeriod,
+              );
+              patch({
+                cutDownPerDay,
+                cutDownPeriod,
+                cutDownStartDate: planTodayKey(),
+                cutDownBase: usual,
+              });
+            }}
           />
           <GoalPacingBreakdown
             averagePuffsPerDay={puffsPerDay(
               draft.frequencyCount,
               draft.frequencyPeriod,
             )}
-            goalPuffsPerDay={commitmentPuffs(
-              puffsPerDay(draft.frequencyCount, draft.frequencyPeriod),
-              draft.cutDownPerDay,
-            )}
+            goalPuffsPerDay={summarizePlan(draft, planTodayKey()).commitment}
           />
         </>
       ) : null}
@@ -517,10 +534,7 @@ export default function OnboardingStepScreen() {
               draft.frequencyCount,
               draft.frequencyPeriod,
             )}
-            goalPuffsPerDay={commitmentPuffs(
-              puffsPerDay(draft.frequencyCount, draft.frequencyPeriod),
-              draft.cutDownPerDay,
-            )}
+            goalPuffsPerDay={summarizePlan(draft, planTodayKey()).commitment}
           />
           <ChipGroup
             options={INTERVAL_PACING_CHOICES}
@@ -617,7 +631,7 @@ function titleFor(step: OnboardingStep): string {
     case "quit-window":
       return "How long until you’ve completely stopped?";
     case "cut-down":
-      return "Reduce by how many puffs each day?";
+      return "By how many puffs do you want to reduce?";
     case "interval-pacing":
       return "Track puffs by the hour?";
     case "quick-log":
@@ -653,7 +667,7 @@ function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undef
     case "nicotine":
       return "Only strengths confirmed for the selected product.";
     case "cost":
-      return "Optional. Helps later savings math. We never charge a card.";
+      return "Optional. After the price, say how often you buy a device. We use that for a savings estimate. We never charge a card.";
     case "triggers":
       return "Pick any that fit. You can skip.";
     case "strictness":
@@ -661,7 +675,7 @@ function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undef
     case "quit-window":
       return "Choose a listed option, an exact date, or Other.";
     case "cut-down":
-      return "Pick 1 to 999,999. We’ll subtract this from your usual day until the date you chose. If the goal is lower, you’ll see an hourly pace. That only tracks logs — it does not ask you to vape.";
+      return "Tomorrow’s goal drops by this amount each day, week, month, or year. That only tracks logs — it does not ask you to vape.";
     case "interval-pacing":
       return INTERVAL_PACING_HELPER;
     case "quick-log":

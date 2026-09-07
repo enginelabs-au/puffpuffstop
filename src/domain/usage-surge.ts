@@ -5,7 +5,7 @@ export const USAGE_SURGE_MIN = 3;
 export const USAGE_SURGE_EXTRA = 2;
 export const USAGE_SURGE_MESSAGE = "Your usage has increased in the last hour.";
 export const USAGE_EASE_MESSAGE =
-  "Usage is easing this hour. Your organs are recovering a little.";
+  "Usage is easing this hour. Organs recover over months, not overnight.";
 export const USAGE_TREND_DISCLAIMER =
   "This compares the puffs you log from hour to hour. It is not a medical score.";
 
@@ -116,6 +116,20 @@ export function dayHourUsageTrend(
     upHours,
     downHours,
   };
+}
+
+export function hourlyUsageSeries(
+  puffAt: readonly number[],
+  now: Date,
+  timeZone: string,
+): number[] {
+  const counts = clockHourPuffCounts(puffAt, now, timeZone);
+  const dayStart = startOfZonedDay(now, timeZone);
+  const currentHour = Math.min(
+    23,
+    Math.max(0, Math.floor((now.getTime() - dayStart) / USAGE_HOUR_MS)),
+  );
+  return counts.slice(0, currentHour + 1);
 }
 
 export function usageTrendLabel(trend: UsageTrend): string {

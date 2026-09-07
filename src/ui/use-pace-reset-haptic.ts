@@ -5,8 +5,8 @@ import { getDailyLog } from "../data/daily-log-store";
 import { intervalPacingRemindersEnabled } from "../domain/onboarding";
 import { getDraft } from "../data/onboarding-store";
 import { getSettings } from "../data/settings-store";
+import { currentPlan } from "../data/plan";
 import { goalPacing, livePacing, shouldVibrateOnPaceLapse } from "../domain/pacing";
-import { summarizePlan } from "../domain/plan-summary";
 import { playPaceResetHaptic } from "./haptics";
 
 const TICK_MS = 1000;
@@ -16,8 +16,7 @@ export function usePaceResetHaptic(ready: boolean): void {
     if (!ready) return;
     let previous = null as ReturnType<typeof livePacing> | null;
     const tick = () => {
-      const draft = getDraft();
-      const summary = summarizePlan(draft);
+      const summary = currentPlan();
       const pacing = goalPacing(summary.puffsPerDay, summary.commitment);
       if (!pacing.applies) {
         previous = null;
@@ -33,7 +32,7 @@ export function usePaceResetHaptic(ready: boolean): void {
       );
       if (
         AppState.currentState === "active" &&
-        intervalPacingRemindersEnabled(draft) &&
+        intervalPacingRemindersEnabled(getDraft()) &&
         shouldVibrateOnPaceLapse(previous, next)
       ) {
         void playPaceResetHaptic();

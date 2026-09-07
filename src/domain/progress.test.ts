@@ -23,6 +23,8 @@ describe("progress totals", () => {
     assert.equal(week.adherence, 50);
     assert.equal(week.averageLogged, 25);
     assert.equal(week.underGoal, 5);
+    assert.equal(week.savingsTotal, 0);
+    assert.ok(week.points.length >= 2);
     assert.equal(profileScore(days, "2026-09-02"), 50);
     assert.equal(daysInRange(days, "2026-09-02", "7d").length, 2);
   });
@@ -49,5 +51,15 @@ describe("progress totals", () => {
     assert.equal(next.length, 1);
     assert.equal(next[0]?.logged, 7);
     assert.equal(next[0]?.met, true);
+  });
+
+  it("tracks money saved over the selected range", () => {
+    const days = [
+      makeProgressDay("2026-09-01", 5, 10, 20, 2.5),
+      makeProgressDay("2026-09-02", 0, 9, 20, 5.71),
+    ];
+    const week = summarizeProgress(days, "2026-09-02", "7d");
+    assert.equal(week.savingsTotal, 8.21);
+    assert.equal(week.points.at(-1)?.savedCumulative, 8.21);
   });
 });

@@ -6,24 +6,28 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { applyDayCycle, syncOpenProgressDay } from "../src/data/day-cycle";
 import { getDailyLog } from "../src/data/daily-log-store";
 import { getDraft } from "../src/data/onboarding-store";
+import { currentPlan } from "../src/data/plan";
 import { getProgress } from "../src/data/progress-store";
+import { getSavings } from "../src/data/savings-store";
 import { getSettings } from "../src/data/settings-store";
 import { localDateKey } from "../src/domain/organs";
 import {
   USAGE_TREND_DISCLAIMER,
   dayHourUsageTrend,
+  hourlyUsageSeries,
   usageHourCounts,
   usageTrendLabel,
 } from "../src/domain/usage-surge";
-import { summarizePlan } from "../src/domain/plan-summary";
 import {
   PROGRESS_DISCLAIMER,
   summarizeProgress,
   type ProgressRange,
 } from "../src/domain/progress";
+import { SAVINGS_DISCLAIMER, formatCurrency } from "../src/domain/savings";
 import { minTapTarget, radius, space, type, type ColorTokens } from "../src/theme/tokens";
 import { AppText } from "../src/ui/AppText";
-import { ProgressBars } from "../src/ui/ProgressBars";
+import { ProgressLines } from "../src/ui/ProgressLines";
+import { useTheme } from "../src/ui/ThemeProvider";
 import { useThemedStyles } from "../src/ui/use-themed-styles";
 
 const RANGES: { id: ProgressRange; label: string }[] = [
@@ -33,9 +37,10 @@ const RANGES: { id: ProgressRange; label: string }[] = [
 ];
 
 export default function StatsScreen() {
+  const { color } = useTheme();
   const styles = useThemedStyles(statsStyles);
   const draft = getDraft();
-  const summary = useMemo(() => summarizePlan(draft), [draft]);
+  const summary = useMemo(() => currentPlan(), []);
   const [range, setRange] = useState<ProgressRange>("7d");
   const todayKey = localDateKey(new Date(), getSettings().timeZone);
   const totals = useMemo(() => {
@@ -46,11 +51,17 @@ export default function StatsScreen() {
   const rangeLabel =
     range === "7d" ? "last 7 days" : range === "30d" ? "last 30 days" : "last 12 weeks";
   const usageHours = usageHourCounts(getDailyLog().puffAt);
+  const hourSeries = hourlyUsageSeries(
+    getDailyLog().puffAt,
+    new Date(),
+    getSettings().timeZone,
+  );
   const usageDay = dayHourUsageTrend(
     getDailyLog().puffAt,
     new Date(),
     getSettings().timeZone,
   );
+  const pot = getSavings().pot;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -106,6 +117,10 @@ export default function StatsScreen() {
           <AppText style={styles.cardValue}>
             {`${usageHours.lastHour} this hour · ${usageHours.previousHour} last hour · today ${usageTrendLabel(usageDay.trend)}`}
           </AppText>
+          <ProgressLines
+            accessibilityLabel="Hourly puff logs today"
+            series={[{ values: hourSeries, color: color.sky }]}
+          />
           <AppText style={styles.heroCaption}>{USAGE_TREND_DISCLAIMER}</AppText>
         </View>
 
@@ -116,7 +131,32 @@ export default function StatsScreen() {
               ? "No days yet"
               : `${totals.averageLogged} avg · goal ${totals.averageGoal}`}
           </AppText>
-          <ProgressBars bars={totals.bars} />
+          <ProgressLines
+            accessibilityLabel="Daily puffs and goal over time"
+            series={[
+              { values: totals.points.map((point) => point.logged), color: color.accentMint },
+              { values: totals.points.map((point) => point.goal), color: color.inkMuted },
+            ]}
+          />
+        </View>
+
+        <View style={styles.card}>
+          <AppText style={styles.cardTitle}>Puff Savings</AppText>
+          <AppText style={styles.cardValue}>
+            {totals.counted === 0 && pot <= 0
+              ? "No savings yet"
+              : `${formatCurrency(totals.savingsTotal, draft.currencyCode)} ${rangeLabel} · ${formatCurrency(pot, draft.currencyCode)} all time`}
+          </AppText>
+          <ProgressLines
+            accessibilityLabel="Estimated money saved over time"
+            series={[
+              {
+                values: totals.points.map((point) => point.savedCumulative),
+                color: color.accent,
+              },
+            ]}
+          />
+          <AppText style={styles.heroCaption}>{SAVINGS_DISCLAIMER}</AppText>
         </View>
 
         <View style={styles.card}>

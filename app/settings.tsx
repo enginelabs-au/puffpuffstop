@@ -14,7 +14,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { readPrivacyPolicyUrl } from "../src/config/env";
 import { readSyncStatus, syncStatusLabel } from "../src/config/sync";
+import { applyCutDownChange } from "../src/data/cut-down-schedule";
 import { getDraft, resetDraft, updateDraft } from "../src/data/onboarding-store";
+import { currentPlan, planTodayKey } from "../src/data/plan";
 import {
   DELETE_LOCAL_BODY,
   DELETE_LOCAL_CONFIRM,
@@ -45,14 +47,9 @@ import {
   upcomingPaceReminders,
 } from "../src/domain/pace-reminders";
 import { goalPacing } from "../src/domain/pacing";
-import {
-  PUFF_DIAL_MAX,
-  clampDial,
-  intervalPacingStartsOpen,
-} from "../src/domain/onboarding";
+import { PERIOD_CHOICES, intervalPacingStartsOpen } from "../src/domain/onboarding";
 import { SHADE_LOG_BODY } from "../src/domain/shade-log";
-import { RotaryDial } from "../src/ui/RotaryDial";
-import { summarizePlan } from "../src/domain/plan-summary";
+import { ReduceByField } from "../src/ui/ReduceByField";
 import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
 import { PacingMeter } from "../src/ui/PacingMeter";
 import {
@@ -85,7 +82,7 @@ export default function SettingsScreen() {
   const [savings, setSavings] = useState(getSavings);
   const [exportText, setExportText] = useState<string | null>(null);
   const hostedPrivacyUrl = readPrivacyPolicyUrl();
-  const summary = useMemo(() => summarizePlan(draft), [draft]);
+  const summary = currentPlan();
   const zoneOptions = useMemo(() => timeZoneOptions(), []);
   const stake = settings.stakePerPuff ?? defaultStakePerPuff(draft);
   const nextLeftover = useMemo(() => {
@@ -158,16 +155,22 @@ export default function SettingsScreen() {
 
         <AppText style={styles.section}>Goals</AppText>
         <AppText style={styles.caption}>
-          Daily commitment is {summary.commitment} puffs. Reduce by how many
-          puffs each day? 1 to 999,999.
+          Today’s goal is {summary.commitment} puffs. Reduce by how many puffs
+          each day, week, month, or year?
         </AppText>
-        <RotaryDial
-          accessibilityLabel="Puffs to reduce by each day"
-          value={draft.cutDownPerDay}
-          onChange={(cutDownPerDay) =>
-            patchDraft({ cutDownPerDay: clampDial(cutDownPerDay, PUFF_DIAL_MAX) })
-          }
-          max={PUFF_DIAL_MAX}
+        <ReduceByField
+          count={draft.cutDownPerDay}
+          period={draft.cutDownPeriod}
+          onChange={(count, period) => {
+            setDraft(
+              applyCutDownChange(
+                count,
+                period,
+                planTodayKey(),
+                currentPlan().commitment,
+              ),
+            );
+          }}
         />
         <GoalPacingBreakdown
           averagePuffsPerDay={summary.puffsPerDay}
@@ -263,6 +266,12 @@ export default function SettingsScreen() {
             });
           }}
           style={styles.input}
+        />
+        <AppText style={styles.caption}>How often do you buy one?</AppText>
+        <ChipGroup
+          options={PERIOD_CHOICES}
+          selected={draft.deviceCostPeriod}
+          onChange={(deviceCostPeriod) => patchDraft({ deviceCostPeriod })}
         />
 
         <AppText style={styles.section}>Day</AppText>

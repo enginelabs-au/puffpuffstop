@@ -5,7 +5,9 @@ import {
   commitmentPuffs,
   daysIn,
   historyDays,
+  periodsElapsed,
   puffsPerDay,
+  steppedDailyGoal,
 } from "./estimation";
 
 describe("estimation", () => {
@@ -29,5 +31,54 @@ describe("estimation", () => {
   it("computes a non-negative daily commitment", () => {
     assert.equal(commitmentPuffs(20, 5), 15);
     assert.equal(commitmentPuffs(3, 10), 0);
+  });
+
+  it("steps the next day's goal by the chosen amount and period", () => {
+    assert.equal(periodsElapsed("2026-09-01", "2026-09-01", "days"), 0);
+    assert.equal(periodsElapsed("2026-09-01", "2026-09-02", "days"), 1);
+    assert.equal(periodsElapsed("2026-09-01", "2026-09-08", "weeks"), 1);
+    assert.equal(
+      steppedDailyGoal({
+        usual: 20,
+        reduceCount: 1,
+        reducePeriod: "days",
+        startDateKey: "2026-09-01",
+        todayKey: "2026-09-01",
+        baseGoal: 20,
+      }),
+      20,
+    );
+    assert.equal(
+      steppedDailyGoal({
+        usual: 20,
+        reduceCount: 1,
+        reducePeriod: "days",
+        startDateKey: "2026-09-01",
+        todayKey: "2026-09-02",
+        baseGoal: 20,
+      }),
+      19,
+    );
+    assert.equal(
+      steppedDailyGoal({
+        usual: 20,
+        reduceCount: 7,
+        reducePeriod: "weeks",
+        startDateKey: "2026-09-01",
+        todayKey: "2026-09-08",
+        baseGoal: 20,
+      }),
+      13,
+    );
+    assert.equal(
+      steppedDailyGoal({
+        usual: 20,
+        reduceCount: 4,
+        reducePeriod: "days",
+        startDateKey: null,
+        todayKey: "2026-09-02",
+      }),
+      16,
+    );
   });
 });

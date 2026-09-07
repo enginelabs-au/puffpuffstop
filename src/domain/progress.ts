@@ -10,6 +10,7 @@ export type ProgressDay = {
   goal: number;
   usual: number;
   met: boolean;
+  saved?: number;
 };
 
 export type ProgressState = {
@@ -28,7 +29,15 @@ export type ProgressTotals = {
   averageGoal: number;
   streak: number;
   underGoal: number;
-  bars: { key: string; logged: number; goal: number; met: boolean }[];
+  savingsTotal: number;
+  points: {
+    key: string;
+    logged: number;
+    goal: number;
+    met: boolean;
+    saved: number;
+    savedCumulative: number;
+  }[];
 };
 
 export function emptyProgress(): ProgressState {
@@ -40,6 +49,7 @@ export function makeProgressDay(
   logged: number,
   goal: number,
   usual: number,
+  saved = 0,
 ): ProgressDay {
   const safeLogged = Math.max(0, Math.round(logged));
   const safeGoal = Math.max(0, Math.round(goal));
@@ -49,6 +59,7 @@ export function makeProgressDay(
     goal: safeGoal,
     usual: Math.max(0, Math.round(usual)),
     met: safeGoal > 0 && safeLogged <= safeGoal,
+    saved: Math.max(0, Number.isFinite(saved) ? saved : 0),
   };
 }
 
@@ -117,15 +128,9 @@ export function summarizeProgress(
   const met = inRange.filter((day) => day.met).length;
   const loggedSum = inRange.reduce((sum, day) => sum + day.logged, 0);
   const goalSum = inRange.reduce((sum, day) => sum + day.goal, 0);
-  const bars =
-    range === "12w"
-      ? weekBars(inRange, todayKey)
-      : inRange.map((day) => ({
-          key: day.dateKey,
-          logged: day.logged,
-          goal: day.goal,
-          met: day.met,
-        }));
+  const rawPoints =
+    range === "12w" ? weekPoints(inRange, todayKey) : dayPoints(inRange);
+  const points = withCumulativeSavings(rawPoints);
   return {
     range,
     days: inRange,
@@ -139,16 +144,31 @@ export function summarizeProgress(
       (sum, day) => sum + Math.max(0, day.goal - day.logged),
       0,
     ),
-    bars,
+    savingsTotal: roundMoney(
+      inRange.reduce((sum, day) => sum + savedAmount(day), 0),
+    ),
+    points,
   };
 }
 
-function weekBars(
+function dayPoints(
+  days: readonly ProgressDay[],
+): Omit<ProgressTotals["points"][number], "savedCumulative">[] {
+  return days.map((day) => ({
+    key: day.dateKey,
+    logged: day.logged,
+    goal: day.goal,
+    met: day.met,
+    saved: roundMoney(savedAmount(day)),
+  }));
+}
+
+function weekPoints(
   days: readonly ProgressDay[],
   todayKey: string,
-): { key: string; logged: number; goal: number; met: boolean }[] {
+): Omit<ProgressTotals["points"][number], "savedCumulative">[] {
   const byKey = new Map(days.map((day) => [day.dateKey, day]));
-  const bars = [];
+  const points = [];
   for (let week = 11; week >= 0; week -= 1) {
     const end = addCalendarDays(todayKey, -week * 7);
     const start = addCalendarDays(end, -6);
@@ -165,14 +185,37 @@ function weekBars(
       slice.length === 0
         ? 0
         : slice.reduce((sum, day) => sum + day.goal, 0) / slice.length;
-    bars.push({
+    const saved =
+      slice.length === 0
+        ? 0
+        : slice.reduce((sum, day) => sum + savedAmount(day), 0);
+    points.push({
       key: end,
       logged: Math.round(logged * 10) / 10,
       goal: Math.round(goal * 10) / 10,
       met: slice.length > 0 && slice.every((day) => day.met),
+      saved: roundMoney(saved),
     });
   }
-  return bars;
+  return points;
+}
+
+function withCumulativeSavings(
+  points: readonly Omit<ProgressTotals["points"][number], "savedCumulative">[],
+): ProgressTotals["points"] {
+  let running = 0;
+  return points.map((point) => {
+    running += point.saved;
+    return { ...point, savedCumulative: roundMoney(running) };
+  });
+}
+
+function savedAmount(day: ProgressDay): number {
+  return Math.max(0, day.saved ?? 0);
+}
+
+function roundMoney(value: number): number {
+  return Math.round(Math.max(0, value) * 100) / 100;
 }
 
 export function profileScore(days: readonly ProgressDay[], todayKey: string): number | null {

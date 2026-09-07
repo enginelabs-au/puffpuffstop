@@ -1,3 +1,4 @@
+import { daysIn, puffsPerDay, type Period } from "./estimation";
 import { impliedPuffsPerDevice } from "./plan-summary";
 import type { OnboardingDraft } from "./onboarding";
 
@@ -15,12 +16,50 @@ export function creditAmount(savedPuffs: number, stakePerPuff: number): number {
   return savedPuffs * stakePerPuff;
 }
 
+export function dailyDeviceSpend(cost: number | null, period: Period): number {
+  if (cost === null || !(cost > 0)) return 0;
+  return cost / daysIn(period);
+}
+
+export function unusedUsageFraction(logged: number, usual: number): number {
+  if (!(usual > 0)) return 0;
+  return Math.max(0, 1 - Math.max(0, logged) / usual);
+}
+
+export function purchaseDaySavings(
+  logged: number,
+  usual: number,
+  cost: number | null,
+  period: Period,
+): number {
+  return dailyDeviceSpend(cost, period) * unusedUsageFraction(logged, usual);
+}
+
 export function defaultStakePerPuff(draft: OnboardingDraft): number {
   const perDevice = impliedPuffsPerDevice(draft);
   if (perDevice && perDevice > 0 && draft.deviceCost && draft.deviceCost > 0) {
     return draft.deviceCost / perDevice;
   }
   return DEFAULT_STAKE;
+}
+
+export function estimateDaySavings(
+  draft: OnboardingDraft,
+  logged: number,
+  commitment: number,
+  stakePerPuff: number,
+): number {
+  const usual = puffsPerDay(draft.frequencyCount, draft.frequencyPeriod);
+  const purchase = purchaseDaySavings(
+    logged,
+    usual,
+    draft.deviceCost,
+    draft.deviceCostPeriod,
+  );
+  if (draft.deviceCost !== null && draft.deviceCost > 0 && usual > 0) {
+    return purchase;
+  }
+  return creditAmount(puffsSaved(logged, commitment), stakePerPuff);
 }
 
 export function formatMoney(value: number): string {

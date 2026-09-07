@@ -68,6 +68,13 @@ export const DIAL_MAX = 999;
 export const PUFF_DIAL_MAX = 999_999;
 export const DEFAULT_CURRENCY = "AUD";
 
+export const PERIOD_CHOICES: { value: Period; label: string }[] = [
+  { value: "days", label: "day" },
+  { value: "weeks", label: "week" },
+  { value: "months", label: "month" },
+  { value: "years", label: "year" },
+];
+
 export type OnboardingDraft = {
   nickname: string;
   durationCount: number;
@@ -84,6 +91,7 @@ export type OnboardingDraft = {
   deviceMl: number | null;
   nicotineLabel: string;
   deviceCost: number | null;
+  deviceCostPeriod: Period;
   currencyCode: string;
   triggers: Trigger[];
   strictness: Strictness | null;
@@ -93,6 +101,9 @@ export type OnboardingDraft = {
   quitOtherPeriod: Period;
   quitExactDate: string;
   cutDownPerDay: number;
+  cutDownPeriod: Period;
+  cutDownStartDate: string | null;
+  cutDownBase: number | null;
   intervalPacing: boolean | null;
   intervalPacingReminders: boolean | null;
 };
@@ -114,6 +125,7 @@ export function emptyDraft(): OnboardingDraft {
     deviceMl: null,
     nicotineLabel: "",
     deviceCost: null,
+    deviceCostPeriod: "weeks",
     currencyCode: DEFAULT_CURRENCY,
     triggers: [],
     strictness: null,
@@ -123,6 +135,9 @@ export function emptyDraft(): OnboardingDraft {
     quitOtherPeriod: "weeks",
     quitExactDate: "",
     cutDownPerDay: 0,
+    cutDownPeriod: "days",
+    cutDownStartDate: null,
+    cutDownBase: null,
     intervalPacing: null,
     intervalPacingReminders: null,
   };

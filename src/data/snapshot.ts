@@ -7,6 +7,7 @@ import {
   type QuitWindow,
   type Trigger,
 } from "../domain/onboarding";
+import { isPeriod } from "../domain/estimation";
 import { resolveTheme } from "../theme/tokens";
 import { deviceTimeZone, resolveTimeZone } from "../domain/timezones";
 import { isCurrencyCode } from "./currencies";
@@ -93,6 +94,9 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
     deviceMl: asNullNumber(value.deviceMl),
     nicotineLabel: asString(value.nicotineLabel, ""),
     deviceCost: asNullNumber(value.deviceCost),
+    deviceCostPeriod: isPeriod(value.deviceCostPeriod)
+      ? value.deviceCostPeriod
+      : base.deviceCostPeriod,
     currencyCode: isCurrencyCode(asString(value.currencyCode, DEFAULT_CURRENCY))
       ? asString(value.currencyCode, DEFAULT_CURRENCY)
       : DEFAULT_CURRENCY,
@@ -123,6 +127,9 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
         : base.quitOtherPeriod,
     quitExactDate: asString(value.quitExactDate, ""),
     cutDownPerDay: asFiniteNumber(value.cutDownPerDay, 0),
+    cutDownPeriod: isPeriod(value.cutDownPeriod) ? value.cutDownPeriod : base.cutDownPeriod,
+    cutDownStartDate: asDateKey(value.cutDownStartDate),
+    cutDownBase: asNullNumber(value.cutDownBase),
     intervalPacing: parseIntervalPacing(
       value.intervalPacing,
       asFiniteNumber(value.durationCount, base.durationCount),
@@ -190,7 +197,13 @@ function parseSettings(raw: unknown): SettingsState | null {
       "",
     ) || null,
     leftoverNoticeRepair: value.leftoverNoticeRepair === true,
+    cutDownCoachKey: asString(value.cutDownCoachKey ?? "", "") || null,
   };
+}
+
+function asDateKey(value: unknown): string | null {
+  const text = asString(value ?? "", "");
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
 }
 
 function parseSavings(raw: unknown): SavingsState | null {

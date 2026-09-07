@@ -5,7 +5,10 @@ import {
   type ProgressDay,
   type ProgressState,
 } from "../domain/progress";
+import { defaultStakePerPuff, estimateDaySavings } from "../domain/savings";
 import { persistNow } from "./persist-hook";
+import { getDraft } from "./onboarding-store";
+import { getSettings } from "./settings-store";
 
 let state: ProgressState = emptyProgress();
 
@@ -22,7 +25,7 @@ export function replaceProgress(next: ProgressState): ProgressState {
     lastGoal: Math.max(0, next.lastGoal),
     lastUsual: Math.max(0, next.lastUsual),
     days: next.days.map((day) =>
-      makeProgressDay(day.dateKey, day.logged, day.goal, day.usual),
+      makeProgressDay(day.dateKey, day.logged, day.goal, day.usual, day.saved),
     ),
   };
   return getProgress();
@@ -35,7 +38,13 @@ export function resetProgress(): ProgressState {
 }
 
 export function recordProgressDay(day: ProgressDay): ProgressState {
-  const next = makeProgressDay(day.dateKey, day.logged, day.goal, day.usual);
+  const next = makeProgressDay(
+    day.dateKey,
+    day.logged,
+    day.goal,
+    day.usual,
+    day.saved ?? daySavings(day.logged, day.goal),
+  );
   state = {
     lastGoal: next.goal,
     lastUsual: next.usual,
@@ -58,7 +67,11 @@ export function parseProgressState(raw: unknown): ProgressState {
         const logged = typeof day.logged === "number" && Number.isFinite(day.logged) ? day.logged : 0;
         const goal = typeof day.goal === "number" && Number.isFinite(day.goal) ? day.goal : 0;
         const usual = typeof day.usual === "number" && Number.isFinite(day.usual) ? day.usual : 0;
-        return [makeProgressDay(day.dateKey, logged, goal, usual)];
+        const saved =
+          typeof day.saved === "number" && Number.isFinite(day.saved)
+            ? day.saved
+            : daySavings(logged, goal);
+        return [makeProgressDay(day.dateKey, logged, goal, usual, saved)];
       })
     : [];
   const last = days.at(-1);
@@ -73,4 +86,10 @@ export function parseProgressState(raw: unknown): ProgressState {
         ? Math.max(0, value.lastUsual)
         : (last?.usual ?? 0),
   };
+}
+
+function daySavings(logged: number, goal: number): number {
+  const draft = getDraft();
+  const stake = getSettings().stakePerPuff ?? defaultStakePerPuff(draft);
+  return estimateDaySavings(draft, logged, goal, stake);
 }

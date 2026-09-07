@@ -4,10 +4,10 @@ import { describe, it } from "node:test";
 import {
   BASELINE_MAX,
   BASELINE_MIN,
-  GOAL_BONUS,
-  HOUR_EASE_RECOVERY,
   LIFETIME_YEARS,
+  ORGAN_RECOVERY_IN_HORIZON,
   PUFF_DAMAGE,
+  RECOVERY_HORIZON_DAYS,
   SCORE_MIN,
   clampScore,
   coreBaseline,
@@ -18,6 +18,8 @@ import {
   localDateKey,
   organBaseline,
   organBaselines,
+  organDayRecovery,
+  organHourEase,
   organScore,
   organScores,
   overCapPuffs,
@@ -73,17 +75,26 @@ describe("organs", () => {
     assert.equal(organScore(70, 1, 10, 0), clampScore(70 - PUFF_DAMAGE));
   });
 
-  it("heals more for a met goal than a typical day's logs", () => {
-    const commitment = 20;
-    const afterLogs = organScore(90, commitment, commitment, 0);
-    const afterGoal = organScore(90, 0, commitment, 1);
-    assert.ok(dayRecovery(commitment) > commitment * PUFF_DAMAGE);
-    assert.ok(afterGoal - 90 > 90 - afterLogs);
-    assert.equal(dayRecovery(commitment), commitment * PUFF_DAMAGE + GOAL_BONUS);
+  it("heals about one to two percent over six abstinent months", () => {
+    const sixMonths = RECOVERY_HORIZON_DAYS;
+    const lungs = organScore(94, 0, 20, sixMonths, 0, "lungs");
+    const heart = organScore(94, 0, 20, sixMonths, 0, "heart");
+    assert.ok(Math.abs(lungs - 94 - ORGAN_RECOVERY_IN_HORIZON.lungs) < 1e-9);
+    assert.ok(heart - 94 > lungs - 94);
+    assert.ok(lungs - 94 <= 2);
+    assert.ok(heart - 94 <= 2);
+    assert.ok(dayRecovery() < 0.02);
+    assert.ok(organDayRecovery("lungs") * sixMonths < 1.1);
     assert.equal(isOnTrack(20, 20), true);
     assert.equal(isOnTrack(21, 20), false);
     assert.equal(isGoalCelebration(1, 0, 20), true);
     assert.equal(isGoalCelebration(0, 0, 20), false);
+  });
+
+  it("does not jump from the mid-90s to 100 after one quiet day", () => {
+    const afterOneDay = organScore(94.5, 0, 20, 1, 0, "lungs");
+    assert.ok(afterOneDay < 95);
+    assert.ok(afterOneDay - 94.5 < 0.02);
   });
 
   it("never hits 0 from ordinary logging", () => {
@@ -92,12 +103,12 @@ describe("organs", () => {
   });
 
   it("heals a little when an hour eases, less than a full goal day", () => {
-    const idle = organScore(90, 2, 20, 0, 0);
-    const eased = organScore(90, 2, 20, 0, 1);
-    const goalDay = organScore(90, 2, 20, 1, 0);
+    const idle = organScore(90, 2, 20, 0, 0, "lungs");
+    const eased = organScore(90, 2, 20, 0, 1, "lungs");
+    const goalDay = organScore(90, 2, 20, 1, 0, "lungs");
     assert.ok(eased > idle);
     assert.ok(goalDay > eased);
-    assert.ok(Math.abs(eased - idle - HOUR_EASE_RECOVERY) < 1e-9);
+    assert.ok(Math.abs(eased - idle - organHourEase("lungs")) < 1e-9);
   });
 
   it("recovers only via recovery ticks, not from being over cap", () => {

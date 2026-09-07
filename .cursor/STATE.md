@@ -28,7 +28,7 @@
 ## Active Role and Gate
 
 - Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm test` 128/128; `npm run typecheck` 0; `npm run lint` 0. Release build 35 installed on Free Malware.
+- Last integrated validation: `npm test` 136/136; `npm run typecheck` 0; `npm run lint` 0. Release build 37 installed on Free Malware.
 
 ## Predecessor Handoff
 
@@ -52,7 +52,7 @@
 
 ## Active Items
 
-- Owner asked to commit and push hourly ease, usage metric, reduce-by, and shade log. Do not publish the app.
+- Owner asked to commit and push as Cursor Agent. Do not publish the app.
 
 ## Files in Active Use
 
@@ -64,9 +64,10 @@
 - `/TOOLS.md`
 - `/memory/MEMORY.md`
 - `/memory/memories/git-identity.md`
-- `/memory/memories/2026-09-04-continuation.md`
+- `/memory/memories/2026-09-07-continuation.md`
 - `docs/plans/phase_12_health-wearables_plan.md`
 - `src/domain/pacing.ts`, `src/domain/organs.ts`, `src/ui/PacingMeter.tsx`, `src/ui/OrganFold.tsx`, `app/onboarding/[step].tsx`, `app/home.tsx`
+- `app/stats.tsx`, `src/ui/ProgressLines.tsx`, `src/domain/progress.ts`, `src/data/progress-store.ts`
 - `app/`, `src/`, `plugins/quick-log/`
 
 ## Open Blockers
@@ -89,8 +90,11 @@
 - Onboarding asks Yes/No for hourly interval pacing after cut-down. Yes opens the Home pace fold on first use; No starts it closed. Missing field on an existing plan defaults to Yes/open. Organs use the same fold, open by default; closed header shows the average of all five organ scores.
 - Leftover lock-screen notices default on with hourly pacing. A one-time repair turns them back on if an earlier opt-in default had stored them off. Scheduling uses iOS time-interval triggers and time-sensitive interruption. The 2s voice poll no longer cancels imminent notices. Settings shows the next leftover time. Log puff action remains. Onboarding still asks Yes/No.
 - Home shows a one-shot amber banner when timed logs in the last 60 minutes jump vs the hour before (at least 3, +2, and double if the prior hour was not empty). Copy: “Your usage has increased in the last hour.” Tap or 8s dismiss; once per clock hour.
-- Organ recovery also fires intra-day: if this rolling hour has fewer logs than the hour before, organs show recovering and one `easeTicks` is awarded per clock hour (smaller than a full goal day). Midnight under-goal ticks still apply. Profile → Hourly usage shows this hour / last hour and whether today’s clock hours are generally higher, easing, or steady.
-- Reduce-by is the cut-down step after quit-by: 1–999,999 puffs/day. Same control in Settings → Goals.
+- Organ recovery is months-to-years, not a one-day reset. About 1.5 points across organs after 180 under-goal days (lungs 1.0, heart 1.6, brain 1.4, liver 1.7, mouth 1.8), following Surgeon General / IPCRG cessation clocks. Hourly ease is 1/24 of that day’s organ rate. Wellness estimate, not medical.
+- Reduce-by is a count plus day/week/month/year. Today’s goal stays; the next period drops by that amount. Existing plans keep today’s flat goal, then step from there. Settings no longer mentions 1–999,999.
+- After 3 consecutive missed days, Home offers a “doing great / change reduce-by” coach.
+- Savings use device cost ÷ buy period when a cost is set. $40/week and no logs credits 40/7. Partial logs credit the unused fraction of usual. No cost still uses the old per-puff fallback.
+- Score tracks estimated savings as its own card (range total + all-time pot) with a cumulative line. Hourly usage, daily puffs/goal, and savings are line graphs, not bars. Progress days persist `saved`; older days without it are reconstructed from logs and goal on load.
 - Notification Center shade card (`puffpuffstop-shade`) offers Log puff and Undo when notification permission is granted. iOS: long-press / swipe the card (lock-screen actions depend on iOS settings). Android: action buttons on the shade. Not a Control Center widget.
 
 ## Current Working State
@@ -102,7 +106,7 @@
 - Phase 12: onboarding + Settings connect Health/Fitbit. Fitbit callback route is `app/fitbit.tsx`.
 - 2026-09-02: Release build 10 installed on Free Malware (`0.0.1` / `10`). JS bundle is embedded. Unplug is safe.
 - Goal pacing stacked on Home. Unused hourly puffs raise this hour and split into 30/15. Watch banner only if Health is on and samples are arriving.
-- Release build 35: hourly ease recovery, profile usage, reduce-by, shade log/undo.
+- Release build 37: profile savings-over-time tracker; all score charts are line graphs.
 
 ## Next Actions
 
@@ -112,4 +116,4 @@
 
 ## Last Updated
 
-- 2026-09-04 — Hourly ease recovery, profile usage, reduce-by, shade log.
+- 2026-09-07 — Profile savings line plus line graphs for hourly and daily tracking.
