@@ -5,6 +5,7 @@ import {
   USAGE_HOUR_MS,
   USAGE_SURGE_MESSAGE,
   dayHourUsageTrend,
+  hourlyUsageSeries,
   detectUsageEase,
   detectUsageSurge,
   hourUsageTrend,
@@ -78,5 +79,8 @@ describe("usage surge", () => {
     const day = dayHourUsageTrend(puffAt, now, "UTC");
     assert.equal(day.trend, "higher");
     assert.ok(day.upHours > day.downHours);
+    const hours = hourlyUsageSeries(puffAt, now, "UTC");
+    assert.equal(hours.length, 4);
+    assert.equal(hours[2], 3);
   });
 });

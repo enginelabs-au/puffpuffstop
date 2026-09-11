@@ -14,7 +14,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { readPrivacyPolicyUrl } from "../src/config/env";
 import { readSyncStatus, syncStatusLabel } from "../src/config/sync";
+import {
+  applyCutDownChange,
+  applyGoalChange,
+  applyUsualChange,
+} from "../src/data/cut-down-schedule";
 import { getDraft, resetDraft, updateDraft } from "../src/data/onboarding-store";
+import { currentPlan, planTodayKey } from "../src/data/plan";
 import {
   DELETE_LOCAL_BODY,
   DELETE_LOCAL_CONFIRM,
@@ -46,14 +52,15 @@ import {
 } from "../src/domain/pace-reminders";
 import { goalPacing } from "../src/domain/pacing";
 import {
-  PUFF_DIAL_MAX,
-  clampDial,
+  PERIOD_CHOICES,
+  formatAuDateInput,
   intervalPacingStartsOpen,
+  type QuitWindow,
 } from "../src/domain/onboarding";
 import { SHADE_LOG_BODY } from "../src/domain/shade-log";
 import { GoalField } from "../src/ui/GoalField";
+import { ReduceByField } from "../src/ui/ReduceByField";
 import { RotaryDial } from "../src/ui/RotaryDial";
-import { summarizePlan } from "../src/domain/plan-summary";
 import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
 import { PacingMeter } from "../src/ui/PacingMeter";
 import {
@@ -78,6 +85,15 @@ import { SelectField } from "../src/ui/SelectField";
 import { useTheme } from "../src/ui/ThemeProvider";
 import { useThemedStyles } from "../src/ui/use-themed-styles";
 
+const QUIT_OPTIONS: { value: QuitWindow; label: string }[] = [
+  { value: "few-days", label: "A few days" },
+  { value: "few-weeks", label: "A few weeks" },
+  { value: "few-months", label: "A few months" },
+  { value: "exact-date", label: "Exact date" },
+  { value: "other", label: "Other" },
+  { value: "unsure", label: "I'm not sure" },
+];
+
 export default function SettingsScreen() {
   const { theme, color, setTheme } = useTheme();
   const styles = useThemedStyles(settingsStyles);
@@ -86,7 +102,7 @@ export default function SettingsScreen() {
   const [savings, setSavings] = useState(getSavings);
   const [exportText, setExportText] = useState<string | null>(null);
   const hostedPrivacyUrl = readPrivacyPolicyUrl();
-  const summary = useMemo(() => summarizePlan(draft), [draft]);
+  const summary = currentPlan();
   const zoneOptions = useMemo(() => timeZoneOptions(), []);
   const stake = settings.stakePerPuff ?? defaultStakePerPuff(draft);
   const nextLeftover = useMemo(() => {
@@ -153,43 +169,90 @@ export default function SettingsScreen() {
           <AppText style={styles.buttonLabel}>Redo setup</AppText>
         </Pressable>
         <AppText style={styles.caption}>
-          Walk through onboarding again with your answers already filled in.
-          Logs, streak, settings, and savings stay unless you delete local data.
+          Walk through onboarding again to change device, brand, or goals.
+          Today’s log and savings stay.
         </AppText>
 
         <AppText style={styles.section}>Goals</AppText>
-        <AppText style={styles.caption}>
-          Main goal — the total you want to get to.
-        </AppText>
+        <AppText style={styles.caption}>How many puffs do you use?</AppText>
         <GoalField
-          count={draft.mainGoalCount}
-          period={draft.mainGoalPeriod}
+          count={draft.frequencyCount}
+          period={draft.frequencyPeriod}
           onChange={(count, period) => {
-            patchDraft({ mainGoalCount: count, mainGoalPeriod: period });
+            setDraft(applyUsualChange(count, period, planTodayKey()));
           }}
         />
         <AppText style={styles.caption}>
-          Period goal — how many puffs each day, week, month, or year.
+          How many puffs do you want to reduce by, and over what period?
+        </AppText>
+        <ReduceByField
+          count={draft.cutDownPerDay}
+          period={draft.cutDownPeriod}
+          onChange={(count, period) => {
+            setDraft(
+              applyCutDownChange(
+                count,
+                period,
+                planTodayKey(),
+                currentPlan().commitment,
+              ),
+            );
+          }}
+        />
+        <AppText style={styles.caption}>
+          What is your daily puff goal? This starts today. Today’s cap is{" "}
+          {summary.commitment} puffs.
         </AppText>
         <GoalField
           count={draft.goalCount}
           period={draft.goalPeriod}
           onChange={(count, period) => {
-            patchDraft({ goalCount: count, goalPeriod: period });
+            setDraft(applyGoalChange(count, period, planTodayKey()));
           }}
         />
         <AppText style={styles.caption}>
-          Today’s cap is {summary.commitment} puffs. Reduce by how many puffs
-          each day? 1 to 999,999.
+          By when do you want to reach zero puffs?
         </AppText>
-        <RotaryDial
-          accessibilityLabel="Puffs to reduce by each day"
-          value={draft.cutDownPerDay}
-          onChange={(cutDownPerDay) =>
-            patchDraft({ cutDownPerDay: clampDial(cutDownPerDay, PUFF_DIAL_MAX) })
-          }
-          max={PUFF_DIAL_MAX}
+        <SelectField
+          label="Reach zero by"
+          value={draft.quitWindow}
+          options={QUIT_OPTIONS}
+          onChange={(quitWindow) => patchDraft({ quitWindow })}
         />
+        {draft.quitWindow === "exact-date" ? (
+          <>
+            <TextInput
+              {...scaledInput}
+              accessibilityLabel="Exact stop date, day month year"
+              keyboardType="number-pad"
+              placeholder="DD-MM-YYYY"
+              placeholderTextColor={color.inkMuted}
+              maxLength={10}
+              value={draft.quitExactDate}
+              onChangeText={(text) =>
+                patchDraft({ quitExactDate: formatAuDateInput(text) })
+              }
+              style={styles.input}
+            />
+            <AppText style={styles.caption}>
+              Day, month, year. Dashes fill in as you type.
+            </AppText>
+          </>
+        ) : null}
+        {draft.quitWindow === "other" ? (
+          <>
+            <RotaryDial
+              accessibilityLabel="Custom stop number"
+              value={draft.quitOtherCount}
+              onChange={(quitOtherCount) => patchDraft({ quitOtherCount })}
+            />
+            <ChipGroup
+              options={PERIOD_CHOICES}
+              selected={draft.quitOtherPeriod}
+              onChange={(quitOtherPeriod) => patchDraft({ quitOtherPeriod })}
+            />
+          </>
+        ) : null}
         <GoalPacingBreakdown
           averagePuffsPerDay={summary.puffsPerDay}
           goalPuffsPerDay={summary.commitment}
@@ -284,6 +347,12 @@ export default function SettingsScreen() {
             });
           }}
           style={styles.input}
+        />
+        <AppText style={styles.caption}>How often do you buy one?</AppText>
+        <ChipGroup
+          options={PERIOD_CHOICES}
+          selected={draft.deviceCostPeriod}
+          onChange={(deviceCostPeriod) => patchDraft({ deviceCostPeriod })}
         />
 
         <AppText style={styles.section}>Day</AppText>

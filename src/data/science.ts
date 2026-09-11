@@ -74,6 +74,17 @@ export const SCIENCE_SOURCES: readonly ScienceSource[] = [
     url: "https://www.ahajournals.org/doi/10.1161/CIR.0000000000001160",
   },
   {
+    id: "sg-2020-cessation",
+    title: "Smoking Cessation: A Report of the Surgeon General",
+    authors: "U.S. Department of Health and Human Services",
+    year: 2020,
+    venue: "Surgeon General report",
+    organs: ["lungs", "heart", "mouth"],
+    summary:
+      "Cessation benefits accrue over months and years: circulation and lung function improve across weeks to 9 months, and coronary risk falls over 1–15 years. In-app heal rates follow that longer clock.",
+    url: "https://www.hhs.gov/sites/default/files/2020-cessation-sgr-full-report.pdf",
+  },
+  {
     id: "oral-2023-hygiene",
     title: "Electronic cigarettes and oral health: a narrative review",
     authors: "Abbott AJ, et al.",

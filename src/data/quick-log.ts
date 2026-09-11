@@ -5,14 +5,13 @@ import {
   type QuickLogOutcome,
 } from "../domain/quick-log";
 import { adjustPuffs, clearTodayPuffs, getDailyLog } from "./daily-log-store";
-import { getDraft } from "./onboarding-store";
 import { hydrateFromDriver } from "./persist";
-import { summarizePlan } from "../domain/plan-summary";
+import { currentPlan } from "./plan";
 
 const listeners = new Set<() => void>();
 
 function commitment(): number {
-  return summarizePlan(getDraft()).commitment;
+  return currentPlan().commitment;
 }
 
 function notify(): void {

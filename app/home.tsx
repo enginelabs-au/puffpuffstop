@@ -12,9 +12,8 @@ import {
 } from "../src/data/daily-log-store";
 import { applyDayCycle, syncOpenProgressDay } from "../src/data/day-cycle";
 import { getProgress } from "../src/data/progress-store";
-import { getDraft } from "../src/data/onboarding-store";
 import { syncPaceReminders } from "../src/data/pace-reminders";
-import { getSettings } from "../src/data/settings-store";
+import { getSettings, updateSettings } from "../src/data/settings-store";
 import { getSavings } from "../src/data/savings-store";
 import { canShowHome, intervalPacingStartsOpen } from "../src/domain/onboarding";
 import {
@@ -30,7 +29,11 @@ import {
   detectUsageEase,
   detectUsageSurge,
 } from "../src/domain/usage-surge";
-import { PLAN_DISCLAIMER, summarizePlan } from "../src/domain/plan-summary";
+import { PLAN_DISCLAIMER } from "../src/domain/plan-summary";
+import {
+  shouldPromptEasierCutDown,
+  struggleWindowKey,
+} from "../src/domain/cut-down-coach";
 import { profileScore } from "../src/domain/progress";
 import { formatCurrency } from "../src/domain/savings";
 import { minTapTarget, radius, space, type, type ColorTokens } from "../src/theme/tokens";
@@ -53,15 +56,16 @@ import { AppText } from "../src/ui/AppText";
 import { OrganFold } from "../src/ui/OrganFold";
 import { PacingMeter } from "../src/ui/PacingMeter";
 import { ProfileScoreButton } from "../src/ui/ProfileScoreButton";
+import { CutDownCoachBanner } from "../src/ui/CutDownCoachBanner";
 import { UsageSurgeBanner } from "../src/ui/UsageSurgeBanner";
 import { WatchShiftBanner } from "../src/ui/WatchShiftBanner";
+import { useCurrentPlan } from "../src/ui/use-current-plan";
 
 const UNDO_MS = 5000;
 
 export default function HomeScreen() {
   const styles = useThemedStyles(homeStyles);
-  const draft = getDraft();
-  const summary = useMemo(() => summarizePlan(draft), [draft]);
+  const { draft, summary } = useCurrentPlan();
   const baselines = useMemo(
     () => organBaselines(summary.historyDays, summary.puffsPerDay),
     [summary.historyDays, summary.puffsPerDay],
@@ -82,6 +86,7 @@ export default function HomeScreen() {
   const [pot, setPot] = useState(boot.pot);
   const [health, setHealth] = useState(getHealth);
   const [dismissedSurgeKey, setDismissedSurgeKey] = useState<string | null>(null);
+  const [coachKey, setCoachKey] = useState(getSettings().cutDownCoachKey);
 
   useEffect(() => {
     const result = applyDayCycle(summary.commitment);
@@ -183,7 +188,15 @@ export default function HomeScreen() {
   const watchFeedLive = isWatchFeedLive(health);
   const watchReadings = watchFeedLive ? visibleHealthRows(health.summary) : [];
   const surge = detectUsageSurge(log.puffAt);
+  const todayKey = localDateKey(new Date(), getSettings().timeZone);
   const showSurge = surge.active && dismissedSurgeKey !== surge.key;
+  const coachWindow = struggleWindowKey(getProgress().days, todayKey);
+  const showCoach = shouldPromptEasierCutDown(
+    getProgress().days,
+    todayKey,
+    draft.cutDownPerDay,
+    coachKey,
+  );
 
   function onLog() {
     setLog(logPuff(summary.commitment));
@@ -232,6 +245,21 @@ export default function HomeScreen() {
         {showSurge ? (
           <UsageSurgeBanner onDismiss={() => setDismissedSurgeKey(surge.key)} />
         ) : null}
+        {showCoach ? (
+          <CutDownCoachBanner
+            onKeep={() => {
+              const next = coachWindow;
+              setCoachKey(next);
+              updateSettings({ cutDownCoachKey: next });
+            }}
+            onChange={() => {
+              const next = coachWindow;
+              setCoachKey(next);
+              updateSettings({ cutDownCoachKey: next });
+              router.push("/settings");
+            }}
+          />
+        ) : null}
         {watchFeedLive || healthEffectRows.length > 0 ? (
           <WatchShiftBanner
             rows={healthEffectRows}
@@ -247,8 +275,8 @@ export default function HomeScreen() {
         {celebrating || justSucceeded ? (
           <AppText style={styles.success} accessibilityLiveRegion="polite">
             {justSucceeded
-              ? "You stayed under yesterday. Your organs are cheering."
-              : "Goal streak on. Your organs are perking up."}
+              ? "You stayed under yesterday. Recovery still takes months."
+              : "Goal streak on. Healing is slow, and that is the point."}
           </AppText>
         ) : ease.active ? (
           <AppText style={styles.success} accessibilityLiveRegion="polite">

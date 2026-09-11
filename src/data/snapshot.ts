@@ -1,4 +1,3 @@
-import type { Period } from "../domain/estimation";
 import {
   DEFAULT_CURRENCY,
   QUIT_WINDOWS,
@@ -8,6 +7,7 @@ import {
   type QuitWindow,
   type Trigger,
 } from "../domain/onboarding";
+import { isPeriod } from "../domain/estimation";
 import { resolveTheme } from "../theme/tokens";
 import { deviceTimeZone, resolveTimeZone } from "../domain/timezones";
 import { isCurrencyCode } from "./currencies";
@@ -46,28 +46,6 @@ function asNullNumber(value: unknown): number | null {
   return null;
 }
 
-function isPeriod(value: unknown): value is Period {
-  return (
-    value === "days" ||
-    value === "weeks" ||
-    value === "months" ||
-    value === "years"
-  );
-}
-
-function inferredMainGoal(
-  value: Record<string, unknown>,
-): Pick<OnboardingDraft, "mainGoalCount" | "mainGoalPeriod"> {
-  const stored = asFiniteNumber(value.mainGoalCount, 0);
-  if (stored > 0) {
-    return {
-      mainGoalCount: stored,
-      mainGoalPeriod: isPeriod(value.mainGoalPeriod) ? value.mainGoalPeriod : "days",
-    };
-  }
-  return { mainGoalCount: 0, mainGoalPeriod: "days" };
-}
-
 function inferredGoal(
   value: Record<string, unknown>,
   base: OnboardingDraft,
@@ -79,12 +57,7 @@ function inferredGoal(
       goalPeriod: isPeriod(value.goalPeriod) ? value.goalPeriod : "days",
     };
   }
-  return {
-    goalCount: asFiniteNumber(value.frequencyCount, base.frequencyCount),
-    goalPeriod: isPeriod(value.frequencyPeriod)
-      ? value.frequencyPeriod
-      : base.frequencyPeriod,
-  };
+  return { goalCount: 0, goalPeriod: base.goalPeriod };
 }
 
 function parseDraft(raw: unknown): OnboardingDraft | null {
@@ -135,6 +108,9 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
     deviceMl: asNullNumber(value.deviceMl),
     nicotineLabel: asString(value.nicotineLabel, ""),
     deviceCost: asNullNumber(value.deviceCost),
+    deviceCostPeriod: isPeriod(value.deviceCostPeriod)
+      ? value.deviceCostPeriod
+      : base.deviceCostPeriod,
     currencyCode: isCurrencyCode(asString(value.currencyCode, DEFAULT_CURRENCY))
       ? asString(value.currencyCode, DEFAULT_CURRENCY)
       : DEFAULT_CURRENCY,
@@ -164,9 +140,11 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
         ? value.quitOtherPeriod
         : base.quitOtherPeriod,
     quitExactDate: asString(value.quitExactDate, ""),
-    ...inferredMainGoal(value),
     ...inferredGoal(value, base),
     cutDownPerDay: asFiniteNumber(value.cutDownPerDay, 0),
+    cutDownPeriod: isPeriod(value.cutDownPeriod) ? value.cutDownPeriod : base.cutDownPeriod,
+    cutDownStartDate: asDateKey(value.cutDownStartDate),
+    cutDownBase: asNullNumber(value.cutDownBase),
     intervalPacing: parseIntervalPacing(
       value.intervalPacing,
       asFiniteNumber(value.durationCount, base.durationCount),
@@ -233,7 +211,13 @@ function parseSettings(raw: unknown): SettingsState | null {
       "",
     ) || null,
     leftoverNoticeRepair: value.leftoverNoticeRepair === true,
+    cutDownCoachKey: asString(value.cutDownCoachKey ?? "", "") || null,
   };
+}
+
+function asDateKey(value: unknown): string | null {
+  const text = asString(value ?? "", "");
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
 }
 
 function parseSavings(raw: unknown): SavingsState | null {

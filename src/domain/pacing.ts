@@ -51,7 +51,7 @@ export function goalPacing(
 ): GoalPacing {
   const average = Math.max(0, averagePuffsPerDay);
   const goal = Math.max(0, goalPuffsPerDay);
-  const applies = goal > 0 && goal < average;
+  const applies = goal > 0;
   const perHour = applies ? ceilPuffs(goal / PACING_HOURS_PER_DAY) : 0;
   return {
     averagePuffsPerDay: average,

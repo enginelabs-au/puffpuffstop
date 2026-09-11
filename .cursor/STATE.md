@@ -28,7 +28,7 @@
 ## Active Role and Gate
 
 - Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm test` 133/133; `npm run typecheck` 0; `npm run lint` 0. Pairing `c6a514b` with main/period goals and persist guard. Installing Release 42 then commit/push as Cursor Agent.
+- Last integrated validation: `npm test` 142/142; `npm run typecheck` 0; `npm run lint` 0. Release 49: Home uses the Settings daily goal immediately (repairs a stale usual-based cap).
 
 ## Predecessor Handoff
 
@@ -85,7 +85,7 @@
 - In-app age-gate screen removed; 16+ remains the store rating.
 - Siri App Intents can write the snapshot with the app closed. Gemini has no public equivalent; Android uses a headless shortcut / Routine.
 - Goal pacing: bases are ceil(goal/24), ceil(hour/2), ceil(hour/4). Unused leftover still rolls (lookback 3). Overage is a debt: 3 of 2 last hour → 0/1 next; more overage can hold 0/0 until baseline returns. Extra puffs never become credit. Yellow = slot used up; red = this slot or the daily goal is exceeded. Numerator is only logs in the current window. 15/30 cannot exceed the hour still open. Cap is remaining daily goal, including untimed logs. No midnight bank of every empty hour. Home uses last-commit GoalResetRow (`logged/goal` + countdown). No invented “Puff credits” label. Hourly leftover still banks into the next window when the period goal is below usual use. Extra puffs are still debt, not extra credit.
-- Goals are two dials: main/total (`mainGoalCount` + period) is the destination; period goal (`goalCount` + day/week/month/year) is the current cap. Reduce-by steps the period goal and cannot go below the main goal. Onboarding order after quit-window: main-goal → goal → cut-down.
+- Goal flow is four questions (onboarding after motivation, and Settings → Goals): usual puffs, reduce-by over a period, daily puff goal, then quit-by zero. The daily goal is today’s cap from the moment they set it (`goalCount` as puffs per day), not a future number to reach. Reduce-by then steps later days down from that cap toward zero. `goalPacing.applies` is `goal > 0`.
 - Home Pace fold: one info bubble on Pacing Intervals opens `PACING_LENIENT_TIP`. Interval chips are progress rings (`used/allowance`) with `Next window in: MM:SS`. Mint / amber / red still mean open / used up / over.
 - Pace timers vibrate once when a 15/30/60 window lapses and that window is green (yellow→green or green→green). No vibrate if the new window is yellow or if a log only flips the color.
 - Onboarding asks Yes/No for hourly interval pacing after cut-down. Yes opens the Home pace fold on first use; No starts it closed. Missing field on an existing plan defaults to Yes/open. Organs use the same fold, open by default; closed header shows the average of all five organ scores.
@@ -96,7 +96,7 @@
 - After 3 consecutive missed days, Home offers a “doing great / change reduce-by” coach.
 - Savings use device cost ÷ buy period when a cost is set. $40/week and no logs credits 40/7. Partial logs credit the unused fraction of usual. No cost still uses the old per-puff fallback.
 - Score tracks estimated savings as its own card (range total + all-time pot) with a cumulative line. Hourly usage, daily puffs/goal, and savings are line graphs, not bars. Progress days persist `saved`; older days without it are reconstructed from logs and goal on load.
-- Onboarding and Settings ask an explicit puff goal (dial + period) after usual use and before reduce-by. Today’s cap is that goal; reduce-by then steps it.
+- Onboarding and Settings ask usual use, then reduce-by + period, then the daily puff goal (starts today), then when they want zero puffs. Changing the daily goal resets today’s cap to that number.
 - Persist never overwrites a snapshot that still has user data with empty boot defaults. Only Settings → Delete all local data may write an empty file. A last-good copy is kept as `puffpuffstop-snapshot.bak.json`.
 - Notification Center shade card (`puffpuffstop-shade`) offers Log puff and Undo when notification permission is granted. iOS: long-press / swipe the card (lock-screen actions depend on iOS settings). Android: action buttons on the shade. Not a Control Center widget.
 
@@ -109,13 +109,13 @@
 - Phase 12: onboarding + Settings connect Health/Fitbit. Fitbit callback route is `app/fitbit.tsx`.
 - 2026-09-02: Release build 10 installed on Free Malware (`0.0.1` / `10`). JS bundle is embedded. Unplug is safe.
 - Goal pacing stacked on Home. Unused hourly puffs raise this hour and split into 30/15. Watch banner only if Health is on and samples are arriving.
-- Pairing confirmed `c6a514b` with main/period goal dials and persist wipe-guard only. Not pulling `2d20218` organ/savings/line-graph changes.
+- Free Malware has Release build 49. Home refreshes from Settings; a daily goal replaces a leftover usual-based cap.
 
 ## Next Actions
 
-1. Install Release 42, commit and push as Cursor Agent without force-push.
-2. Do not store-submit.
+1. Do not store-submit.
+2. Do not force-push.
 
 ## Last Updated
 
-- 2026-09-11 — Pair `c6a514b` with goals + persist; commit and push.
+- 2026-09-11 — Owner confirmed Home goals. Committing and pushing as Cursor Agent.

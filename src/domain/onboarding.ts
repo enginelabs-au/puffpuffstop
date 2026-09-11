@@ -13,10 +13,9 @@ export const ONBOARDING_STEPS = [
   "triggers",
   "strictness",
   "motivation",
-  "quit-window",
-  "main-goal",
-  "goal",
   "cut-down",
+  "goal",
+  "quit-window",
   "interval-pacing",
   "quick-log",
   "wearables",
@@ -93,6 +92,7 @@ export type OnboardingDraft = {
   deviceMl: number | null;
   nicotineLabel: string;
   deviceCost: number | null;
+  deviceCostPeriod: Period;
   currencyCode: string;
   triggers: Trigger[];
   strictness: Strictness | null;
@@ -101,11 +101,12 @@ export type OnboardingDraft = {
   quitOtherCount: number;
   quitOtherPeriod: Period;
   quitExactDate: string;
-  mainGoalCount: number;
-  mainGoalPeriod: Period;
   goalCount: number;
   goalPeriod: Period;
   cutDownPerDay: number;
+  cutDownPeriod: Period;
+  cutDownStartDate: string | null;
+  cutDownBase: number | null;
   intervalPacing: boolean | null;
   intervalPacingReminders: boolean | null;
 };
@@ -127,6 +128,7 @@ export function emptyDraft(): OnboardingDraft {
     deviceMl: null,
     nicotineLabel: "",
     deviceCost: null,
+    deviceCostPeriod: "weeks",
     currencyCode: DEFAULT_CURRENCY,
     triggers: [],
     strictness: null,
@@ -135,11 +137,12 @@ export function emptyDraft(): OnboardingDraft {
     quitOtherCount: 0,
     quitOtherPeriod: "weeks",
     quitExactDate: "",
-    mainGoalCount: 0,
-    mainGoalPeriod: "days",
     goalCount: 0,
     goalPeriod: "days",
     cutDownPerDay: 0,
+    cutDownPeriod: "days",
+    cutDownStartDate: null,
+    cutDownBase: null,
     intervalPacing: null,
     intervalPacingReminders: null,
   };
@@ -246,13 +249,6 @@ export function dailyGoalPuffs(draft: OnboardingDraft): number {
   if (draft.goalCount > 0) {
     return puffsPerDay(draft.goalCount, draft.goalPeriod);
   }
-  return puffsPerDay(draft.frequencyCount, draft.frequencyPeriod);
-}
-
-export function mainGoalPuffs(draft: OnboardingDraft): number {
-  if (draft.mainGoalCount > 0) {
-    return puffsPerDay(draft.mainGoalCount, draft.mainGoalPeriod);
-  }
   return 0;
 }
 
@@ -301,6 +297,10 @@ export function canContinue(step: OnboardingStep, draft: OnboardingDraft): boole
       return draft.strictness !== null;
     case "motivation":
       return draft.motivation !== null;
+    case "cut-down":
+      return draft.cutDownPerDay >= 1 && draft.cutDownPerDay <= PUFF_DIAL_MAX;
+    case "goal":
+      return draft.goalCount > 0;
     case "quit-window":
       if (draft.quitWindow === "exact-date") {
         return isValidAuDate(draft.quitExactDate);
@@ -309,12 +309,6 @@ export function canContinue(step: OnboardingStep, draft: OnboardingDraft): boole
         return draft.quitOtherCount > 0;
       }
       return draft.quitWindow !== null;
-    case "main-goal":
-      return draft.mainGoalCount > 0;
-    case "goal":
-      return draft.goalCount > 0;
-    case "cut-down":
-      return draft.cutDownPerDay >= 1 && draft.cutDownPerDay <= PUFF_DIAL_MAX;
     case "quick-log":
     case "wearables":
       return true;

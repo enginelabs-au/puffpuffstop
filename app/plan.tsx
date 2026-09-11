@@ -2,8 +2,8 @@ import { router } from "expo-router";
 import { Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { getDraft } from "../src/data/onboarding-store";
-import { formatCount, summarizePlan } from "../src/domain/plan-summary";
+import { currentPlan } from "../src/data/plan";
+import { formatCount } from "../src/domain/plan-summary";
 import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
 import { minTapTarget, radius, space, type, type ColorTokens } from "../src/theme/tokens";
 import { AppText } from "../src/ui/AppText";
@@ -26,7 +26,7 @@ const WINDOW_COPY = {
 
 export default function PlanScreen() {
   const styles = useThemedStyles(planStyles);
-  const summary = summarizePlan(getDraft());
+  const summary = currentPlan();
   const tone = summary.strictness
     ? STRICTNESS_COPY[summary.strictness]
     : "We’ll follow your pace.";

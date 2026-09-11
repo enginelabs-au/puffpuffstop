@@ -9,6 +9,7 @@ export type SettingsState = {
   theme: ThemeName;
   lastNotificationResponseKey: string | null;
   leftoverNoticeRepair: boolean;
+  cutDownCoachKey: string | null;
 };
 
 function emptySettings(): SettingsState {
@@ -19,6 +20,7 @@ function emptySettings(): SettingsState {
     theme: DEFAULT_THEME,
     lastNotificationResponseKey: null,
     leftoverNoticeRepair: false,
+    cutDownCoachKey: null,
   };
 }
 

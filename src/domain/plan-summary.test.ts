@@ -34,30 +34,85 @@ describe("plan summary", () => {
     assert.equal(summary.disclaimer, PLAN_DISCLAIMER);
   });
 
-  it("uses the period goal as today's commitment", () => {
-    const summary = summarizePlan({
-      ...emptyDraft(),
-      frequencyCount: 50,
-      frequencyPeriod: "days",
-      goalCount: 20,
-      goalPeriod: "days",
-      cutDownPerDay: 0,
-    });
+  it("lowers the next day's goal by the reduce-by amount", () => {
+    const summary = summarizePlan(
+      {
+        ...emptyDraft(),
+        frequencyCount: 20,
+        frequencyPeriod: "days",
+        cutDownPerDay: 1,
+        cutDownPeriod: "days",
+        cutDownStartDate: "2026-09-01",
+        cutDownBase: 20,
+      },
+      "2026-09-02",
+    );
+    assert.equal(summary.commitment, 19);
+  });
+
+  it("replaces a stale usual-based cap with the daily goal from settings", () => {
+    const summary = summarizePlan(
+      {
+        ...emptyDraft(),
+        frequencyCount: 50,
+        frequencyPeriod: "days",
+        goalCount: 20,
+        goalPeriod: "days",
+        cutDownPerDay: 1,
+        cutDownPeriod: "days",
+        cutDownStartDate: "2026-09-01",
+        cutDownBase: 50,
+      },
+      "2026-09-11",
+    );
     assert.equal(summary.commitment, 20);
   });
 
-  it("does not step the period goal below the main goal", () => {
+  it("uses a just-set daily goal immediately, before reduce-by steps", () => {
     const summary = summarizePlan({
       ...emptyDraft(),
       frequencyCount: 50,
       frequencyPeriod: "days",
-      mainGoalCount: 18,
-      mainGoalPeriod: "days",
-      goalCount: 20,
+      goalCount: 18,
       goalPeriod: "days",
       cutDownPerDay: 5,
+      cutDownPeriod: "days",
     });
     assert.equal(summary.commitment, 18);
+  });
+
+  it("uses the daily goal as today's cap from the day they set it", () => {
+    const sameDay = summarizePlan(
+      {
+        ...emptyDraft(),
+        frequencyCount: 50,
+        frequencyPeriod: "days",
+        goalCount: 18,
+        goalPeriod: "days",
+        cutDownPerDay: 5,
+        cutDownPeriod: "days",
+        cutDownStartDate: "2026-09-01",
+        cutDownBase: 18,
+      },
+      "2026-09-01",
+    );
+    assert.equal(sameDay.commitment, 18);
+
+    const nextDay = summarizePlan(
+      {
+        ...emptyDraft(),
+        frequencyCount: 50,
+        frequencyPeriod: "days",
+        goalCount: 18,
+        goalPeriod: "days",
+        cutDownPerDay: 5,
+        cutDownPeriod: "days",
+        cutDownStartDate: "2026-09-01",
+        cutDownBase: 18,
+      },
+      "2026-09-02",
+    );
+    assert.equal(nextDay.commitment, 13);
   });
 
   it("uses custom ml math when a device size is present", () => {

@@ -7,8 +7,8 @@ import {
   upcomingPaceReminders,
 } from "../domain/pace-reminders";
 import { goalPacing } from "../domain/pacing";
-import { summarizePlan } from "../domain/plan-summary";
 import { getDailyLog } from "./daily-log-store";
+import { currentPlan } from "./plan";
 import { getDraft, updateDraft } from "./onboarding-store";
 import { applyQuickLog } from "./quick-log";
 import { handleShadeNotificationResponse } from "./shade-log";
@@ -66,7 +66,7 @@ export async function syncPaceReminders(): Promise<boolean> {
   }
 
   await preparePaceNotifications();
-  const summary = summarizePlan(draft);
+  const summary = currentPlan();
   const pacing = goalPacing(summary.puffsPerDay, summary.commitment);
   const log = getDailyLog();
   const slots = upcomingPaceReminders(

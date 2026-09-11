@@ -11,15 +11,24 @@ export const ORGAN_LABELS: Record<OrganId, string> = {
 };
 
 /**
- * Daily nudges sit on a 50-year horizon. One puff is a hundredth of a
- * percent — measurable at two decimals, tiny against a lifetime baseline.
- * Beating the daily cap heals more than that day's puffs plus a visible bonus.
+ * Daily logs sit on a 50-year exposure horizon. One puff is a hundredth
+ * of a percent — measurable at two decimals, tiny against a lifetime baseline.
+ *
+ * Recovery follows public-health cessation clocks (hours for CO/heart rate,
+ * weeks–months for circulation, taste, and liver enzymes, 3–9 months for
+ * lung-function gains, 1–15 years for heart-disease risk). A quiet day is
+ * not a reset: about 1.5 points across organs after six abstinent months.
  */
 export const PUFF_DAMAGE = 0.01;
 export const OVER_CAP_EXTRA = 0.004;
-export const GOAL_BONUS = 1.2;
-export const DAY_RECOVERY = GOAL_BONUS;
-export const HOUR_EASE_RECOVERY = 0.12;
+export const RECOVERY_HORIZON_DAYS = 180;
+export const ORGAN_RECOVERY_IN_HORIZON: Record<OrganId, number> = {
+  lungs: 1.0,
+  heart: 1.6,
+  brain: 1.4,
+  liver: 1.7,
+  mouth: 1.8,
+};
 export const SCORE_MIN = 1;
 export const SCORE_MAX = 100;
 
@@ -122,9 +131,17 @@ export function isOrganRecovering(
   return hourlyEase || isGoalCelebration(recoveryTicks, logged, commitment);
 }
 
-/** One successful day undoes that day's puffs and then some. */
-export function dayRecovery(commitment: number): number {
-  return Math.max(0, commitment) * PUFF_DAMAGE + GOAL_BONUS;
+export function organDayRecovery(id: OrganId): number {
+  return ORGAN_RECOVERY_IN_HORIZON[id] / RECOVERY_HORIZON_DAYS;
+}
+
+export function organHourEase(id: OrganId): number {
+  return organDayRecovery(id) / 24;
+}
+
+export function dayRecovery(_commitment = 0): number {
+  const total = ORGAN_IDS.reduce((sum, id) => sum + organDayRecovery(id), 0);
+  return total / ORGAN_IDS.length;
 }
 
 export function organScore(
@@ -133,11 +150,12 @@ export function organScore(
   commitment: number,
   recoveryTicks: number,
   easeTicks = 0,
+  id: OrganId = "brain",
 ): number {
   const extra = overCapPuffs(logged, commitment);
   const damage = logged * PUFF_DAMAGE + extra * OVER_CAP_EXTRA;
   const recover =
-    recoveryTicks * dayRecovery(commitment) + easeTicks * HOUR_EASE_RECOVERY;
+    recoveryTicks * organDayRecovery(id) + easeTicks * organHourEase(id);
   return clampScore(baseline - damage + recover);
 }
 
@@ -149,11 +167,11 @@ export function organScores(
   easeTicks = 0,
 ): Record<OrganId, number> {
   return {
-    lungs: organScore(baselines.lungs, logged, commitment, recoveryTicks, easeTicks),
-    heart: organScore(baselines.heart, logged, commitment, recoveryTicks, easeTicks),
-    brain: organScore(baselines.brain, logged, commitment, recoveryTicks, easeTicks),
-    liver: organScore(baselines.liver, logged, commitment, recoveryTicks, easeTicks),
-    mouth: organScore(baselines.mouth, logged, commitment, recoveryTicks, easeTicks),
+    lungs: organScore(baselines.lungs, logged, commitment, recoveryTicks, easeTicks, "lungs"),
+    heart: organScore(baselines.heart, logged, commitment, recoveryTicks, easeTicks, "heart"),
+    brain: organScore(baselines.brain, logged, commitment, recoveryTicks, easeTicks, "brain"),
+    liver: organScore(baselines.liver, logged, commitment, recoveryTicks, easeTicks, "liver"),
+    mouth: organScore(baselines.mouth, logged, commitment, recoveryTicks, easeTicks, "mouth"),
   };
 }
 

@@ -35,11 +35,12 @@ describe("goal pacing", () => {
     assert.match(PACING_LENIENT_TIP, /does not ask you to vape/);
   });
 
-  it("hides windows when the goal is not below the usual day", () => {
-    assert.equal(goalPacing(25, 25).applies, false);
-    assert.equal(goalPacing(25, 25).perHour, 0);
+  it("still paces when the goal matches the usual day", () => {
+    const pacing = goalPacing(25, 25);
+    assert.equal(pacing.applies, true);
+    assert.equal(pacing.perHour, 2);
     assert.equal(goalPacing(10, 0).applies, false);
-    assert.equal(goalPacingCaption(goalPacing(25, 25)), "");
+    assert.equal(goalPacingCaption(goalPacing(10, 0)), "");
   });
 
   it("ceils a 1-puff goal across every window", () => {

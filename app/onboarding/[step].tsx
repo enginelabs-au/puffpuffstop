@@ -9,6 +9,7 @@ import {
   productsForBrand,
 } from "../../src/data/brands";
 import { CURRENCIES } from "../../src/data/currencies";
+import { applyGoalChange } from "../../src/data/cut-down-schedule";
 import { getDraft, updateDraft } from "../../src/data/onboarding-store";
 import { getSettings } from "../../src/data/settings-store";
 import { applyTimeZonePreference } from "../../src/data/time-zone-preference";
@@ -21,15 +22,17 @@ import {
 } from "../../src/domain/quick-log";
 import { HealthConnectControls } from "../../src/ui/HealthConnectControls";
 import { puffsPerDay, type Period } from "../../src/domain/estimation";
+import { planTodayKey } from "../../src/data/plan";
 import { summarizePlan } from "../../src/domain/plan-summary";
-import { GoalField } from "../../src/ui/GoalField";
 import { INTERVAL_PACING_REMINDER_HELPER } from "../../src/domain/pace-reminders";
 import { INTERVAL_PACING_HELPER } from "../../src/domain/pacing";
 import { applyPaceReminderPreference } from "../../src/data/pace-reminders";
 import { GoalPacingBreakdown } from "../../src/ui/GoalPacingBreakdown";
 import {
+  PERIOD_CHOICES,
   PUFF_DIAL_MAX,
   canContinue,
+  dailyGoalPuffs,
   formatAuDateInput,
   frequencyCaption,
   isOnboardingStep,
@@ -48,6 +51,8 @@ import { radius, scaledInput, space, type, type ColorTokens } from "../../src/th
 import { AppText } from "../../src/ui/AppText";
 import { ChipGroup } from "../../src/ui/ChipGroup";
 import { OnboardingFrame } from "../../src/ui/OnboardingFrame";
+import { GoalField } from "../../src/ui/GoalField";
+import { ReduceByField } from "../../src/ui/ReduceByField";
 import { RotaryDial } from "../../src/ui/RotaryDial";
 import { SelectField } from "../../src/ui/SelectField";
 import { useTheme } from "../../src/ui/ThemeProvider";
@@ -403,6 +408,12 @@ export default function OnboardingStepScreen() {
             }}
             style={styles.input}
           />
+          <AppText style={styles.caption}>How often do you buy one?</AppText>
+          <ChipGroup
+            options={PERIOD_CHOICES}
+            selected={draft.deviceCostPeriod}
+            onChange={(deviceCostPeriod) => patch({ deviceCostPeriod })}
+          />
         </>
       ) : null}
 
@@ -491,40 +502,41 @@ export default function OnboardingStepScreen() {
         />
       ) : null}
 
-      {step === "main-goal" ? (
-        <GoalField
-          count={draft.mainGoalCount}
-          period={draft.mainGoalPeriod}
-          onChange={(mainGoalCount, mainGoalPeriod) => {
-            patch({ mainGoalCount, mainGoalPeriod });
-          }}
-        />
-      ) : null}
-
       {step === "goal" ? (
         <GoalField
           count={draft.goalCount}
           period={draft.goalPeriod}
           onChange={(goalCount, goalPeriod) => {
-            patch({ goalCount, goalPeriod });
+            setDraft(applyGoalChange(goalCount, goalPeriod, planTodayKey()));
           }}
         />
       ) : null}
 
       {step === "cut-down" ? (
         <>
-          <RotaryDial
-            accessibilityLabel="Puffs to reduce by each day"
-            value={draft.cutDownPerDay}
-            onChange={(cutDownPerDay) => patch({ cutDownPerDay })}
-            max={PUFF_DIAL_MAX}
+          <ReduceByField
+            count={draft.cutDownPerDay}
+            period={draft.cutDownPeriod}
+            onChange={(cutDownPerDay, cutDownPeriod) => {
+              const usual = puffsPerDay(
+                draft.frequencyCount,
+                draft.frequencyPeriod,
+              );
+              const dailyGoal = dailyGoalPuffs(draft);
+              patch({
+                cutDownPerDay,
+                cutDownPeriod,
+                cutDownStartDate: planTodayKey(),
+                cutDownBase: dailyGoal > 0 ? dailyGoal : usual,
+              });
+            }}
           />
           <GoalPacingBreakdown
             averagePuffsPerDay={puffsPerDay(
               draft.frequencyCount,
               draft.frequencyPeriod,
             )}
-            goalPuffsPerDay={summarizePlan(draft).commitment}
+            goalPuffsPerDay={summarizePlan(draft, planTodayKey()).commitment}
           />
         </>
       ) : null}
@@ -536,7 +548,7 @@ export default function OnboardingStepScreen() {
               draft.frequencyCount,
               draft.frequencyPeriod,
             )}
-            goalPuffsPerDay={summarizePlan(draft).commitment}
+            goalPuffsPerDay={summarizePlan(draft, planTodayKey()).commitment}
           />
           <ChipGroup
             options={INTERVAL_PACING_CHOICES}
@@ -613,7 +625,7 @@ function titleFor(step: OnboardingStep): string {
     case "duration":
       return "How long have you been vaping?";
     case "frequency":
-      return "How much do you vape?";
+      return "How many puffs do you use?";
     case "device":
       return "What do you use most?";
     case "brand":
@@ -630,14 +642,12 @@ function titleFor(step: OnboardingStep): string {
       return "How strict should we be?";
     case "motivation":
       return "How motivated are you to stop?";
-    case "quit-window":
-      return "How long until you’ve completely stopped?";
-    case "main-goal":
-      return "What’s your main goal?";
-    case "goal":
-      return "What’s your day, week, month, or year goal?";
     case "cut-down":
-      return "Reduce by how many puffs each day?";
+      return "How many puffs do you want to reduce by, and over what period?";
+    case "goal":
+      return "What is your daily puff goal?";
+    case "quit-window":
+      return "By when do you want to reach zero puffs?";
     case "interval-pacing":
       return "Track puffs by the hour?";
     case "quick-log":
@@ -673,19 +683,17 @@ function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undef
     case "nicotine":
       return "Only strengths confirmed for the selected product.";
     case "cost":
-      return "Optional. Helps later savings math. We never charge a card.";
+      return "Optional. After the price, say how often you buy a device. We use that for a savings estimate. We never charge a card.";
     case "triggers":
       return "Pick any that fit. You can skip.";
     case "strictness":
       return "This sets how firm reminders and the daily cap will feel.";
-    case "quit-window":
-      return "Choose a listed option, an exact date, or Other.";
-    case "main-goal":
-      return `${frequencyCaption(draft.mainGoalCount, draft.mainGoalPeriod)}. This is the total you want to get to.`;
-    case "goal":
-      return `${frequencyCaption(draft.goalCount, draft.goalPeriod)}. This is your cap for each day, week, month, or year.`;
     case "cut-down":
-      return "Pick 1 to 999,999. We’ll subtract this from your usual day until the date you chose. If the goal is lower, you’ll see an hourly pace. That only tracks logs — it does not ask you to vape.";
+      return "How many puffs to cut, and over each day, week, month, or year. That only tracks logs — it does not ask you to vape.";
+    case "goal":
+      return `${frequencyCaption(draft.goalCount, draft.goalPeriod)}. This is your puff cap from today.`;
+    case "quit-window":
+      return "When do you want to be at zero puffs? Choose a listed option, an exact date, or Other.";
     case "interval-pacing":
       return INTERVAL_PACING_HELPER;
     case "quick-log":

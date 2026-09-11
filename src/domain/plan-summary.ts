@@ -1,9 +1,9 @@
 import {
-  commitmentPuffs,
   historyDays,
   puffsPerDay,
+  steppedDailyGoal,
 } from "./estimation";
-import { dailyGoalPuffs, displayName, mainGoalPuffs, type OnboardingDraft } from "./onboarding";
+import { dailyGoalPuffs, displayName, type OnboardingDraft } from "./onboarding";
 
 export const PLAN_DISCLAIMER =
   "These numbers and later organ scores are motivational estimates, not a medical diagnosis or treatment plan.";
@@ -36,8 +36,19 @@ export function impliedPuffsPerDevice(draft: OnboardingDraft): number | null {
     : null;
 }
 
-export function summarizePlan(draft: OnboardingDraft): PlanSummary {
+export function staleCutDownBase(draft: OnboardingDraft): boolean {
+  const dailyGoal = dailyGoalPuffs(draft);
+  return dailyGoal > 0 && draft.cutDownBase != null && draft.cutDownBase > dailyGoal;
+}
+
+export function summarizePlan(
+  draft: OnboardingDraft,
+  todayKey = "",
+): PlanSummary {
   const daily = puffsPerDay(draft.frequencyCount, draft.frequencyPeriod);
+  const dailyGoal = dailyGoalPuffs(draft);
+  const startCap = dailyGoal > 0 ? dailyGoal : daily;
+  const staleBase = staleCutDownBase(draft);
   const weekly = daily * 7;
   const perDevice = impliedPuffsPerDevice(draft);
   const devicesPerWeek =
@@ -56,10 +67,14 @@ export function summarizePlan(draft: OnboardingDraft): PlanSummary {
     historyDays: historyDays(draft.durationCount, draft.durationPeriod),
     devicesPerWeek,
     spendPerWeek,
-    commitment: Math.max(
-      mainGoalPuffs(draft),
-      commitmentPuffs(dailyGoalPuffs(draft), draft.cutDownPerDay),
-    ),
+    commitment: steppedDailyGoal({
+      usual: startCap,
+      reduceCount: draft.cutDownPerDay,
+      reducePeriod: draft.cutDownPeriod,
+      startDateKey: staleBase ? todayKey || draft.cutDownStartDate : draft.cutDownStartDate,
+      todayKey,
+      baseGoal: staleBase ? dailyGoal : (draft.cutDownBase ?? (dailyGoal > 0 ? dailyGoal : null)),
+    }),
     strictness: draft.strictness,
     motivation: draft.motivation,
     quitWindow: draft.quitWindow,
