@@ -44,7 +44,7 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - Agent workspace layout: `/memory/runbooks/agent-workspace.md`
 - Bootstrap procedure: `/memory/runbooks/agent-config-bootstrap.md`
 - iOS device debug / offline Release build: `/memory/runbooks/ios-device-debug-build.md`
-- Latest continuation: `/memory/memories/2026-09-04-continuation.md`
+- Latest continuation: `/memory/memories/2026-09-11-continuation.md`
 
 ## Product architecture (PuffPuffStop)
 

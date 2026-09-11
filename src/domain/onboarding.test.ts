@@ -40,6 +40,9 @@ describe("onboarding", () => {
     assert.equal(isOnboardingStep("home"), false);
     assert.equal(nextStep("nickname"), "timezone");
     assert.equal(nextStep("timezone"), "duration");
+    assert.equal(nextStep("quit-window"), "main-goal");
+    assert.equal(nextStep("main-goal"), "goal");
+    assert.equal(nextStep("goal"), "cut-down");
     assert.equal(nextStep("cut-down"), "interval-pacing");
     assert.equal(nextStep("interval-pacing"), "quick-log");
     assert.equal(nextStep("quick-log"), "wearables");
@@ -83,6 +86,10 @@ describe("onboarding", () => {
       }),
       true,
     );
+    assert.equal(canContinue("main-goal", draft), false);
+    assert.equal(canContinue("main-goal", { ...draft, mainGoalCount: 10 }), true);
+    assert.equal(canContinue("goal", draft), false);
+    assert.equal(canContinue("goal", { ...draft, goalCount: 20 }), true);
     assert.equal(canContinue("cut-down", draft), false);
     assert.equal(canContinue("cut-down", { ...draft, cutDownPerDay: 1 }), true);
     assert.equal(canContinue("interval-pacing", draft), false);

@@ -1,3 +1,4 @@
+import type { Period } from "../domain/estimation";
 import {
   DEFAULT_CURRENCY,
   QUIT_WINDOWS,
@@ -43,6 +44,47 @@ function asNullNumber(value: unknown): number | null {
   if (value === null) return null;
   if (typeof value === "number" && Number.isFinite(value)) return value;
   return null;
+}
+
+function isPeriod(value: unknown): value is Period {
+  return (
+    value === "days" ||
+    value === "weeks" ||
+    value === "months" ||
+    value === "years"
+  );
+}
+
+function inferredMainGoal(
+  value: Record<string, unknown>,
+): Pick<OnboardingDraft, "mainGoalCount" | "mainGoalPeriod"> {
+  const stored = asFiniteNumber(value.mainGoalCount, 0);
+  if (stored > 0) {
+    return {
+      mainGoalCount: stored,
+      mainGoalPeriod: isPeriod(value.mainGoalPeriod) ? value.mainGoalPeriod : "days",
+    };
+  }
+  return { mainGoalCount: 0, mainGoalPeriod: "days" };
+}
+
+function inferredGoal(
+  value: Record<string, unknown>,
+  base: OnboardingDraft,
+): Pick<OnboardingDraft, "goalCount" | "goalPeriod"> {
+  const stored = asFiniteNumber(value.goalCount, 0);
+  if (stored > 0) {
+    return {
+      goalCount: stored,
+      goalPeriod: isPeriod(value.goalPeriod) ? value.goalPeriod : "days",
+    };
+  }
+  return {
+    goalCount: asFiniteNumber(value.frequencyCount, base.frequencyCount),
+    goalPeriod: isPeriod(value.frequencyPeriod)
+      ? value.frequencyPeriod
+      : base.frequencyPeriod,
+  };
 }
 
 function parseDraft(raw: unknown): OnboardingDraft | null {
@@ -122,6 +164,8 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
         ? value.quitOtherPeriod
         : base.quitOtherPeriod,
     quitExactDate: asString(value.quitExactDate, ""),
+    ...inferredMainGoal(value),
+    ...inferredGoal(value, base),
     cutDownPerDay: asFiniteNumber(value.cutDownPerDay, 0),
     intervalPacing: parseIntervalPacing(
       value.intervalPacing,
@@ -179,9 +223,8 @@ function parseDailyLog(raw: unknown): DailyLogState | null {
 function parseSettings(raw: unknown): SettingsState | null {
   if (!raw || typeof raw !== "object") return null;
   const value = raw as Record<string, unknown>;
-  if (typeof value.remindersEnabled !== "boolean") return null;
   return {
-    remindersEnabled: value.remindersEnabled,
+    remindersEnabled: value.remindersEnabled === true,
     stakePerPuff: asNullNumber(value.stakePerPuff),
     timeZone: resolveTimeZone(asString(value.timeZone, deviceTimeZone())),
     theme: resolveTheme(value.theme),
@@ -258,4 +301,32 @@ export function restoreSnapshot(raw: unknown): boolean {
   replaceHealth(parsed.health);
   replaceProgress(parsed.progress);
   return true;
+}
+
+export function isVacantSnapshot(snapshot: AppSnapshot): boolean {
+  const draft = snapshot.draft;
+  return (
+    draft.durationCount === 0 &&
+    draft.frequencyCount === 0 &&
+    snapshot.dailyLog.logged === 0 &&
+    snapshot.savings.pot === 0 &&
+    snapshot.progress.days.length === 0
+  );
+}
+
+export function snapshotTextHasUserData(raw: string): boolean {
+  try {
+    const value = JSON.parse(raw) as { draft?: Record<string, unknown> };
+    const parsed = parseSnapshot(value);
+    if (parsed) return !isVacantSnapshot(parsed);
+    const draft = value.draft;
+    if (!draft || typeof draft !== "object") return false;
+    return (
+      asFiniteNumber(draft.durationCount, 0) > 0 ||
+      asFiniteNumber(draft.frequencyCount, 0) > 0 ||
+      (typeof draft.nickname === "string" && draft.nickname.trim().length > 0)
+    );
+  } catch {
+    return false;
+  }
 }

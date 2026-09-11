@@ -11,6 +11,7 @@ import {
   setPersistDriver,
 } from "./persist";
 import { setHydrating } from "./persist-hook";
+import { resetProgress } from "./progress-store";
 import { addSavings, resetSavings } from "./savings-store";
 import { resetSettings, updateSettings } from "./settings-store";
 import {
@@ -55,9 +56,65 @@ describe("snapshot persist", () => {
     assert.equal(next.savings.pot, 1.4);
   });
 
-  it("rejects a foreign or incomplete snapshot", () => {
+  it("rejects an unknown snapshot version and keeps a thin v1 file", () => {
     assert.equal(parseSnapshot({ version: 99, draft: {} }), null);
     assert.equal(restoreSnapshot({ version: SNAPSHOT_VERSION }), false);
+  });
+
+  it("does not overwrite a stored plan with empty boot defaults", async () => {
+    resetPersistDriver();
+    const store = new Map<string, string>();
+    setPersistDriver(createMemoryPersistDriver(store));
+    resetDraft();
+    resetDailyLog(new Date(2026, 7, 18, 12));
+    resetSettings();
+    resetSavings();
+    resetProgress();
+    updateDraft({ nickname: "Sam", durationCount: 8, frequencyCount: 12 });
+    persistNow();
+    const saved = store.get("puffpuffstop-snapshot");
+    assert.ok(saved && saved.includes("Sam"));
+
+    setHydrating(true);
+    resetDraft();
+    resetDailyLog(new Date(2026, 7, 18, 12));
+    resetSettings();
+    resetSavings();
+    resetProgress();
+    setHydrating(false);
+    persistNow();
+    assert.equal(store.get("puffpuffstop-snapshot"), saved);
+  });
+
+  it("restores a backup when the primary snapshot is junk", async () => {
+    resetPersistDriver();
+    const store = new Map<string, string>();
+    const driver = createMemoryPersistDriver(store);
+    setPersistDriver(driver);
+    resetDraft();
+    updateDraft({ nickname: "Sam", durationCount: 8, frequencyCount: 12 });
+    persistNow();
+    store.set("puffpuffstop-snapshot.bak", store.get("puffpuffstop-snapshot") ?? "");
+    store.set("puffpuffstop-snapshot", "{not-json");
+    setHydrating(true);
+    resetDraft();
+    setHydrating(false);
+    const hydrated = await hydrateFromDriver();
+    assert.equal(hydrated, true);
+    assert.equal(captureSnapshot().draft.nickname, "Sam");
+  });
+
+  it("keeps a snapshot when remindersEnabled is not a boolean", () => {
+    const current = captureSnapshot();
+    const parsed = parseSnapshot({
+      ...current,
+      settings: {
+        ...current.settings,
+        remindersEnabled: "yes",
+      },
+    });
+    assert.ok(parsed);
+    assert.equal(parsed.settings.remindersEnabled, false);
   });
 
   it("upgrades an unversioned snapshot to v1 and rejects unknown versions", () => {

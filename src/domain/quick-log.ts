@@ -48,7 +48,7 @@ const RESET_TOKENS = new Set(["reset"]);
 
 export const REDO_SETUP_TITLE = "Redo setup?";
 export const REDO_SETUP_BODY =
-  "You'll walk through onboarding again. Today's puff log and savings stay on this device.";
+  "You'll walk through onboarding again with your answers already filled in. Logs, streak, settings, and savings stay on this device.";
 export const REDO_SETUP_CONFIRM = "Redo setup";
 export const REDO_SETUP_CANCEL = "Cancel";
 

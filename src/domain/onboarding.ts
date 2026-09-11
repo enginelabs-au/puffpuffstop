@@ -1,4 +1,4 @@
-import type { Period } from "./estimation";
+import { puffsPerDay, type Period } from "./estimation";
 
 export const ONBOARDING_STEPS = [
   "nickname",
@@ -14,6 +14,8 @@ export const ONBOARDING_STEPS = [
   "strictness",
   "motivation",
   "quit-window",
+  "main-goal",
+  "goal",
   "cut-down",
   "interval-pacing",
   "quick-log",
@@ -68,6 +70,13 @@ export const DIAL_MAX = 999;
 export const PUFF_DIAL_MAX = 999_999;
 export const DEFAULT_CURRENCY = "AUD";
 
+export const PERIOD_CHOICES: { value: Period; label: string }[] = [
+  { value: "days", label: "day" },
+  { value: "weeks", label: "week" },
+  { value: "months", label: "month" },
+  { value: "years", label: "year" },
+];
+
 export type OnboardingDraft = {
   nickname: string;
   durationCount: number;
@@ -92,6 +101,10 @@ export type OnboardingDraft = {
   quitOtherCount: number;
   quitOtherPeriod: Period;
   quitExactDate: string;
+  mainGoalCount: number;
+  mainGoalPeriod: Period;
+  goalCount: number;
+  goalPeriod: Period;
   cutDownPerDay: number;
   intervalPacing: boolean | null;
   intervalPacingReminders: boolean | null;
@@ -122,6 +135,10 @@ export function emptyDraft(): OnboardingDraft {
     quitOtherCount: 0,
     quitOtherPeriod: "weeks",
     quitExactDate: "",
+    mainGoalCount: 0,
+    mainGoalPeriod: "days",
+    goalCount: 0,
+    goalPeriod: "days",
     cutDownPerDay: 0,
     intervalPacing: null,
     intervalPacingReminders: null,
@@ -225,6 +242,20 @@ export function frequencyCaption(count: number, period: Period): string {
   return `${count} ${puffWord(count)} a ${periodLabel(period)}`;
 }
 
+export function dailyGoalPuffs(draft: OnboardingDraft): number {
+  if (draft.goalCount > 0) {
+    return puffsPerDay(draft.goalCount, draft.goalPeriod);
+  }
+  return puffsPerDay(draft.frequencyCount, draft.frequencyPeriod);
+}
+
+export function mainGoalPuffs(draft: OnboardingDraft): number {
+  if (draft.mainGoalCount > 0) {
+    return puffsPerDay(draft.mainGoalCount, draft.mainGoalPeriod);
+  }
+  return 0;
+}
+
 export function isOnboardingStep(value: string): value is OnboardingStep {
   return (ONBOARDING_STEPS as readonly string[]).includes(value);
 }
@@ -278,6 +309,10 @@ export function canContinue(step: OnboardingStep, draft: OnboardingDraft): boole
         return draft.quitOtherCount > 0;
       }
       return draft.quitWindow !== null;
+    case "main-goal":
+      return draft.mainGoalCount > 0;
+    case "goal":
+      return draft.goalCount > 0;
     case "cut-down":
       return draft.cutDownPerDay >= 1 && draft.cutDownPerDay <= PUFF_DIAL_MAX;
     case "quick-log":

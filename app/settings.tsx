@@ -51,6 +51,7 @@ import {
   intervalPacingStartsOpen,
 } from "../src/domain/onboarding";
 import { SHADE_LOG_BODY } from "../src/domain/shade-log";
+import { GoalField } from "../src/ui/GoalField";
 import { RotaryDial } from "../src/ui/RotaryDial";
 import { summarizePlan } from "../src/domain/plan-summary";
 import { GoalPacingBreakdown } from "../src/ui/GoalPacingBreakdown";
@@ -152,14 +153,34 @@ export default function SettingsScreen() {
           <AppText style={styles.buttonLabel}>Redo setup</AppText>
         </Pressable>
         <AppText style={styles.caption}>
-          Walk through onboarding again to change device, brand, or goals.
-          Today’s log and savings stay.
+          Walk through onboarding again with your answers already filled in.
+          Logs, streak, settings, and savings stay unless you delete local data.
         </AppText>
 
         <AppText style={styles.section}>Goals</AppText>
         <AppText style={styles.caption}>
-          Daily commitment is {summary.commitment} puffs. Reduce by how many
-          puffs each day? 1 to 999,999.
+          Main goal — the total you want to get to.
+        </AppText>
+        <GoalField
+          count={draft.mainGoalCount}
+          period={draft.mainGoalPeriod}
+          onChange={(count, period) => {
+            patchDraft({ mainGoalCount: count, mainGoalPeriod: period });
+          }}
+        />
+        <AppText style={styles.caption}>
+          Period goal — how many puffs each day, week, month, or year.
+        </AppText>
+        <GoalField
+          count={draft.goalCount}
+          period={draft.goalPeriod}
+          onChange={(count, period) => {
+            patchDraft({ goalCount: count, goalPeriod: period });
+          }}
+        />
+        <AppText style={styles.caption}>
+          Today’s cap is {summary.commitment} puffs. Reduce by how many puffs
+          each day? 1 to 999,999.
         </AppText>
         <RotaryDial
           accessibilityLabel="Puffs to reduce by each day"

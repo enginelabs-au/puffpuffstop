@@ -1,6 +1,7 @@
 import type { PersistDriver } from "./persist-hook";
 
 const SNAPSHOT_FILE = "puffpuffstop-snapshot.json";
+const SNAPSHOT_BACKUP_FILE = "puffpuffstop-snapshot.bak.json";
 
 type SnapshotFile = {
   exists: boolean;
@@ -21,23 +22,46 @@ export async function createFilePersistDriver(): Promise<PersistDriver | null> {
     const directory = FS.Paths.document;
     return {
       async read() {
-        try {
-          const file = new FS.File(directory, SNAPSHOT_FILE);
-          if (!file.exists) return null;
-          return await file.text();
-        } catch {
-          return null;
-        }
+        return readNamed(FS, directory, SNAPSHOT_FILE);
       },
       async write(value: string) {
-        const file = new FS.File(directory, SNAPSHOT_FILE);
-        if (!file.exists) {
-          file.create({ overwrite: true });
-        }
-        file.write(value);
+        writeNamed(FS, directory, SNAPSHOT_FILE, value);
+      },
+      async readBackup() {
+        return readNamed(FS, directory, SNAPSHOT_BACKUP_FILE);
+      },
+      async writeBackup(value: string) {
+        writeNamed(FS, directory, SNAPSHOT_BACKUP_FILE, value);
       },
     };
   } catch {
     return null;
   }
+}
+
+async function readNamed(
+  FS: ModernFileSystem,
+  directory: unknown,
+  name: string,
+): Promise<string | null> {
+  try {
+    const file = new FS.File(directory, name);
+    if (!file.exists) return null;
+    return await file.text();
+  } catch {
+    return null;
+  }
+}
+
+function writeNamed(
+  FS: ModernFileSystem,
+  directory: unknown,
+  name: string,
+  value: string,
+): void {
+  const file = new FS.File(directory, name);
+  if (!file.exists) {
+    file.create({ overwrite: true });
+  }
+  file.write(value);
 }

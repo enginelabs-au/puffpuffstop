@@ -34,6 +34,32 @@ describe("plan summary", () => {
     assert.equal(summary.disclaimer, PLAN_DISCLAIMER);
   });
 
+  it("uses the period goal as today's commitment", () => {
+    const summary = summarizePlan({
+      ...emptyDraft(),
+      frequencyCount: 50,
+      frequencyPeriod: "days",
+      goalCount: 20,
+      goalPeriod: "days",
+      cutDownPerDay: 0,
+    });
+    assert.equal(summary.commitment, 20);
+  });
+
+  it("does not step the period goal below the main goal", () => {
+    const summary = summarizePlan({
+      ...emptyDraft(),
+      frequencyCount: 50,
+      frequencyPeriod: "days",
+      mainGoalCount: 18,
+      mainGoalPeriod: "days",
+      goalCount: 20,
+      goalPeriod: "days",
+      cutDownPerDay: 5,
+    });
+    assert.equal(summary.commitment, 18);
+  });
+
   it("uses custom ml math when a device size is present", () => {
     const summary = summarizePlan({
       ...emptyDraft(),

@@ -1,6 +1,6 @@
 import { getDailyLog, resetDailyLog } from "./daily-log-store";
 import { resetDraft, getDraft } from "./onboarding-store";
-import { persistNow, setHydrating } from "./persist-hook";
+import { persistNow, runExplicitWipe, setHydrating } from "./persist-hook";
 import { cancelPaceReminders } from "./pace-reminders";
 import { cancelDailyReminder } from "./reminders";
 import { getSavings, resetSavings } from "./savings-store";
@@ -53,6 +53,6 @@ export function deleteLocalData(now: Date = new Date()): Promise<void> {
   } finally {
     setHydrating(false);
   }
-  persistNow();
+  runExplicitWipe(() => persistNow());
   return cancelDailyReminder().then(() => cancelPaceReminders());
 }

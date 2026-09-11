@@ -3,7 +3,7 @@ import {
   historyDays,
   puffsPerDay,
 } from "./estimation";
-import { displayName, type OnboardingDraft } from "./onboarding";
+import { dailyGoalPuffs, displayName, mainGoalPuffs, type OnboardingDraft } from "./onboarding";
 
 export const PLAN_DISCLAIMER =
   "These numbers and later organ scores are motivational estimates, not a medical diagnosis or treatment plan.";
@@ -56,7 +56,10 @@ export function summarizePlan(draft: OnboardingDraft): PlanSummary {
     historyDays: historyDays(draft.durationCount, draft.durationPeriod),
     devicesPerWeek,
     spendPerWeek,
-    commitment: commitmentPuffs(daily, draft.cutDownPerDay),
+    commitment: Math.max(
+      mainGoalPuffs(draft),
+      commitmentPuffs(dailyGoalPuffs(draft), draft.cutDownPerDay),
+    ),
     strictness: draft.strictness,
     motivation: draft.motivation,
     quitWindow: draft.quitWindow,
