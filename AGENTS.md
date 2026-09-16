@@ -13,7 +13,7 @@ Before substantive planning, delegation, implementation, review, or release:
 1. Classify the task briefly by work type, reversibility, product/release impact, production impact, data/privacy exposure, and affected domains.
 2. Assign the safest proportionate risk tier and identify the evidence needed for completion.
 3. Load `.cursor/instructions/ROLES.md` only when role selection, delegation, a predecessor handoff, a security/quality gate, multi-domain reconciliation, or a release stage gate is relevant.
-4. For a raw idea, major change, resume, remediation, or closure, invoke `/launch-pipeline` and follow `.cursor/instructions/LAUCH.md`.
+4. For a raw idea, major change, resume, remediation, or closure, invoke `/launch-pipeline` and follow `.cursor/instructions/LAUNCH.md`.
 
 For role-governed work:
 
