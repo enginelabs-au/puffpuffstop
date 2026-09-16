@@ -46,7 +46,7 @@
 
 ## Active Instructions
 
-- `/instructions/LAUCH.md`
+- `/instructions/LAUNCH.md`
 - `/instructions/PROJECT_PLANNING.md`
 - `/instructions/ROLES.md`
 
