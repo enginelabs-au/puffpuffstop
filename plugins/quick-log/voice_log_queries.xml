@@ -102,12 +102,12 @@
         <item>reset in puffpuffstop</item>
         <item>reset on puffpuffstop</item>
         <item>reset puffs</item>
-        <item>reset today's log</item>
-        <item>reset today's log in puffpuffstop</item>
+        <item>reset today log</item>
+        <item>reset today log in puffpuffstop</item>
         <item>clear</item>
         <item>clear in puffpuffstop</item>
-        <item>clear today's log</item>
-        <item>wipe today's log</item>
+        <item>clear today log</item>
+        <item>wipe today log</item>
         <item>wipe in puffpuffstop</item>
         <item>clear on puffpuffstop</item>
     </string-array>

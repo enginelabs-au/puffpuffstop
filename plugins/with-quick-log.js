@@ -114,7 +114,20 @@ function withAndroidVoiceLog(config) {
   return withAndroidManifest(config, (mod) => {
     const manifest = mod.modResults;
     const app = AndroidConfig.Manifest.getMainApplicationOrThrow(manifest);
-    app.$["android:shortcuts"] = "@xml/shortcuts";
+    app["meta-data"] = app["meta-data"] ?? [];
+    const shortcutMetadata = app["meta-data"].find(
+      (item) => item.$?.["android:name"] === "android.app.shortcuts",
+    );
+    if (shortcutMetadata) {
+      shortcutMetadata.$["android:resource"] = "@xml/shortcuts";
+    } else {
+      app["meta-data"].push({
+        $: {
+          "android:name": "android.app.shortcuts",
+          "android:resource": "@xml/shortcuts",
+        },
+      });
+    }
     app.activity = app.activity ?? [];
     app.service = (app.service ?? []).filter(
       (service) => service.$?.["android:name"] !== ".QuickLogTileService",
@@ -126,7 +139,7 @@ function withAndroidVoiceLog(config) {
       app.activity.push({
         $: {
           "android:name": ".VoiceLogActivity",
-          "android:exported": "true",
+          "android:exported": "false",
           "android:excludeFromRecents": "true",
           "android:noHistory": "true",
           "android:taskAffinity": "",
@@ -173,6 +186,15 @@ function withAndroidVoiceLog(config) {
           },
         ],
       });
+    }
+    const voiceLogActivity = app.activity.find(
+      (activity) => activity.$?.["android:name"] === ".VoiceLogActivity",
+    );
+    if (voiceLogActivity) {
+      voiceLogActivity.$ = {
+        ...voiceLogActivity.$,
+        "android:exported": "false",
+      };
     }
     return mod;
   });

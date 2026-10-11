@@ -8,19 +8,39 @@ import android.os.Bundle
 class VoiceLogActivity : Activity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    val intentAction = intent?.action
+    if (intentAction !in setOf(LOG_ACTION, UNDO_ACTION, CLEAR_ACTION)) {
+      finish()
+      return
+    }
     val actionRaw = extraText("action") ?: intent?.data?.getQueryParameter("action")
     val countRaw = extraText("count") ?: intent?.data?.getQueryParameter("count")
     val parsedCount = parseCountOrNull()
-    val direction = when {
-      intent?.action == CLEAR_ACTION -> "clear"
-      intent?.action == LOG_ACTION -> "up"
+    val payloadDirection = when {
+      actionRaw == null -> null
       actionRaw in ADD_ACTIONS -> "up"
-      actionRaw == "reset" && parsedCount != null -> "down"
-      actionRaw in setOf("clear", "wipe", "everything") -> "clear"
-      actionRaw == "reset" -> "clear"
-      intent?.action == UNDO_ACTION -> if (countRaw in CLEAR_COUNTS) "clear" else "down"
-      actionRaw in SUB_ACTIONS -> if (countRaw in CLEAR_COUNTS) "clear" else "down"
-      else -> "up"
+      actionRaw in SUB_ACTIONS -> "down"
+      actionRaw in setOf("clear", "wipe", "everything", "reset") -> "clear"
+      else -> {
+        finish()
+        return
+      }
+    }
+    val payloadMatchesIntent = when (intentAction) {
+      LOG_ACTION -> payloadDirection == null || payloadDirection == "up"
+      UNDO_ACTION -> payloadDirection == null || payloadDirection == "down" || payloadDirection == "clear"
+      CLEAR_ACTION -> payloadDirection == null || payloadDirection == "clear"
+      else -> false
+    }
+    if (!payloadMatchesIntent) {
+      finish()
+      return
+    }
+    val direction = when (intentAction) {
+      LOG_ACTION -> "up"
+      UNDO_ACTION -> if (countRaw in CLEAR_COUNTS || payloadDirection == "clear") "clear" else "down"
+      CLEAR_ACTION -> "clear"
+      else -> return
     }
     val amount = if (direction == "clear") 0 else (parsedCount ?: 1)
     val result = VoiceSnapshot.apply(filesDir, direction, if (direction == "clear") 1 else amount)

@@ -1,0 +1,183 @@
+name: Mobile release
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build or submit
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - ios
+          - android
+      profile:
+        description: EAS build profile
+        required: true
+        default: production
+        type: choice
+        options:
+          - preview
+          - production
+      submit:
+        description: Owner-approved store submission (requires the protected environment)
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-release-${{ inputs.platform }}-${{ inputs.profile }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Reject unsafe submission combination
+        if: ${{ inputs.submit && inputs.profile != 'production' }}
+        run: |
+          echo "Store submission is only allowed with the production profile."
+          exit 1
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Expo Doctor
+        run: npx expo-doctor
+
+      - name: Expo dependency check
+        run: npx expo install --check
+
+  build:
+    name: Build ${{ inputs.platform }} (${{ inputs.profile }})
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      ios_id: ${{ steps.capture.outputs.ios_id }}
+      android_id: ${{ steps.capture.outputs.android_id }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          test -n "$EXPO_TOKEN" || {
+            echo "The EXPO_TOKEN GitHub Actions secret is required."
+            exit 1
+          }
+          npx eas-cli@16.28.0 build \
+            --platform "${{ inputs.platform }}" \
+            --profile "${{ inputs.profile }}" \
+            --non-interactive \
+            --wait \
+            --json > eas-build.json
+
+      - name: Capture immutable build IDs
+        id: capture
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const output = JSON.parse(fs.readFileSync("eas-build.json", "utf8"));
+          const builds = Array.isArray(output)
+            ? output
+            : Array.isArray(output.builds)
+              ? output.builds
+              : [output];
+          const ids = Object.fromEntries(
+            builds
+              .filter((build) => build && build.id && build.platform)
+              .map((build) => [String(build.platform).toLowerCase(), build.id]),
+          );
+          if (!ids.ios && !ids.android) {
+            throw new Error("EAS did not return an immutable build ID.");
+          }
+          const outputFile = process.env.GITHUB_OUTPUT;
+          for (const platform of ["ios", "android"]) {
+            if (ids[platform]) {
+              fs.appendFileSync(outputFile, `${platform}_id=${ids[platform]}\n`);
+            }
+          }
+          NODE
+
+  submit:
+    name: Submit ${{ inputs.platform }} to stores
+    needs: build
+    if: ${{ inputs.submit }}
+    runs-on: ubuntu-latest
+    environment:
+      name: store-release
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Submit the exact EAS build
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          test -n "$EXPO_TOKEN" || {
+            echo "The EXPO_TOKEN GitHub Actions secret is required."
+            exit 1
+          }
+          if [ "${{ inputs.platform }}" = "ios" ] || [ "${{ inputs.platform }}" = "all" ]; then
+            test -n "${{ needs.build.outputs.ios_id }}" || {
+              echo "The iOS build ID was not captured."
+              exit 1
+            }
+            npx eas-cli@16.28.0 submit \
+              --platform ios \
+              --id "${{ needs.build.outputs.ios_id }}" \
+              --non-interactive
+          fi
+          if [ "${{ inputs.platform }}" = "android" ] || [ "${{ inputs.platform }}" = "all" ]; then
+            test -n "${{ needs.build.outputs.android_id }}" || {
+              echo "The Android build ID was not captured."
+              exit 1
+            }
+            npx eas-cli@16.28.0 submit \
+              --platform android \
+              --id "${{ needs.build.outputs.android_id }}" \
+              --non-interactive
+          fi

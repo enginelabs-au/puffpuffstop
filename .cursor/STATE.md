@@ -2,7 +2,7 @@
 
 ## Current Objective
 
-- Phase 12 health wearables (in progress) plus hourly puff-goal pacing on onboarding, Settings, and Home.
+- Phase 13 release preparation is verified; finish owner-controlled EAS/store setup before any submission.
 
 ## Current Status
 
@@ -11,24 +11,26 @@
 
 ## Project Phase
 
-- Phases 0–9 verified on `origin/main`. Phases 10–11 verified locally; owner asked to commit and push.
+- Phases 0–12 are verified locally. Phase 13 release preparation is verified locally; store submission remains unauthorized.
 
 ## Active Plan
 
-- `docs/plans/phase_12_health-wearables_plan.md` (status: implementing)
+- `docs/plans/phase_13_release-prep_plan.md` (status: owner-gated)
+- Prior: `docs/plans/phase_12_health-wearables_plan.md` (status: implementing)
 - Prior: `docs/plans/phase_11_quick-log-hardware_plan.md` (status: verified)
 - Prior: `docs/plans/phase_10_friendly-science-onboarding_plan.md` (status: verified)
 - Closure: `docs/plans/final_implementation_checklist.md` (status: open)
 
 ## Active Workstream
 
-- `docs/workstreams/20260901-health-wearables/manifest.md`
-- Task ID: `20260901-health-wearables`
+- `docs/workstreams/20261011-mobile-store-release/manifest.md`
+- Task ID: `20261011-mobile-store-release`
 
 ## Active Role and Gate
 
-- Parent-led software implementation. Other roles skipped (owner-specified product).
-- Last integrated validation: `npm test` 142/142; `npm run typecheck` 0; `npm run lint` 0. Release 49: Home uses the Settings daily goal immediately (repairs a stale usual-based cap).
+- Parent-led release preparation. Software implementation is verified; owner-release-setup is the current gate.
+- Last integrated validation: `npm test` 142/142; `npm run typecheck` 0; `npm run lint` 0; Expo Doctor 21/21; Expo dependency check clean.
+- EAS project linked to `@camdouglass-team/puffpuffstop` (`fe183d74-3fd3-4e32-88c7-9d72c4534a9b`); no token or store credentials stored.
 
 ## Predecessor Handoff
 
@@ -52,7 +54,7 @@
 
 ## Active Items
 
-- Owner confirmed `c6a514b` on device. Pull forward goals + persist only, then commit and push as Cursor Agent. Do not force-push.
+- Owner confirmed build 49 and asked to commit and push as Cursor Agent. Published `9997054` on `origin/main`. Do not force-push.
 
 ## Files in Active Use
 
@@ -113,9 +115,10 @@
 
 ## Next Actions
 
-1. Do not store-submit.
-2. Do not force-push.
+1. Owner adds `EXPO_TOKEN`, configures Apple/Google distribution signing, and protects the `store-release` GitHub environment.
+2. Owner hosts the privacy policy, completes store accounts/listings/legal acceptance, and runs final iOS/Android device smoke tests.
+3. Do not store-submit or force-push.
 
 ## Last Updated
 
-- 2026-09-11 — Owner confirmed Home goals. Committing and pushing as Cursor Agent.
+- 2026-10-11 — Release preparation owner-gated; EAS project linked; unsigned iOS archive and debug-signed Android AAB built locally; manual EAS workflow added.
