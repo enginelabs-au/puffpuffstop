@@ -5,10 +5,10 @@
 - Execute agent-capable work directly; do not delegate routine implementation or investigation to the user.
 - Use the sequential planning lifecycle for new projects and major implementations: phase 0 maps the full project, each later phase plan is generated only after the previous phase is implemented and verified, and closure produces `docs/plans/final_implementation_checklist.md`.
 - Defer non-blocking human-only actions and missing credential values to the final phase while completing all possible code, configuration, adapters, tests, documentation, and environment-variable wiring first.
-- Read `/AGENTS.md` first on every substantive turn and route detailed instructions through `/INSTRUCTIONS.md`.
-- Use `/launch-pipeline` and `/instructions/LAUCH.md` as the linked entry point for a raw idea, major change, resume, remediation, or closure.
-- Launch is preflight-first and bootstrap-gated: run read-only `/skills/launch-pipeline/scripts/preflight.mjs` before mode selection. Every pre-Build Cursor plan must close with `bash .cursor/scripts/bootstrap.sh` as the first post-Build action, then run that command after Build or explicit Agent-mode implementation authorization.
-- Use adaptive role routing for substantive work: record required/skipped canonical roles, require role charters before action, and preserve evidence-backed handoffs under `docs/workstreams/`.
+- Read `/AGENTS.md` once per session, reuse it while it remains in context, re-read only after change or context loss, and route detailed instructions through `/INSTRUCTIONS.md`.
+- Use `/launch-pipeline` and `/instructions/LAUNCH.md` only for explicitly requested complete lifecycle execution; natural-language project planning can load the planning instructions without launching that pipeline.
+- Run read-only preflight when the host permits it. Bootstrap only when materialization or installation/repair is needed and implementation is authorized; Ask and Plan remain read-only. Already-ready workspaces need no repeated bootstrap.
+- Use formal role routing and workstream artifacts when multi-role delivery or consequential release gates require them. Ordinary bounded changes and reviews need no six-role matrix or exhaustive role plans.
 - Treat prompts and role identities as guidance, not production authorization; deterministic policy and external access controls govern sensitive actions.
 - Never store passwords, tokens, private keys, or secret values in agent markdown, plans, memories, logs, or templates.
 - HARD RULE: never use the owner's personal Gmail or any personal/private email. Always commit and author as `Cursor Agent <cursoragent@cursor.com>` via `GIT_AUTHOR_*` / `GIT_COMMITTER_*`. Never change git config. Canonical note: `/rules/git-identity-cursor-anonymous.mdc`.
@@ -44,7 +44,7 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - Agent workspace layout: `/memory/runbooks/agent-workspace.md`
 - Bootstrap procedure: `/memory/runbooks/agent-config-bootstrap.md`
 - iOS device debug / offline Release build: `/memory/runbooks/ios-device-debug-build.md`
-- Latest continuation: `/memory/memories/2026-09-11-continuation.md`
+- Latest continuation: `/memory/memories/2026-10-11-continuation.md`
 
 ## Product architecture (PuffPuffStop)
 
@@ -60,3 +60,4 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 
 - Vercel: `/skills/vercel-deploy-workflow/SKILL.md` and `/memory/runbooks/vercel-workflow.md`
 - Supabase: `/skills/supabase-linked-migrations/SKILL.md` and `/memory/runbooks/supabase-cli-macos.md`
+- Local runbook: `memory/runbooks/snapshot-persist-guard.md`

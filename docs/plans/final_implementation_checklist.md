@@ -2,15 +2,18 @@
 document: final_implementation_checklist
 status: open
 created: 2026-08-18
-updated: 2026-08-18
+updated: 2026-10-11
 ---
 
 # Final Implementation Checklist
 
 ## 1. Completion declaration
 
-- [x] All planned agent-executable phases (0–10) are implemented.
-- [x] All available automated validation passes (`lint` 0, `test` 63/63, `typecheck` 0).
+- [x] All planned agent-executable phases (0–13) are implemented.
+- [x] JavaScript validation passes (`lint` 0, `test` 142/142, `typecheck` 0).
+- [x] Expo dependency validation passes (`expo-doctor` 21/21 and `expo install --check`).
+- [x] Android Release AAB bundles locally without store signing credentials.
+- [x] iOS Release archive completes locally with signing disabled.
 - [x] Unverified results are listed below.
 
 ## 2. Outstanding defects or unverified items
@@ -21,6 +24,9 @@ updated: 2026-08-18
 | SEC-P0-002 Expo `image-size` advisories | Toolchain DoS in Metro | `npm audit` 10 high / 8 moderate / 0 critical | Refresh Expo later; do not force-fix | Owner |
 | SEC-P4-001 unencrypted local snapshot | On-device JSON readable if filesystem is accessed | `src/data/persist.ts` | Accept device lock or add encryption later | Owner |
 | No simulator/device runtime recording | Persist/haptics/reminders unproven on a physical device | Node tests use memory/no-op drivers | Run iOS/Android smoke after a native rebuild | Owner |
+| Local Android artifact is debug-signed | A store upload must use Play App Signing/EAS credentials | `android/app/build/outputs/bundle/release/app-release.aab` | Configure EAS/Play signing and build through EAS | Owner |
+| Local iOS archive is unsigned | An App Store upload needs Apple distribution signing and provisioning | `/tmp/PuffPuffStop.xcarchive` | Configure Apple credentials in EAS and build a signed archive | Owner |
+| EAS project is linked but unsigned CI is not configured | CI builds need an Expo token; store artifacts still need owner signing | `@camdouglass-team/puffpuffstop`, project ID `fe183d74-3fd3-4e32-88c7-9d72c4534a9b` | Add `EXPO_TOKEN`, configure signing, then run a signed build | Owner |
 | No hosted privacy URL | Store listings need a public policy page | `docs/legal/privacy.html` ready to host | Publish HTTPS URL and set `EXPO_PUBLIC_PRIVACY_POLICY_URL` | Owner |
 | Listing drafts unpublished | Copy is local only | `docs/store/ios-listing.md`, `docs/store/android-listing.md` | Paste only after residual acceptance | Owner |
 
@@ -31,9 +37,9 @@ updated: 2026-08-18
 | product-manager-subagent | required | PASS (inherited PRD lock) | `product-manager-subagent/handoff.md` |
 | ui-ux-developer-subagent | required | PASS (haptic + Reduce Motion) | `ui-ux-developer-subagent/handoff.md` |
 | software-engineer-subagent | required | PASS phases 0–5 | `software-engineer-subagent/handoff.md` |
-| security-engineer-subagent | required | CONDITIONAL | `artifacts/phase-4-review.md`, `artifacts/phase-5-review.md` |
+| security-engineer-subagent | required | CONDITIONAL | `docs/workstreams/20261011-mobile-store-release/security-engineer-subagent/handoff.md` |
 | growth-marketing-subagent | required for listing drafts | PASS drafts only; no campaigns | `docs/store/` |
-| project-lead-subagent | required | CONDITIONAL until owner accepts residuals | `delivery/owner-handoff.md` |
+| project-lead-subagent | required | CONDITIONAL until owner completes EAS/signing/store actions | `docs/workstreams/20261011-mobile-store-release/project-lead-subagent/handoff.md` |
 
 - [x] No open `BLOCKED` verdicts. Residuals remain CONDITIONAL.
 - [x] Owner handoff links residuals and this checklist.
@@ -49,10 +55,13 @@ Never include secret values.
 | EXPO_PUBLIC_SUPABASE_ANON_KEY | Supabase | EAS, never committed | Future client auth | No | RLS tests after first real schema |
 | SUPABASE_PROJECT_REF | Supabase | CI/CLI only | Linked migrations later | No | `supabase link` |
 | SUPABASE_ACCESS_TOKEN | Supabase | Secret manager only | CLI if used | No | Never git |
-| EAS_PROJECT_ID | Expo | EAS, not git secrets | Build profiles | No | `eas init` then preview build |
+| EAS_PROJECT_ID | Expo | `app.json` non-secret project ID | Build profiles | Yes | `eas project:info` shows `@camdouglass-team/puffpuffstop` |
 | EXPO_PUBLIC_PRIVACY_POLICY_URL | Owner web | EAS / `.env` | HTTPS hosted policy | No | Settings shows hosted link |
 | EXPO_PUBLIC_SENTRY_DSN | Sentry (optional) | Reserved unused | Crash reporting later | No | Leave empty until approved |
 | EXPO_PUBLIC_FITBIT_CLIENT_ID | Fitbit developer app | EAS / local `.env` | Direct Fitbit OAuth; Health still works without it | No | Connect Fitbit in Settings exchanges a PKCE code |
+| EXPO_TOKEN | Expo | GitHub Actions secret only | Authenticate future EAS builds/submissions | No | Manual workflow reaches EAS |
+| ASC_APP_ID | App Store Connect | EAS/CI configuration | Identify the iOS store app for submission | No | EAS submit in protected environment |
+| GOOGLE_SERVICE_ACCOUNT_JSON | Google Play | EAS/CI secret manager only | Authenticate Android submission if not using EAS-managed credentials | No | EAS submit in protected environment |
 
 ## 5. Human-only account, permission, billing, or legal actions
 
@@ -73,8 +82,12 @@ Never include secret values.
 
 ### Deployment
 
-- [ ] `eas init` and preview build only after owner approval
-- [ ] Production submit only after store accounts and residual acceptance
+- [x] Create/link the EAS project and commit only its non-secret `extra.eas.projectId`.
+- [ ] Add `EXPO_TOKEN` to GitHub Actions; the workflow is manual and builds by default.
+- [ ] Configure the protected GitHub `store-release` environment before enabling submission.
+- [ ] Configure Apple distribution and Google Play signing credentials in EAS.
+- [ ] Production submit only after store accounts, privacy URL, legal review, and residual acceptance.
+- [x] `.github/workflows/mobile-release.yml` validates first, builds with EAS, and submits only when the owner explicitly enables `submit`.
 
 ### DNS and domains
 
@@ -109,8 +122,11 @@ This checklist is **not** store-submit authorization.
 
 ## 9. Final evidence
 
-- Plans: `docs/plans/phase_0_foundations_plan.md` through `docs/plans/phase_9_app-identity-journey_plan.md`
-- Blueprint: `docs/blueprints/2026-08-18_puffpuffstop.md`
-- Workstream: `docs/workstreams/20260818-puffpuffstop-mobile-mvp/manifest.md`
-- Validation: `npm run lint` 0; `npm test` 58 pass; `npm run typecheck` 0
-- Commits: phase 6 `29bc181`; phase 7 `dec05c3`. Phases 8–9 commit with this merge.
+- Release plan: `docs/plans/phase_13_release-prep_plan.md`
+- Release workstream: `docs/workstreams/20261011-mobile-store-release/manifest.md`
+- Validation: `npm test` 142/142; `npm run typecheck` 0; `npm run lint` 0.
+- Expo validation: `npx expo-doctor` 21/21; `npx expo install --check` clean.
+- Android artifact: `android/app/build/outputs/bundle/release/app-release.aab` (local debug signing only; SHA-256 `9cfee80099484f2dd911e5b226f34f56437c8daea8f021e401a88dc7b1178b8a`).
+- iOS artifact: `/tmp/PuffPuffStop.xcarchive` (unsigned local archive).
+- Automation: `.github/workflows/mobile-release.yml` (manual, build-first, protected submission gate).
+- This checklist is not store-submit authorization.
