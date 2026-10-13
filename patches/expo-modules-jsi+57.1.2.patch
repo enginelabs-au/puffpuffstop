@@ -5,7 +5,7 @@ index 77b0525..6d6a80d 100644
 @@ -86,14 +86,10 @@ let package = Package(
        swiftSettings: [
          .interoperabilityMode(.Cxx),
-
+ 
 -        // Enable some upcoming features that improve ergonomics and reduce executor hoppings
 -        // https://github.com/swiftlang/swift-evolution/blob/main/proposals/0461-async-function-isolation.md
 -        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
@@ -27,29 +27,7 @@ index 77b0525..6d6a80d 100644
 +  swiftLanguageModes: [.v5],
    cxxLanguageStandard: .cxx20
  )
-
-diff --git a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI-Cxx/include/RuntimeScheduler.h b/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI-Cxx/include/RuntimeScheduler.h
-index 6115e87..957527c 100644
---- a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI-Cxx/include/RuntimeScheduler.h
-+++ b/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI-Cxx/include/RuntimeScheduler.h
-@@ -50,7 +50,7 @@ public:
-    `scheduleTask` dispatches through `fn`, which the host implements against
-    the real react::RuntimeScheduler.
-    */
--  SWIFT_RETURNS_RETAINED RuntimeScheduler(void *scheduler, ScheduleFn fn) noexcept
-+  RuntimeScheduler(void *scheduler, ScheduleFn fn) noexcept
-       : nativeScheduler(scheduler), scheduleFn(fn) {}
-
-   /**
-@@ -58,7 +58,7 @@ public:
-    caller's thread — intended for standalone runtimes (e.g. tests) that have
-    no React scheduler.
-    */
--  SWIFT_RETURNS_RETAINED RuntimeScheduler() {}
-+  RuntimeScheduler() {}
-
-   RuntimeScheduler(const RuntimeScheduler &) = delete;
-
+ 
 diff --git a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/Values/JavaScriptPromise.swift b/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/Values/JavaScriptPromise.swift
 index 434c379..1709442 100644
 --- a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/Values/JavaScriptPromise.swift
