@@ -24,7 +24,7 @@ Operational history belongs in `/memory/memories/YYYY-MM-DD-continuation.md` or 
 - Operating contract: `/AGENTS.md`
 - Startup: `/BOOTSTRAP.md` and `/scripts/bootstrap.sh`
 - Instruction router: `/INSTRUCTIONS.md`
-- Product lifecycle launcher: `/instructions/LAUCH.md` and `/skills/launch-pipeline/SKILL.md`
+- Product lifecycle launcher: `/instructions/LAUNCH.md` and `/skills/launch-pipeline/SKILL.md`
 - Project planning: `/instructions/PROJECT_PLANNING.md`
 - Product strategy: `/instructions/STRATEGY.md`
 - Sub-agent orchestration: `/instructions/SUBAGENTS.md`
