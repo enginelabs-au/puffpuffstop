@@ -48,7 +48,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Reject unsafe submission combination
         if: ${{ inputs.submit && inputs.profile != 'production' }}
@@ -89,7 +89,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build with EAS
         env:
@@ -151,7 +151,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Submit the exact EAS build
         env:
