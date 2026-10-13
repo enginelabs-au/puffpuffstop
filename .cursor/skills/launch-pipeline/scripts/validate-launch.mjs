@@ -36,7 +36,7 @@ const requiredFiles = [
   ".cursor/SKILLS.md",
   ".cursor/TOOLS.md",
   ".cursor/memory/MEMORY.md",
-  ".cursor/instructions/LAUCH.md",
+  ".cursor/instructions/LAUNCH.md",
   ".cursor/instructions/STRATEGY.md",
   ".cursor/instructions/PROJECT_PLANNING.md",
   ".cursor/instructions/SUBAGENTS.md",
@@ -84,6 +84,7 @@ function walkFiles(relativeDirectory) {
     withFileTypes: true,
   })) {
     const relativePath = `${relativeDirectory}/${entry.name}`;
+    if (entry.name === ".DS_Store" || entry.name === "Thumbs.db") continue;
     if (entry.isDirectory()) {
       files.push(...walkFiles(relativePath));
     } else {
@@ -102,12 +103,14 @@ function classifyControlPlaneFile(relativePath) {
   if (
     /^\.cursor\/rules\/[^/]+\.mdc$/.test(relativePath) ||
     /^\.cursor\/agents\/[^/]+\.md$/.test(relativePath) ||
+    /^\.cursor\/commands\/(?:[^/]+\/)*[^/]+\.md$/.test(relativePath) ||
     /^\.cursor\/skills\/[^/]+\/SKILL\.md$/.test(relativePath) ||
     [
       ".cursor/hooks.json",
       ".cursor/cli.json",
       ".cursor/sandbox.json",
       ".cursor/permissions.json",
+      ".cursor/mcp.json",
     ].includes(relativePath)
   ) {
     return { kind: "native" };
@@ -125,6 +128,10 @@ function classifyControlPlaneFile(relativePath) {
     [
       ".cursor/AGENTS.md",
       linked("routed", ["AGENTS.md"], ".cursor/AGENTS.md"),
+    ],
+    [
+      ".cursor/PROJECT.md",
+      linked("routed", ["AGENTS.md", ".cursor/rules/00-core-routing.mdc"], "PROJECT.md"),
     ],
     [
       ".cursor/BOOTSTRAP.md",
@@ -204,7 +211,7 @@ function classifyControlPlaneFile(relativePath) {
       [
         ".cursor/INSTRUCTIONS.md",
         ".cursor/skills/launch-pipeline/SKILL.md",
-        ".cursor/instructions/LAUCH.md",
+        ".cursor/instructions/LAUNCH.md",
       ],
       `/instructions/${name}`,
     );
@@ -246,6 +253,24 @@ function classifyControlPlaneFile(relativePath) {
     return { kind: "generated-history" };
   }
 
+  // Consumer-owned extensions stay at their original paths. Require an exact
+  // Markdown link in the project index; do not silently bless arbitrary files.
+  try {
+    const index = read(".cursor/PROJECT.md");
+    const localPath = relativePath.replace(/^\.cursor\//, "");
+    const targets = [...index.matchAll(/\]\(\<([^>\n]+)\>\)|\]\(([^)\n]+)\)/g)].map(
+      (match) => match[1] ?? match[2],
+    );
+    const routedDirectory = targets.find((target) =>
+      target.endsWith("/") && !target.startsWith("/") && !target.includes("..") &&
+      target !== "./" && localPath.startsWith(target));
+    if (targets.includes(localPath) || targets.includes(relativePath)) {
+      return linked("project-local", [".cursor/PROJECT.md"], localPath);
+    }
+    if (routedDirectory) {
+      return linked("project-local", [".cursor/PROJECT.md"], routedDirectory);
+    }
+  } catch { /* No consumer extension index. */ }
   return { kind: "invalid" };
 }
 
@@ -276,6 +301,11 @@ function validateReachability() {
         return false;
       }
     });
+
+    if (!referenced && /^\.cursor\/memory\/runbooks\/[^/]+\.md$/.test(relativePath)) {
+      process.stderr.write(`launch validation warning: ${relativePath} is a project-local runbook not listed in MEMORY.md or TOOLS.md\n`);
+      continue;
+    }
 
     expect(
       referenced,
@@ -325,7 +355,7 @@ for (const roleId of roleIds) {
 
 const references = new Map([
   [
-    ".cursor/instructions/LAUCH.md",
+    ".cursor/instructions/LAUNCH.md",
     [
       "AGENTS.md",
       "/AGENTS.md",
@@ -355,7 +385,7 @@ const references = new Map([
     [
       "name: launch-pipeline",
       "disable-model-invocation: true",
-      ".cursor/instructions/LAUCH.md",
+      ".cursor/instructions/LAUNCH.md",
       ".cursor/scripts/bootstrap.sh",
       "First post-Build action",
       "bash .cursor/scripts/bootstrap.sh",
@@ -379,17 +409,17 @@ const references = new Map([
       "scripts/validate-agent-config.mjs",
     ],
   ],
-  [".cursor/instructions/PROJECT_PLANNING.md", ["/instructions/LAUCH.md"]],
-  [".cursor/instructions/STRATEGY.md", ["/instructions/LAUCH.md"]],
-  [".cursor/instructions/SUBAGENTS.md", ["/instructions/LAUCH.md"]],
+  [".cursor/instructions/PROJECT_PLANNING.md", ["/instructions/LAUNCH.md"]],
+  [".cursor/instructions/STRATEGY.md", ["/instructions/LAUNCH.md"]],
+  [".cursor/instructions/SUBAGENTS.md", ["/instructions/LAUNCH.md"]],
   [".cursor/USER.md", ["/launch-pipeline"]],
-  [".cursor/SKILLS.md", ["launch-pipeline", "/instructions/LAUCH.md"]],
-  [".cursor/TOOLS.md", ["/launch-pipeline", "/instructions/LAUCH.md"]],
-  [".cursor/memory/MEMORY.md", ["/launch-pipeline", "/instructions/LAUCH.md"]],
+  [".cursor/SKILLS.md", ["launch-pipeline", "/instructions/LAUNCH.md"]],
+  [".cursor/TOOLS.md", ["/launch-pipeline", "/instructions/LAUNCH.md"]],
+  [".cursor/memory/MEMORY.md", ["/launch-pipeline", "/instructions/LAUNCH.md"]],
   [
     ".cursor/BOOTSTRAP.md",
     [
-      "/instructions/LAUCH.md",
+      "/instructions/LAUNCH.md",
       "/skills/launch-pipeline/SKILL.md",
       "docs/blueprints/",
       "docs/plans/",

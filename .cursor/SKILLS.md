@@ -18,9 +18,9 @@ The following are mandatory instruction modes, not optional skills:
 - Product strategy: `/instructions/STRATEGY.md`
 - Sub-agent orchestration: `/instructions/SUBAGENTS.md`
 - Adaptive role catalog and stage gates: `/instructions/ROLES.md`
-- Product lifecycle launcher: `/instructions/LAUCH.md`, invoked only through `/launch-pipeline` and `/skills/launch-pipeline/SKILL.md`
+- Product lifecycle launcher: `/instructions/LAUNCH.md`, invoked only through `/launch-pipeline` and `/skills/launch-pipeline/SKILL.md`
 
-Load planning, strategy, sub-agent, and role bodies through `/INSTRUCTIONS.md`. Load `/instructions/LAUCH.md` through `/launch-pipeline`; it is also registered in `/INSTRUCTIONS.md`.
+Load planning, strategy, sub-agent, and role bodies through `/INSTRUCTIONS.md`. Load `/instructions/LAUNCH.md` through `/launch-pipeline`; it is also registered in `/INSTRUCTIONS.md`.
 
 Every activated role must inspect this registry and load each skill whose description matches its charter before inventing a new procedure. Record skills actually used, relevant limitations, and validation evidence in the role handoff. A role name does not grant tool access or turn a procedure into a skill.
 
@@ -121,6 +121,7 @@ If a procedure is still experimental or not outcome-stable, keep it in a **runbo
 | ID | One-line purpose | Detail |
 |----|------------------|--------|
 | `launch-pipeline` | Start, resume, remediate, or close the complete linked product-delivery pipeline | [SKILL.md](skills/launch-pipeline/SKILL.md) |
+| `git-safety` | Force Cursor anonymous git identity and block secrets from git | [SKILL.md](skills/git-safety/SKILL.md) |
 | `supabase-linked-migrations` | SQL migrations to linked Supabase; local/remote alignment | [SKILL.md](skills/supabase-linked-migrations/SKILL.md) |
 | `vercel-deploy-workflow` | Next.js → Vercel via Git or CLI; env; MCP optional | [SKILL.md](skills/vercel-deploy-workflow/SKILL.md) |
 

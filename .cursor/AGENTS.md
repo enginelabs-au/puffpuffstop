@@ -20,38 +20,33 @@ Apply instructions in this order:
 
 When two instructions at the same level conflict, use the most specific and most recent. Never silently discard a material requirement; record the resolution in `STATE.md` when it affects execution.
 
-## 2. Mandatory session startup
+## 2. Session startup
 
-At the beginning of every new agent session, before project work:
+At the beginning of a new lead-agent session, before project work:
 
-1. Read `/AGENTS.md`.
-2. Read `/BOOTSTRAP.md`.
-3. Run read-only `node .cursor/skills/launch-pipeline/scripts/preflight.mjs`. Do not run `/scripts/bootstrap.sh` in Ask or Plan Mode. After Build or explicit Agent-mode implementation authorization, run `/scripts/bootstrap.sh` as the first mutation.
-4. Read every file under `/instructions/` and `/rules/` once to establish the installed operating surface.
-5. Read the per-turn context set in section 3.
-6. Inspect `STATE.md` for an active plan, active instructions, and incomplete work before accepting a new execution path.
+1. Read this file once.
+2. Run read-only `node .cursor/skills/launch-pipeline/scripts/preflight.mjs` when the host mode exposes a permitted execution tool. Ask Mode may not provide one: inspect available files, report preflight as not run, and defer execution until a capable mode. Never change modes or bypass a restriction merely to run it. Do not run `/scripts/bootstrap.sh` in Ask or Plan Mode. After Build or explicit implementation authorization, run bootstrap only when preflight reports required materialization or installation/repair is explicitly in scope; an already-ready workspace needs no bootstrap on each session.
+3. Inspect `/STATE.md` for an active plan, active instructions, files in active use, and open blockers before accepting a new execution path. Read the files it lists only when they bear on the current task.
+4. Read `/BOOTSTRAP.md` only when materialization, installation, or bootstrap failure handling is in scope.
 
-The bootstrap is idempotent. It may create missing directories, indexes, and compatibility links, but must not overwrite non-empty project files.
+Native rules under `/rules/` are injected by the client and are not re-read. Detailed instruction bodies under `/instructions/` load through `/INSTRUCTIONS.md` when their activation conditions match; do not read them all at startup.
 
-## 3. Mandatory per-turn read contract
+The bootstrap is idempotent. It may create missing directories, indexes, seeded root files, and compatibility links, but must not overwrite non-empty project files.
 
-Each new user message starts a new agent turn. Before any substantive response or any tool other than reading this file:
+Bounded delegates are not new lead sessions. They consume the parent's scoped task packet and applicable native instructions; they do not run startup preflight/bootstrap or read shared state/history unless their assignment requires it. Missing task evidence must be requested or retrieved within scope, not replaced with a full-corpus read.
 
-1. Read `/AGENTS.md` first, even if it was read earlier in the session.
-2. Then read all existing core agent files:
-   - `/USER.md`
-   - `/STATE.md`
-   - `/INSTRUCTIONS.md`
-   - `/SKILLS.md`
-   - `/TOOLS.md`
-   - `/memory/MEMORY.md`
-3. Read every active file in `/memory/blockers/`.
-4. Read the files listed under `Active Instructions`, `Active Plan`, and `Files in Active Use` in `STATE.md` when relevant to the turn.
-5. Read relevant linked runbooks, skills, decisions, blueprints, or prior plans before repeating related work.
+## 3. Loading and reread policy
 
-Do not read the full `BOOTSTRAP.md`, every historical memory, every skill body, or every instruction body on every turn unless routed by the core files or needed for the task. This keeps the control plane complete without loading inactive detail.
+Instructions already present in context remain in force. A new user message does not by itself require re-reading any control file. Re-read a control file only when:
 
-A pure acknowledgment that uses no tools and has no project consequence is the only exception.
+- the session, context window, or compaction reset it;
+- the file changed (your own edit, a validator or hook report, or a differing revision);
+- a new scope became relevant (a mode in `/INSTRUCTIONS.md`, a skill, a runbook, a blocker);
+- exact wording matters for a consequential decision.
+
+Consult on demand rather than by schedule: `/USER.md` when a choice depends on standing preferences; `/SKILLS.md` before improvising a procedure that may already exist; `/TOOLS.md` when selecting deployment, database, integration, or unfamiliar tooling; `/memory/MEMORY.md` and linked runbooks when a prior decision or exact procedure may apply; `/memory/blockers/` when resuming or when a known failure recurs. Live permission and authorization checks are never satisfied by an earlier read.
+
+Never assume material dropped from context is remembered, and never re-read the whole corpus to avoid that uncertainty: re-read the specific file. After compaction, restore from `/STATE.md` and the files it lists.
 
 ## 4. Autonomous execution policy
 
@@ -80,7 +75,7 @@ Use the phased planning workflow for a new project, product idea, major feature,
 
 For phased work:
 
-1. Follow `/instructions/LAUCH.md`: preflight first, then bootstrap after Build or explicit Agent-mode implementation authorization.
+1. Follow `/instructions/PROJECT_PLANNING.md` for natural-language phased work. Activate `/instructions/LAUNCH.md` only when the user explicitly invokes `/launch-pipeline` or explicitly asks to run that named lifecycle. A natural planning, strategy, or resume request alone does not activate the complete launcher.
 2. Determine whether `/instructions/STRATEGY.md` should be activated for market, product, architecture, or go-to-market discovery.
 3. Create `docs/plans/phase_0_foundations_plan.md` before application implementation.
 4. Phase 0 must describe the complete project from start to finish, define all expected later phases, establish architecture and validation foundations, and end with the exact prompt for generating the next phase plan.
@@ -94,9 +89,11 @@ Detailed rules and templates are routed through `/INSTRUCTIONS.md`.
 
 ## 6. Adaptive role pipeline
 
-For substantive work, classify the request by product impact, affected domains, reversibility, data/privacy exposure, production impact, and release significance before delegating or implementing. Activate `/instructions/ROLES.md` when a specialist role, multi-domain handoff, or stage gate is relevant.
+Classify work proportionately by affected domains, reversibility, security/privacy exposure, and release impact. An ordinary bounded change or read-only investigation needs no role catalog, six-role matrix, workstream, or exhaustive role plan. A bounded scout or reviewer can use `/instructions/SUBAGENTS.md` without entering the formal pipeline.
 
-Use the adaptive pipeline rather than invoking every role mechanically:
+Activate `/instructions/ROLES.md` for an explicitly requested formal role pipeline, coordinated multi-role delivery with material handoffs, or consequential security/release gates. Reading a specialist's domain guidance alone does not activate the entire pipeline. Within an activated formal pipeline, preserve its required security checks and owner gates.
+
+For an activated formal pipeline:
 
 1. Create or resume a task workstream under `docs/workstreams/<task-id>/`.
 2. Record the risk tier, required roles, skipped roles with reasons, dependency order, and current gate in its manifest.
@@ -115,13 +112,13 @@ Before delegating, give each sub-agent:
 
 - a bounded objective and explicit non-goals
 - exact repository paths it may read or edit
-- required context files, including `/AGENTS.md`, `/INSTRUCTIONS.md`, `/instructions/ROLES.md` when role-based, and the active workstream artifacts
+- only the applicable context and source references; supply relevant instructions already known rather than requiring every delegate to reread `/AGENTS.md`, `/INSTRUCTIONS.md`, shared state, or history; include `/instructions/ROLES.md` sections and workstream artifacts only for a formal role assignment
 - expected output format and validation evidence
 - ownership boundaries that avoid concurrent edits to the same file
 
 Suitable delegations include research, repository mapping, test design, security review, documentation audit, migration analysis, and independent verification. Do not delegate a vague whole-project objective or use sub-agents merely to avoid reasoning.
 
-After delegation, the lead agent must inspect outputs, resolve conflicts, run integrated validation, update plans/state, and reject unsupported conclusions.
+After delegation, the lead agent must inspect outputs, resolve conflicts, run relevant integrated validation, update existing plans/state when materially changed, and reject unsupported conclusions. Do not create persistent role artifacts solely because a bounded delegate was used.
 
 ## 8. File roles
 
@@ -130,7 +127,7 @@ After delegation, the lead agent must inspect outputs, resolve conflicts, run in
 - `/INSTRUCTIONS.md` — instruction registry and activation router
 - `/instructions/` — detailed task-mode instructions
 - `/instructions/ROLES.md` — canonical adaptive role catalog and stage-gate contract
-- `/instructions/LAUCH.md` — product lifecycle launcher
+- `/instructions/LAUNCH.md` — product lifecycle launcher
 - `/skills/launch-pipeline/SKILL.md` — explicit-only native entry
 - `/agents/` — thin native Cursor role adapters
 - `/USER.md` — durable user preferences and standing directives
@@ -154,7 +151,7 @@ Do not duplicate long content across roles. Link to the canonical source.
 
 Update `STATE.md` whenever the objective, active phase, active files, blockers, attempts, decisions, or next actions materially change.
 
-After substantive work:
+After substantive work that changes resumable project state (not a read-only answer or isolated bounded report):
 
 - update the active plan status and evidence
 - append a concise entry to the current UTC day file at `/memory/memories/YYYY-MM-DD-continuation.md`
@@ -169,7 +166,7 @@ Preserve state before phase transitions, long tool runs, risky changes, and like
 
 Before coding, inspect existing patterns and define verifiable acceptance criteria. Prefer the simplest implementation that satisfies the plan. Make surgical changes, avoid speculative abstractions, and do not refactor unrelated code.
 
-Validate using the strongest available checks: tests, type checks, linting, builds, migrations, runtime checks, security checks, and direct inspection. Do not claim completion without evidence. If validation is unavailable, state exactly what remains unverified in the active plan and final checklist.
+Validate with checks proportionate to the changed behavior and risk: tests, type checks, linting, builds, migrations, runtime/security checks, or direct inspection as relevant. Do not run every available suite for a reversible wording change. Do not claim completion without evidence. If validation is unavailable, state exactly what remains unverified in the task result and any active plan/checklist.
 
 ## 11. Completion standard
 
@@ -177,7 +174,7 @@ A task is complete only when:
 
 - requested implementation exists
 - relevant checks pass or limitations are recorded
-- every required role gate has a materialized evidence-backed verdict and every skipped role has a recorded reason
-- plans and state reflect reality
+- for an activated formal pipeline, every required role gate has a materialized evidence-backed verdict and every skipped role has a recorded reason
+- any active plans and materially affected state reflect reality
 - no avoidable agent-executable work is deferred to the user
-- outstanding manual actions and environment-variable names are consolidated into the final checklist rather than scattered through the project
+- for phased delivery, outstanding manual actions and environment-variable names are consolidated into the final checklist; bounded work reports remaining actions directly without creating unnecessary lifecycle files

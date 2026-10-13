@@ -14,7 +14,6 @@ const scriptDir = dirname(scriptPath);
 const defaultRepoRoot = resolve(scriptDir, "../../../..");
 
 const requiredControlFiles = [
-  "AGENTS.md",
   ".cursor/README.md",
   ".cursor/AGENTS.md",
   ".cursor/BOOTSTRAP.md",
@@ -24,7 +23,7 @@ const requiredControlFiles = [
   ".cursor/SKILLS.md",
   ".cursor/TOOLS.md",
   ".cursor/memory/MEMORY.md",
-  ".cursor/instructions/LAUCH.md",
+  ".cursor/instructions/LAUNCH.md",
   ".cursor/instructions/STRATEGY.md",
   ".cursor/instructions/PROJECT_PLANNING.md",
   ".cursor/instructions/SUBAGENTS.md",
@@ -34,6 +33,13 @@ const requiredControlFiles = [
   ".cursor/skills/launch-pipeline/SKILL.md",
   ".cursor/skills/launch-pipeline/scripts/preflight.mjs",
   ".cursor/skills/launch-pipeline/scripts/validate-launch.mjs",
+  ".cursor/templates/root-agents.md",
+  ".cursor/templates/cursorignore",
+  ".cursor/templates/docs-readme.md",
+  ".cursor/templates/plans-readme.md",
+  ".cursor/templates/workstreams-readme.md",
+  ".cursor/templates/agent-governance-operator-setup.md",
+  ".cursor/skills/git-safety/payloads/agent-governance.yml",
 ];
 
 const materializedDirectories = [
@@ -46,9 +52,16 @@ const materializedDirectories = [
 ];
 
 const seededIndexes = [
+  "AGENTS.md",
+  ".cursorignore",
   "docs/README.md",
   "docs/plans/README.md",
   "docs/workstreams/README.md",
+  "docs/handover/agent-governance-operator-setup.md",
+  ".github/workflows/agent-governance.yml",
+  ".githooks/pre-commit",
+  ".githooks/commit-msg",
+  ".githooks/pre-push",
 ];
 
 const jsonFiles = [
@@ -67,6 +80,15 @@ function isNonEmptyFile(repoRoot, relativePath) {
   try {
     return statSync(pathFor(repoRoot, relativePath)).isFile() &&
       statSync(pathFor(repoRoot, relativePath)).size > 0;
+  } catch {
+    return false;
+  }
+}
+
+function pathExists(repoRoot, relativePath) {
+  try {
+    lstatSync(pathFor(repoRoot, relativePath));
+    return true;
   } catch {
     return false;
   }
@@ -237,7 +259,10 @@ export function collectPreflight(repoRoot = defaultRepoRoot) {
     (relativePath) => !isDirectory(repoRoot, relativePath),
   );
   const missingIndexes = seededIndexes.filter(
-    (relativePath) => !isNonEmptyFile(repoRoot, relativePath),
+    (relativePath) => !pathExists(repoRoot, relativePath),
+  );
+  const invalidMaterializedFiles = seededIndexes.filter(
+    (relativePath) => pathExists(repoRoot, relativePath) && !isNonEmptyFile(repoRoot, relativePath),
   );
   const invalidJson = validateJsonFiles(repoRoot);
   const settingsLink = settingsLinkStatus(repoRoot);
@@ -257,7 +282,7 @@ export function collectPreflight(repoRoot = defaultRepoRoot) {
     missingIndexes.length > 0 ||
     settingsLink !== "valid";
   const configurationHealthy =
-    missingControlFiles.length === 0 && invalidJson.length === 0;
+    missingControlFiles.length === 0 && invalidJson.length === 0 && invalidMaterializedFiles.length === 0;
   const status = !configurationHealthy
     ? "BLOCKED"
     : bootstrapRequired
@@ -274,6 +299,7 @@ export function collectPreflight(repoRoot = defaultRepoRoot) {
       healthy: configurationHealthy,
       missing_control_files: missingControlFiles,
       invalid_json: invalidJson,
+      invalid_materialized_files: invalidMaterializedFiles,
     },
     materialization: {
       bootstrap_required: bootstrapRequired,

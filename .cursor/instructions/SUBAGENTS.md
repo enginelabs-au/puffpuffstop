@@ -1,56 +1,29 @@
 # SUBAGENTS.md
 
-## Role
+## Role and activation
 
-Use sub-agents as bounded specialists while retaining one lead agent responsible for scope, integration, validation, and final decisions.
+Delegate independently useful investigation, implementation, or review while retaining one lead responsible for scope, integration, verification, and the final result. Use delegation when independence or specialist evidence justifies its context, latency, and coordination cost. Do not create a workstream merely because a subagent is available.
 
-## Activation
+## Bounded delegation — default
 
-Use one or more sub-agents when:
+A task packet is sufficient for ordinary mapping, research, implementation, test design, or independent review. Include:
 
-- independent investigations can run in parallel
-- repository mapping is broad
-- research and implementation can be separated
-- tests, security, accessibility, performance, or architecture need an independent review
-- a strategy blueprint requires separate market, competitor, architecture, or distribution analysis
-- a complex plan benefits from adversarial gap analysis
+- objective, non-goals, and acceptance criteria;
+- exact repository/worktree and allowed read/write paths, or `read-only`;
+- applicable constraints, relevant source references and revision when useful;
+- existing decisions and evidence the worker must verify;
+- expected output, checks, limitations, and stop/escalation conditions;
+- ownership boundaries and the lead responsible for integration.
 
-Do not use sub-agents for trivial tasks, tightly coupled edits, or work where coordination costs exceed the benefit.
+Supply only context needed for the assignment. Reuse applicable instructions already delivered by the host or parent; do not require a delegate to read every control file or run lead-session preflight/bootstrap. Shared `STATE.md`, history, `/INSTRUCTIONS.md`, `/instructions/LAUNCH.md`, and `/instructions/ROLES.md` are not mandatory inputs for a bounded packet. Read a specific missing instruction or source only when its relevance requires it. Never assume unseen evidence has been verified.
 
-## Required briefing
+A bounded brief can serve as the charter and concise plan. Return findings or changed paths, validation evidence, assumptions, and unresolved items to the lead. No six-role matrix, persistent role directory, owner handoff document, or exhaustive plan is required. Domain safety constraints still apply, and a material security or release gate must not be disguised as a low-risk bounded task.
 
-Every sub-agent brief must include:
+## Formal role pipeline — conditional
 
-- canonical role ID from `/instructions/ROLES.md`
-- task/workstream ID and risk tier
-- objective
-- why the task is delegated
-- required context files to read
-- task manifest, role charter, and predecessor handoff paths
-- exact paths it may inspect
-- exact paths it may edit, or `read-only`
-- non-goals and prohibited actions
-- assumptions already decided
-- required output format
-- required validation/evidence
-- completion criteria
+Load `/instructions/ROLES.md` when the user requests a formal role pipeline, material multi-role handoffs need coordination, or consequential security/release gates apply. `/instructions/LAUNCH.md` participates only when its named lifecycle was explicitly invoked.
 
-Every sub-agent must read `/AGENTS.md`, `/INSTRUCTIONS.md`, `/instructions/ROLES.md`, `/instructions/LAUCH.md` when the assignment belongs to a launched product lifecycle, and the core context required by its canonical role, plus the active plan, task manifest, role charter, predecessor handoff, and instruction files relevant to its assignment. A role starts by verifying or completing its charter and exhaustive plan; delegation is not permission to implement before that plan exists.
-
-## Write ownership
-
-Avoid concurrent writes to the same file. Prefer:
-
-- read-only specialist reports returned to the lead agent
-- separate output files under `docs/` with explicit ownership
-- disjoint source-file ownership
-- one lead-agent integration pass
-
-Sub-agents must not alter shared `STATE.md`, `MEMORY.md`, active blockers, or the active plan unless explicitly assigned sole ownership for that file.
-
-## Canonical specialist roles
-
-Use only these stable role IDs for the primary product pipeline:
+The six stable formal role IDs are:
 
 - `product-manager-subagent`
 - `ui-ux-developer-subagent`
@@ -59,28 +32,14 @@ Use only these stable role IDs for the primary product pipeline:
 - `growth-marketing-subagent`
 - `project-lead-subagent`
 
-The detailed responsibilities, activation and skip conditions, allowed actions, outputs, validation gates, and downstream handoffs live in `/instructions/ROLES.md`. Do not recreate role bodies in delegation prompts. Additional narrow specialists may support an activated canonical role, but they must have a bounded objective and may not bypass the canonical role's gate or ownership.
+For formal assignments, add task/workstream ID, risk tier, manifest, charter, role plan, relevant predecessor handoffs, assigned role-contract sections, gate criteria, and downstream owner to the task packet. Load the common formal contract and only the assigned role body. Preserve its required/skipped-role records, charter/plan/evidence/handoff artifacts, supported verdicts, and remediation rules. Reading domain guidance or invoking a narrow specialist alone does not activate every formal artifact.
 
-## Adaptive ordering and handoff
+## Ownership and handoff
 
-- Start only the roles marked `required` in `docs/workstreams/<task-id>/manifest.md`.
-- Respect predecessor evidence and dependency order. Independent discovery may run in parallel only when it cannot create conflicting decisions or writes.
-- A downstream role may begin only after the predecessor handoff has a supported `PASS` or explicitly bounded `CONDITIONAL` verdict.
-- A `BLOCKED` verdict returns to the owning upstream role. Security findings return to `software-engineer-subagent` until independently re-verified.
-- Materialize read-only sub-agent output into the assigned role directory before downstream activation.
-- Record every skipped canonical role and the reason; silence is not a skip decision.
+Use disjoint write paths or separate worktrees, read-only reports, and a single integration owner. A worktree does not isolate databases, ports, credentials, or external state. Subagents must not edit shared state, memory, plans, blockers, or manifests without explicit sole ownership. Read-only workers return content for the lead to materialize when persistence is useful.
 
-## Lead-agent integration
+Within a formal pipeline, respect predecessor evidence and dependency order. `BLOCKED` returns to the owning role; a downstream `CONDITIONAL` is permissible only under the canonical contract. Materialize formal evidence before advancing its gate. Ordinary bounded reports can remain in the task result.
 
-After sub-agents finish, the lead agent must:
+## Lead integration and closure
 
-1. inspect all findings and diffs
-2. reject unsupported or duplicated conclusions
-3. reconcile conflicts against user intent and repository evidence
-4. integrate changes in dependency order
-5. run project-wide validation
-6. materialize the role handoff using the canonical schema
-7. update the workstream manifest, active plan, and state with verified results only
-8. route the next required role or close through the project-lead and owner gates
-
-Sub-agent output is evidence, not authority.
+Inspect each finding and diff, reject unsupported conclusions, resolve conflicts, integrate in dependency order, and run relevant checks on the combined result. Update existing plans and materially changed resumable state; for formal work also record gate status and canonical handoffs. Report incomplete verification honestly. Subagent output is evidence, not authority, and delegation never authorizes external actions or policy bypass.

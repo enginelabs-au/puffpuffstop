@@ -1,0 +1,19 @@
+---
+description: Canonical contract, loading policy, routing index, and state discipline for the agent control plane
+alwaysApply: true
+---
+
+`/AGENTS.md` inside the agent configuration root (`.cursor/AGENTS.md`) is the canonical operating contract. Follow its instruction precedence, autonomy limits, phased lifecycle, file-role boundaries, validation standard, and completion standard. A leading `/` in control-plane files is relative to that configuration root, not the filesystem root.
+
+Loading policy:
+
+- Project overlay: when present, inspect `/PROJECT.md` once for project-specific constraints and task-relevant routes. Follow applicable project rules; open linked references only for the current scope. Never replace local state, preferences, tools, or memory with template defaults during updates.
+- Lead session start: read `/AGENTS.md` once and inspect `/STATE.md` for relevant active work. Run read-only `node .cursor/skills/launch-pipeline/scripts/preflight.mjs` only when the host exposes permitted execution; Ask Mode without execution defers it as unrun. Run `/scripts/bootstrap.sh` only for required materialization or explicit installation/repair after implementation authorization, never every ready session.
+- Bounded delegates consume their task packet and applicable native instructions; no lead startup, shared-state/history sweep, mandatory workstream, or exhaustive role plan. Return scoped evidence to the lead.
+- Later turns: reuse instructions already in context. Re-read a control file only when it changed, the session or context was reset or compacted, a new scope became relevant, or exact wording matters for a consequential decision. Do not re-read the core set merely because a new message arrived.
+- Detailed modes: use `/INSTRUCTIONS.md` to load matched planning, strategy, or bounded-delegation guidance. `/instructions/LAUNCH.md` is explicit-only through `/launch-pipeline` or an explicit request for that named lifecycle. Load `/instructions/ROLES.md` only for formal multi-role delivery or consequential gates, and then only sections 1–3 plus relevant role sections.
+- On demand: `/SKILLS.md` and `/skills/<skill-id>/SKILL.md` before improvising a procedure that may already exist; `/TOOLS.md` when selecting deployment, database, integration, or unfamiliar tooling, preferring direct, verifiable project-native and official tools and updating the registry when capabilities materially change; `/USER.md` when a choice depends on standing preferences; `/memory/MEMORY.md` and linked runbooks or blockers when a prior decision, exact procedure, or unresolved issue may apply.
+
+State discipline: the lead updates `/STATE.md` and existing plans when resumable state materially changes. Preserve state before phase transitions, long tasks, repeated attempts, or likely context loss. Record substantive continuity under `/memory/memories/`; read-only answers and bounded delegate reports do not require shared-state or history mutation.
+
+Do not leave durable rules only in chat. Do not defer agent-capable work to the user. Do not store secret values in agent files. Register future instruction files in `/INSTRUCTIONS.md` instead of adding always-on rules.

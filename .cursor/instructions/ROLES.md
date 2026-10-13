@@ -15,7 +15,7 @@ Thin adapters under `.cursor/agents/`, routing in `AGENTS.md` and `.cursor/AGENT
 
 All paths in this file are repository-root-relative. Paths beginning with `.cursor/` explicitly refer to the repository's agent configuration tree. Task artifacts belong under `docs/workstreams/`; they must not be mixed with application source directories.
 
-Activate this catalog when a substantive task needs role selection, delegation, stage gates, cross-domain coordination, or an evidence-backed owner handoff. A simple answer, read-only lookup, or trivial operation may remain outside the role pipeline when the router classifies it as Tier 0 and no specialist or workstream is needed.
+Activate the formal pipeline for an explicit formal-role request, coordinated multi-role delivery with material handoffs, or consequential security/release gates. Ordinary bounded changes and read-only investigation can remain outside it, including Tier 1 work. Delegation or consulting one domain section does not alone activate a workstream. Use `.cursor/instructions/SUBAGENTS.md` for bounded task packets.
 
 The pipeline is adaptive. It is not a requirement to invoke all six roles for every task. Every substantive workstream must identify required roles, record every skipped role with an evidence-based rationale, preserve the dependency order among activated roles, and finish at the owner gate.
 
@@ -40,11 +40,11 @@ The process that routes and integrates subagents is the orchestrating lead proce
 
 ## 3. Shared operating contract
 
-The requirements in this section apply to every role and are not repeated in each role body.
+The formal artifact and gate requirements in this section apply to activated formal role assignments. A bounded supporting assignment uses its task packet as charter/plan and returns scoped findings or changes with evidence; it does not require a workstream, full horizontal checklist, six-role matrix, or owner handoff. Relevant domain prohibitions, independent security checks, evidence honesty, ownership, and permission boundaries apply in both modes. Do not classify consequential security/release work as bounded merely to evade a required gate.
 
 ### 3.1 Task identity and canonical workstream layout
 
-For each substantive task, the orchestrating lead must create one immutable task ID:
+For each activated formal workstream, the orchestrating lead creates one immutable task ID:
 
 `YYYYMMDD-<descriptive-kebab-slug>`
 
@@ -71,18 +71,16 @@ The manifest is the workstream index. A role's `charter.md` is its task-local, s
 
 ### 3.2 Mandatory context preflight
 
-Before planning, every activated role must read:
+For a formal assignment, reuse applicable instructions already in context and load the following task-relevant inputs. A delegate does not repeat lead-session preflight/bootstrap or scan shared state/history:
 
-1. `AGENTS.md`, when present, then `.cursor/AGENTS.md`.
-2. `.cursor/INSTRUCTIONS.md`, `.cursor/USER.md`, `.cursor/STATE.md`, `.cursor/SKILLS.md`, `.cursor/TOOLS.md`, and `.cursor/memory/MEMORY.md`.
-3. This file and `.cursor/instructions/SUBAGENTS.md`.
-4. Every file under `.cursor/rules/`.
-5. Every active instruction, active plan, file in active use, and active blocker named by `.cursor/STATE.md`.
-6. `docs/workstreams/<task-id>/manifest.md`, its own `charter.md` if already materialized, and every required predecessor handoff.
-7. The complete skill registry and each `.cursor/skills/<skill-id>/SKILL.md` whose activation conditions could affect the assignment.
-8. Relevant source, configuration, tests, schemas, documentation, plans, blueprints, decisions, runbooks, continuation records, and repository conventions.
+1. Applicable repository-root `AGENTS.md` and `.cursor/AGENTS.md` guidance already supplied by the host/parent; retrieve a specific missing rule when the assignment requires it.
+2. `docs/workstreams/<task-id>/manifest.md`, its own `charter.md` if already materialized, and every required predecessor handoff.
+3. Sections 1–3 of this file and its own role section. Do not read other roles' sections unless the charter names a dependency on them.
+4. The active instruction excerpts, plan sections, source references, and blockers selected by the parent for this assignment. Read `.cursor/STATE.md` only when the brief assigns continuity recovery or its current contents are necessary to resolve a specific task question.
+5. On demand: `.cursor/USER.md` when a decision depends on standing preferences; `.cursor/SKILLS.md` and the `SKILL.md` of each skill whose description matches the charter; `.cursor/TOOLS.md` when selecting external tooling; `.cursor/memory/MEMORY.md` and linked runbooks or blockers when prior decisions or unresolved issues may apply; `.cursor/instructions/SUBAGENTS.md` only when the role itself delegates.
+6. Relevant source, configuration, tests, schemas, documentation, plans, blueprints, decisions, and repository conventions.
 
-Roles must confirm that referenced files exist and report missing or stale context. They must not assume that a parent prompt included complete context, that a registry entry proves a tool is installed, or that predecessor conclusions are correct.
+Native rules under `.cursor/rules/` are injected by the client and are not re-read. Roles verify referenced task evidence and report missing or stale inputs. A bounded packet is a valid briefing, not proof of every factual assertion; verify claims that affect the result. A registry entry is not proof a tool is installed, and predecessor conclusions require evidence.
 
 Read enough repository evidence to understand existing patterns before proposing or changing anything. Preserve context discipline by loading relevant skill bodies and historical artifacts rather than unrelated archives.
 
@@ -156,7 +154,7 @@ No downstream role may proceed from `BLOCKED`. It may proceed from `CONDITIONAL`
 
 ### 3.6 Mandatory exhaustive pre-action planning
 
-Every activated role must complete context preflight, bounded read-only discovery, `charter.md`, and `plan.md` before implementation, external mutation, publication, or other deliverable-producing action.
+Every activated formal role completes relevant context review, bounded discovery, `charter.md`, and `plan.md` before dependent implementation, external mutation, publication, or other deliverable-producing action. A bounded supporting delegate uses the task packet and concise execution approach rather than materializing these formal records.
 
 The role plan must be concrete enough for another qualified agent to execute and validate. It must include:
 

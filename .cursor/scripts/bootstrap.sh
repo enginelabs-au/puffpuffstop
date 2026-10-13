@@ -5,12 +5,25 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 AGENT_CONFIG_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
 REPO_ROOT=$(CDPATH= cd -- "$AGENT_CONFIG_DIR/.." && pwd)
 
+# Validate source inputs before the first write; an incomplete copy must not
+# leave behind a partly installed control plane.
+if ! command -v node >/dev/null 2>&1; then
+  printf 'bootstrap error: node is required for fail-closed policy validation\n' >&2
+  exit 1
+fi
+if [ ! -s "$AGENT_CONFIG_DIR/skills/launch-pipeline/scripts/preflight.mjs" ]; then
+  printf 'bootstrap error: source preflight is missing\n' >&2
+  exit 1
+fi
+node "$AGENT_CONFIG_DIR/skills/launch-pipeline/scripts/preflight.mjs" >/dev/null
+
 mkdir -p \
   "$REPO_ROOT/docs/blueprints" \
   "$REPO_ROOT/docs/plans" \
   "$REPO_ROOT/docs/decisions" \
   "$REPO_ROOT/docs/handover" \
   "$REPO_ROOT/docs/workstreams" \
+  "$REPO_ROOT/.githooks" \
   "$AGENT_CONFIG_DIR/agents" \
   "$AGENT_CONFIG_DIR/config" \
   "$AGENT_CONFIG_DIR/hooks" \
@@ -27,7 +40,7 @@ mkdir -p \
 copy_if_missing() {
   src=$1
   dst=$2
-  if [ ! -e "$dst" ]; then
+  if [ ! -e "$dst" ] && [ ! -L "$dst" ]; then
     cp "$src" "$dst"
   fi
 }
@@ -35,6 +48,45 @@ copy_if_missing() {
 copy_if_missing "$AGENT_CONFIG_DIR/templates/docs-readme.md" "$REPO_ROOT/docs/README.md"
 copy_if_missing "$AGENT_CONFIG_DIR/templates/plans-readme.md" "$REPO_ROOT/docs/plans/README.md"
 copy_if_missing "$AGENT_CONFIG_DIR/templates/workstreams-readme.md" "$REPO_ROOT/docs/workstreams/README.md"
+copy_if_missing "$AGENT_CONFIG_DIR/templates/root-agents.md" "$REPO_ROOT/AGENTS.md"
+copy_if_missing "$AGENT_CONFIG_DIR/templates/cursorignore" "$REPO_ROOT/.cursorignore"
+copy_if_missing "$AGENT_CONFIG_DIR/templates/agent-governance-operator-setup.md" "$REPO_ROOT/docs/handover/agent-governance-operator-setup.md"
+mkdir -p "$REPO_ROOT/.github/workflows"
+copy_if_missing "$AGENT_CONFIG_DIR/skills/git-safety/payloads/agent-governance.yml" "$REPO_ROOT/.github/workflows/agent-governance.yml"
+
+write_githook_if_missing() {
+  hook=$1
+  mode=$2
+  purpose=$3
+  dst="$REPO_ROOT/.githooks/$hook"
+  if [ -e "$dst" ]; then
+    return 0
+  fi
+  cat > "$dst" <<HOOK
+#!/bin/sh
+set -eu
+
+REPO_ROOT=\$(git rev-parse --show-toplevel)
+SCRIPT="\$REPO_ROOT/.cursor/skills/git-safety/scripts/git-safety.mjs"
+
+if [ ! -f "\$SCRIPT" ]; then
+  printf 'git-safety: missing %s\\n' "\$SCRIPT" >&2
+  exit 1
+fi
+
+if ! command -v node >/dev/null 2>&1; then
+  printf 'git-safety: node is required to enforce $purpose\\n' >&2
+  exit 1
+fi
+
+node "\$SCRIPT" $mode
+HOOK
+  chmod +x "$dst"
+}
+
+write_githook_if_missing pre-commit commit "anonymous git identity and secret blocking"
+write_githook_if_missing commit-msg identity "anonymous git identity"
+write_githook_if_missing pre-push push "anonymous git identity"
 
 for dir in \
   "$AGENT_CONFIG_DIR/memory/memories" \
@@ -66,11 +118,37 @@ if [ -f "$AGENT_CONFIG_DIR/config/settings.json" ]; then
   fi
 fi
 
+# Git resolves both linked worktrees and core.hooksPath. Never overwrite a
+# consumer's hook; a differing hook needs explicit composition and validation.
+hook_conflict=0
+if git_root=$(git -C "$REPO_ROOT" rev-parse --show-toplevel 2>/dev/null) && [ "$git_root" = "$REPO_ROOT" ]; then
+  hooks_dir=$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-path hooks)
+  mkdir -p "$hooks_dir"
+  for hook in pre-commit commit-msg pre-push; do
+    src="$REPO_ROOT/.githooks/$hook"
+    dst="$hooks_dir/$hook"
+    if [ -f "$src" ]; then
+      if [ -e "$dst" ] || [ -L "$dst" ]; then
+        if ! cmp -s "$src" "$dst" || [ ! -x "$dst" ]; then
+          printf 'bootstrap error: preserved existing hook; integration required: %s\n' "$dst" >&2
+          hook_conflict=1
+        fi
+      else
+        cp "$src" "$dst"
+        chmod +x "$dst"
+      fi
+    fi
+  done
+fi
+
 required_files="
 $REPO_ROOT/AGENTS.md
 $REPO_ROOT/.cursorignore
 $REPO_ROOT/docs/handover/agent-governance-operator-setup.md
 $REPO_ROOT/.github/workflows/agent-governance.yml
+$REPO_ROOT/.githooks/pre-commit
+$REPO_ROOT/.githooks/commit-msg
+$REPO_ROOT/.githooks/pre-push
 $AGENT_CONFIG_DIR/AGENTS.md
 $AGENT_CONFIG_DIR/BOOTSTRAP.md
 $AGENT_CONFIG_DIR/INSTRUCTIONS.md
@@ -103,10 +181,13 @@ $AGENT_CONFIG_DIR/templates/role-plan-template.md
 $AGENT_CONFIG_DIR/templates/role-evidence-template.md
 $AGENT_CONFIG_DIR/templates/role-handoff-template.md
 $AGENT_CONFIG_DIR/templates/owner-handoff-template.md
-$AGENT_CONFIG_DIR/instructions/LAUCH.md
+$AGENT_CONFIG_DIR/instructions/LAUNCH.md
 $AGENT_CONFIG_DIR/skills/launch-pipeline/SKILL.md
 $AGENT_CONFIG_DIR/skills/launch-pipeline/scripts/preflight.mjs
 $AGENT_CONFIG_DIR/skills/launch-pipeline/scripts/validate-launch.mjs
+$AGENT_CONFIG_DIR/skills/git-safety/SKILL.md
+$AGENT_CONFIG_DIR/skills/git-safety/scripts/git-safety.mjs
+$AGENT_CONFIG_DIR/rules/git-privacy-and-secrets.mdc
 "
 
 printf '%s\n' "$required_files" | while IFS= read -r path; do
@@ -124,5 +205,11 @@ fi
 
 node "$AGENT_CONFIG_DIR/scripts/validate-agent-config.mjs"
 node "$AGENT_CONFIG_DIR/skills/launch-pipeline/scripts/validate-launch.mjs"
+node --test "$AGENT_CONFIG_DIR/skills/git-safety/scripts/git-safety.test.mjs"
+
+if [ "$hook_conflict" -ne 0 ]; then
+  printf 'bootstrap incomplete: existing Git hooks require integration; no existing hook was overwritten\n' >&2
+  exit 1
+fi
 
 printf 'bootstrap complete: %s\n' "$REPO_ROOT"

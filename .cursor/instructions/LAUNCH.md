@@ -2,29 +2,22 @@
 
 ## Role and objective
 
-This file is the canonical practical entry point for starting, resuming, and closing product work in this repository. Read-only preflight is its first executable gate; bootstrap is its cornerstone and first mutating gate after Build or explicit Agent-mode implementation authorization. The launcher connects the operating contract, instruction router, adaptive roles, phase plans, skills, tools, memory, state, workstreams, validation, and owner handoff into one parent-agent workflow.
+This file is the canonical practical entry point for starting, resuming, and closing product work in this repository. Read-only preflight is its first executable gate when the host permits execution; bootstrap is a conditional materialization gate after Build or existing implementation authorization. The launcher connects the operating contract, instruction router, adaptive roles, phase plans, skills, tools, memory, state, workstreams, validation, and owner handoff into one parent-agent workflow.
 
-The filename `LAUCH.md` is retained exactly as requested. Invoke the native project skill as `/launch-pipeline`; do not ask the user to attach the entire `.cursor/` tree manually.
+The filename is `LAUNCH.md`. Invoke the native project skill as `/launch-pipeline`; do not ask the user to attach the entire `.cursor/` tree manually.
 
 ## Activation
 
-Activate for:
+Activate only when the user explicitly invokes `/launch-pipeline` or explicitly asks to run that named lifecycle. The invocation can cover a new idea, major change, existing launched workstream, remediation, or closure.
 
-- a raw product or business idea;
-- a new application, service, feature, integration, migration, or major refactor;
-- a request to continue an existing phase or workstream;
-- cross-role remediation or re-verification;
-- release-readiness, final checklist, or owner-handoff work;
-- an explicit `/launch-pipeline` invocation.
-
-Do not activate for a trivial answer or isolated low-risk change when the root router determines that no workstream, specialist, or phase plan is needed.
+A natural-language request for planning, strategy, a feature, or a resume does not silently invoke this launcher. Route those requests through `/INSTRUCTIONS.md` and load only matched task guidance. An active phase may continue under its existing recorded contract without reopening the complete launch process.
 
 ## Native discovery and routing
 
 Cursor loads or discovers these surfaces without manual attachment:
 
 - repository-root `AGENTS.md` — native project-wide router;
-- `/rules/*.mdc` with `alwaysApply: true` — always-on project rules;
+- `/rules/*.mdc` — three always-on rules plus Agent-Requested rules that load by description;
 - `/agents/*.md` — native custom subagents;
 - `/skills/*/SKILL.md` — native discoverable and slash-invokable skills;
 - `/hooks.json`, `/cli.json`, `/sandbox.json`, and `/permissions.json` — native runtime and security configuration at required paths.
@@ -33,40 +26,33 @@ Files under `/instructions/` are ordinary Markdown, not native auto-loaded instr
 
 ## Required launch graph
 
-The parent agent remains the sole orchestrator. On activation, connect and read the stack in this order:
+The parent remains the sole orchestrator. Reuse instructions already in context. On explicit activation:
 
-1. Repository-root `AGENTS.md`.
-2. `/AGENTS.md`.
-3. `/USER.md`, `/STATE.md`, `/INSTRUCTIONS.md`, `/SKILLS.md`, `/TOOLS.md`, and `/memory/MEMORY.md`.
-4. Run the read-only `/skills/launch-pipeline/scripts/preflight.mjs`.
-5. Every active blocker under `/memory/blockers/`.
-6. This file.
-7. The matched detailed instructions:
-   - `/instructions/STRATEGY.md`
-   - `/instructions/PROJECT_PLANNING.md`
-   - `/instructions/SUBAGENTS.md`
-   - `/instructions/ROLES.md`
-8. Relevant `/rules/*.mdc`, skills, runbooks, decisions, blueprints, plans, workstream artifacts, source, tests, and configuration.
+1. Read repository-root `AGENTS.md` and `/AGENTS.md` if needed.
+2. Read this file, `/STATE.md`, and `/INSTRUCTIONS.md` for the launch and current work.
+3. Run the read-only `/skills/launch-pipeline/scripts/preflight.mjs` when execution is permitted.
+4. Load only the matched instructions: `/instructions/STRATEGY.md`, `/instructions/PROJECT_PLANNING.md`, `/instructions/SUBAGENTS.md`, and/or `/instructions/ROLES.md`.
+5. Load `/USER.md`, `/SKILLS.md`, `/TOOLS.md`, `/memory/MEMORY.md`, relevant blockers, plans, workstream evidence, skills, runbooks, source, and tests only when the selected mode needs them.
 
-Do not load every historical memory or every skill body indiscriminately. Use the indexes to load only relevant detail.
+Native `/rules/*.mdc` already injected by the client are not reread. Do not sweep every active blocker, skill, memory, or role body. A delegated task receives a bounded packet; the parent owns shared state and launch preflight.
 
 ## Read-only preflight and bootstrap cornerstone
 
-Every `/launch-pipeline` invocation—new idea, major change, resume, remediation, or closure—must begin with:
+Every explicit invocation—new idea, major change, resume, remediation, or closure—runs this read-only check when a permitted execution tool is available:
 
 ```bash
 node .cursor/skills/launch-pipeline/scripts/preflight.mjs
 ```
 
-Preflight reads configuration health, materialization status, live state, and a lifecycle-mode hint without changing repository or external state. A `BLOCKED` preflight stops routing until the reported control-plane defect is repaired. `MATERIALIZATION_REQUIRED` is carried into the launch plan; it does not authorize a write while in Ask or Plan Mode.
+Ask Mode may not expose execution. In that case inspect available files, report preflight as not run, and defer execution until a capable mode before mutation. Do not bypass mode limits or claim a verified status. Preflight reads configuration health, materialization status, live state, and a lifecycle-mode hint without changing repository or external state. A `BLOCKED` preflight stops routing until the reported control-plane defect is repaired. `MATERIALIZATION_REQUIRED` is carried into the launch plan; it does not authorize a write while in Ask or Plan Mode.
 
-After Build approval or an explicit Agent-mode implementation request, read `/BOOTSTRAP.md`, then run the resolved `/scripts/bootstrap.sh` as the first mutating action. Bootstrap must finish successfully before creating plans, workstreams, role artifacts, implementation, or closure changes. It:
+After Build or explicit implementation authorization, read `/BOOTSTRAP.md` and run the resolved `/scripts/bootstrap.sh` only if preflight reports `MATERIALIZATION_REQUIRED`, or installation/repair is explicitly in scope. Required materialization must finish before work that depends on those artifacts. A `READY` workspace proceeds without another bootstrap. The script:
 
 - resolves the repository and agent configuration roots;
 - creates `docs/blueprints/`, `docs/plans/`, `docs/decisions/`, `docs/handover/`, and `docs/workstreams/`;
 - seeds `docs/README.md`, `docs/plans/README.md`, and `docs/workstreams/README.md` only when absent;
 - creates required agent, instruction, hook, memory, rule, script, skill, template, and config directories;
-- preserves existing non-empty project content;
+- preserves existing non-empty project content, hook files, and an existing `core.hooksPath`; handles linked worktrees through Git metadata;
 - repairs the optional settings compatibility link when safe;
 - validates required control-plane files and deterministic policy configuration.
 
@@ -86,7 +72,7 @@ Extract from the user request and repository:
 
 Resolve missing information from evidence first. Make reversible provisional assumptions when safe and record them. Ask only for strict blockers or consequential decisions under `/AGENTS.md`.
 
-Use the AskQuestion tool for required clarification. Bundle related decisions and do not ask the user to select, open, or execute individual control-plane files.
+Use an available user-question tool for required clarification, or ask concisely in the host conversation when no such tool exists. Bundle related decisions and do not ask the user to select, open, or execute individual control-plane files.
 
 Before Plan or execution, present one activation summary containing:
 
@@ -107,7 +93,7 @@ Classify the launch as exactly one operating mode.
 
 ### New idea or product
 
-Activate Strategy, Project Planning, Subagents, and Roles. Produce an evidence-based blueprint, phase-zero roadmap, task workstream, adaptive role matrix, and owner decision points before application implementation.
+Activate Strategy and Project Planning; add Subagents when independent work warrants delegation and Roles for formal multi-role delivery or consequential gates. Produce an evidence-based blueprint, phase-zero roadmap, task workstream, adaptive role matrix, and owner decision points before application implementation.
 
 ### Major feature or migration
 
@@ -127,30 +113,26 @@ Require Project Lead reconciliation, the final implementation checklist when app
 
 ## Cursor Plan Mode and Build boundary
 
-For a new idea, major feature, migration, or other consequential work:
+When the current interaction is in Ask or Plan Mode, keep it read-only. A reviewable plan states scope, materialization status, artifacts, checks, and the next authorized action. Wait for Build if the user has not already authorized implementation; do not create a redundant approval gate after an explicit Agent-mode implementation request.
 
-1. Begin in Cursor Plan Mode.
-2. Run only read-only preflight, inspection, intake, classification, and planning.
-3. Present a reviewable Cursor plan that includes the repository artifacts to materialize.
-4. End that plan with the required first post-Build bootstrap invocation below. A plan that omits it is incomplete.
-5. Wait for the user to accept the plan with Build.
-6. After Build, run that exact bootstrap command as the first mutation, then materialize the strategy, phase, and workstream documents before application code.
-
-Every pre-Build Cursor plan must include this closing section, even when preflight already reports `READY`:
+Each pre-Build launch plan includes:
 
 ```text
 ## First post-Build action
 
-After Build, run this command before creating plans, workstreams, role artifacts, or application code:
+Run or refresh read-only preflight if it could not run or installation state changed.
+If MATERIALIZATION_REQUIRED (or installation/repair is explicitly in scope), run:
 
 bash .cursor/scripts/bootstrap.sh
 
-Require a successful exit. Do not skip this step because directories already exist.
+Require successful materialization before dependent changes. If READY, skip
+bootstrap and begin the first approved task. Do not run it just because a new
+session started. Resolve BLOCKED without bypassing policy.
 ```
 
-Clicking Build approves implementation of the reviewed local plan, including that bootstrap invocation. It does not authorize production deployment, publication, spend, secret access, remote database mutation, risk acceptance, or bypassing any stage gate.
+Build approves the reviewed local plan. It does not authorize production deployment, publication, spend, secret access, remote database mutation, risk acceptance, or bypassing a stage gate. Preserve the scope of prior explicit authorization; do not ask again solely because this workflow is active.
 
-If the user has already explicitly authorized implementation in Agent Mode, still create the required repository planning and role artifacts before code.
+For phased or formal role work, materialize the required planning and evidence records before dependent implementation. A bounded task outside that scope needs only proportionate planning and verification.
 
 ## New-product launch sequence
 
@@ -165,20 +147,20 @@ For a loose product vision, execute:
    - Ask only for unresolved consequential decisions and present the activation summary.
 3. **Plan and Build gate**
    - Produce the reviewable Cursor plan without repository mutation.
-   - Close that plan with `First post-Build action` and `bash .cursor/scripts/bootstrap.sh`.
+   - Close that plan with `First post-Build action`, the conditional `bash .cursor/scripts/bootstrap.sh`, and the `READY` skip path.
    - Wait for Build unless implementation was already explicitly authorized in Agent Mode.
 4. **Bootstrap**
-   - Run `/scripts/bootstrap.sh` as the first mutating action and require success.
+   - Run `/scripts/bootstrap.sh` only when materialization or explicit installation/repair is needed; otherwise proceed from `READY`.
 5. **Workstream**
-   - Create `docs/workstreams/<task-id>/manifest.md`.
-   - Record all six roles as required or skipped with evidence.
+   - For formal role delivery, create `docs/workstreams/<task-id>/manifest.md` and record all six roles as required or skipped with evidence.
+   - A phased single-owner implementation without formal gates may keep ownership and checks in its phase plan.
 6. **Strategy**
    - Produce `docs/blueprints/YYYY-MM-DD_<project_slug>.md` when Strategy is activated.
 7. **Phase zero**
    - Produce `docs/plans/phase_0_foundations_plan.md`.
    - Map the complete expected lifecycle while detailing only the current phase.
 8. **Role planning**
-   - Materialize each activated role's `charter.md` and `plan.md`.
+   - For each formal role, materialize `charter.md` and `plan.md`; bounded supporting scouts use their task packets.
 9. **Role execution**
    - Launch required roles through direct parent Task delegation in dependency order.
    - Materialize `evidence.md` and `handoff.md` before downstream activation.
@@ -188,7 +170,7 @@ For a loose product vision, execute:
 11. **Remediation**
    - Return failed acceptance, quality, accessibility, privacy, reliability, or security gates to the accountable role and replay invalidated gates.
 12. **Closure**
-    - Produce the final checklist, Project Lead reconciliation, and owner handoff.
+    - Produce the phased final checklist and, for formal role delivery, Project Lead reconciliation and the owner handoff.
     - Stop at the owner decision or at an explicitly authorized, policy-permitted action.
 
 ## Adaptive role order
@@ -251,15 +233,15 @@ Do not duplicate canonical role bodies, long instructions, secret values, or unv
 
 ## Resume prompt contract
 
-When the user asks to resume, behave as though instructed:
+For an explicit launcher resume, behave as though instructed:
 
-> Read repository-root `AGENTS.md`, the complete core context, `/instructions/LAUCH.md`, the active phase plan, active workstream manifest, current role charter and plan, latest predecessor handoff, blockers, decisions, and continuation evidence. Verify current repository state against recorded evidence. Resume only from the recorded gate, preserve completed work, route the next required role, and continue until a strict blocker or owner decision.
+> Read repository-root `AGENTS.md` and `/AGENTS.md` if they are not already in context, `/instructions/LAUNCH.md`, the active phase plan, active workstream manifest, current role charter and plan, latest predecessor handoff, blockers, decisions, and continuation evidence. Verify current repository state against recorded evidence. Resume only from the recorded gate, preserve completed work, route the next required role, and continue until a strict blocker or owner decision.
 
 ## Initial idea prompt contract
 
-When the user provides a raw idea, behave as though instructed:
+For an explicit launcher invocation with a raw idea, behave as though instructed:
 
-> Act as the parent orchestrator. Follow repository-root `AGENTS.md` and `/instructions/LAUCH.md`. Treat this as a new product. Run read-only preflight; infer intake from evidence; ask only for unresolved consequential decisions; present the activation summary; and enter Plan Mode without mutation. Close the pre-Build plan with `First post-Build action` and `bash .cursor/scripts/bootstrap.sh`. After Build, run that bootstrap command first. Then activate Strategy, Project Planning, Subagents, and Roles; classify risk and affected domains; create an adaptive required/skipped-role matrix; materialize the blueprint, phase zero, and workstream; invoke required roles through direct parent Task delegation in dependency order; require role charters, plans, evidence, and handoffs; remediate failed gates; and continue autonomously until a strict blocker or final owner decision. Do not perform production, publishing, spend, secret, destructive, or external mutation without explicit policy-permitted authorization.
+> Act as the parent orchestrator under repository-root `AGENTS.md` and `/instructions/LAUNCH.md`. Run permitted read-only preflight or mark it unrun in Ask Mode; infer intake from evidence; resolve strict blockers; present one activation summary. Respect the current mode and existing implementation authorization. The plan's `First post-Build action` includes `bash .cursor/scripts/bootstrap.sh` only when materialization or explicit installation/repair is needed, and skips bootstrap when `READY`. Activate Strategy and Project Planning for the new product, with Subagents and Roles only when their criteria apply. Materialize the blueprint and phase-zero plan, plus formal workstream artifacts if activated. Delegate independent tasks with bounded context, preserve role evidence and remediation gates where applicable, and continue until completion, a strict blocker, or an actual required owner decision. Production, publication, spend, secrets, destructive operations, and external mutation retain their policy and authorization boundaries.
 
 ## Security and production boundary
 
@@ -281,12 +263,11 @@ These native JSON files remain at the `.cursor/` root because Cursor discovers t
 A launched workflow is complete only when:
 
 - required instruction files were activated and recorded;
-- every role is required or skipped with evidence;
-- every activated role has charter, plan, evidence, and handoff artifacts;
+- for formal role delivery, every role is required or skipped with evidence and every activated role has charter, plan, evidence, and handoff artifacts;
 - all blocking remediation loops are closed and invalidated gates replayed;
 - implementation and integrated checks pass or exact limitations are surfaced;
 - no high or critical security finding remains open;
 - phase plan, state, memory, blockers, and continuation evidence match reality;
 - the final checklist contains remaining human-only work;
-- Project Lead prepared the owner handoff;
-- the owner decision is recorded rather than inferred.
+- for formal role delivery, Project Lead prepared the owner handoff;
+- any required owner decision is recorded rather than inferred; previously authorized bounded work does not create a new approval requirement.

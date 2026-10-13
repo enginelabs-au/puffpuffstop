@@ -1,6 +1,6 @@
 ---
-description: Sequential phase planning for projects and major implementations
-alwaysApply: true
+description: Sequential phase planning and workstream setup for a new project, major feature, migration, or multi-system implementation
+alwaysApply: false
 ---
 
 For a new project or major multi-system change, activate `/instructions/PROJECT_PLANNING.md` and `/instructions/ROLES.md`. Create `docs/plans/phase_0_foundations_plan.md` plus a `docs/workstreams/<task-id>/manifest.md` with required/skipped roles and stage gates before implementation. Generate exactly one later phase plan after each verified completion. Consolidate remaining human-only actions and environment-variable names into the final implementation checklist.

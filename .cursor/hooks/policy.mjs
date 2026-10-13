@@ -2,6 +2,11 @@
 
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import {
+  commandReferencesSecret,
+  isSecretPath,
+  usesForbiddenGitIdentity,
+} from "../skills/git-safety/scripts/git-safety.mjs";
 
 const DENY_MESSAGE =
   "Action blocked by the repository's fail-closed agent policy.";
@@ -13,33 +18,7 @@ function normalize(value) {
     .replace(/\/+/g, "/");
 }
 
-function basename(value) {
-  return normalize(value).split("/").at(-1) ?? "";
-}
-
-export function isSecretPath(value) {
-  const path = normalize(value);
-  const name = basename(path);
-
-  if (
-    /^\.env(?:\.|$)/i.test(name) &&
-    !/^\.env\.(?:example|sample|template)$/i.test(name)
-  ) {
-    return true;
-  }
-
-  return (
-    /\.(?:pem|key|p12|pfx)$/i.test(name) ||
-    /^(?:credentials?|secrets?)\.json$/i.test(name) ||
-    /^id_(?:rsa|ed25519|ecdsa|dsa)$/i.test(name) ||
-    /(^|\/)\.aws\/credentials$/i.test(path) ||
-    /(^|\/)\.config\/gcloud\/application_default_credentials\.json$/i.test(
-      path,
-    ) ||
-    /(^|\/)\.docker\/config\.json$/i.test(path) ||
-    /(^|\/)(?:\.netrc|\.npmrc|\.pypirc)$/i.test(path)
-  );
-}
+export { isSecretPath };
 
 const protectedPathPatterns = [
   /(^|\/)AGENTS\.md$/i,
@@ -53,6 +32,7 @@ const protectedPathPatterns = [
   /(^|\/)\.cursor\/scripts\/(?:bootstrap\.sh|validate-agent-config\.mjs)$/i,
   /(^|\/)\.github\/workflows\/agent-governance\.yml$/i,
   /(^|\/)\.cursorignore$/i,
+  /(^|\/)\.githooks(?:\/|$)/i,
 ];
 
 export function isProtectedPath(value) {
@@ -87,22 +67,6 @@ function collectPathFields(value, paths = [], parentKey = "") {
   return paths;
 }
 
-function shellReferencesSecret(command) {
-  const value = String(command ?? "");
-  const withoutTemplates = value
-    .replace(/\.env\.(?:example|sample|template)\b/gi, "")
-    .replace(/\bid_(?:rsa|ed25519|ecdsa|dsa)\.pub\b/gi, "");
-
-  return (
-    /(^|[\s"'=:/\\])\.env(?:\.[\w.-]+)?\b/i.test(withoutTemplates) ||
-    /\.(?:pem|key|p12|pfx)\b/i.test(value) ||
-    /\b(?:credentials?|secrets?)\.json\b/i.test(value) ||
-    /(?:^|[\s"'=:/\\])(?:\.netrc|\.npmrc|\.pypirc)\b/i.test(value) ||
-    /\.aws[\\/]credentials\b/i.test(value) ||
-    /application_default_credentials\.json\b/i.test(value)
-  );
-}
-
 export function isDestructiveGit(command) {
   const value = String(command ?? "");
   return [
@@ -115,6 +79,8 @@ export function isDestructiveGit(command) {
     /\bgit\s+(?:filter-repo|filter-branch)\b/i,
     /\bgit\s+reflog\s+expire\b/i,
     /\bgit\s+gc\b[^;&|\n]*--prune(?:=|\s+)now\b/i,
+    /\bgit\s+commit\b[^;&|\n]*--no-verify\b/i,
+    /\bgit\s+push\b[^;&|\n]*--no-verify\b/i,
   ].some((pattern) => pattern.test(value));
 }
 
@@ -246,13 +212,19 @@ export function evaluate(input) {
   if (event === "beforeShellExecution") {
     const command = String(input.command ?? "");
 
-    if (shellReferencesSecret(command)) {
+    if (commandReferencesSecret(command)) {
       return denied(event, "Shell access to secret-bearing paths is blocked.");
+    }
+    if (usesForbiddenGitIdentity(command)) {
+      return denied(
+        event,
+        "Git writes must use the Cursor anonymous email cursoragent@noreply.github.com or a GitHub noreply address. Never use a private inbox or change git config.",
+      );
     }
     if (isDestructiveGit(command)) {
       return denied(
         event,
-        "Destructive Git and force-push operations are blocked.",
+        "Destructive Git, hook bypass, and force-push operations are blocked.",
       );
     }
     if (isProductionMutation(command)) {

@@ -14,15 +14,15 @@ When delegated to a sub-agent, remain read-only outside the assigned blueprint p
 
 ## Pre-flight
 
-1. Read `/AGENTS.md`, `/INSTRUCTIONS.md`, `/instructions/LAUCH.md`, `/instructions/ROLES.md` when role delegation is active, `/STATE.md`, `/memory/MEMORY.md`, `/USER.md`, and relevant plans or repository documentation.
-2. Ensure the startup bootstrap has created `docs/` and `docs/blueprints/`.
-3. Set `STATE.md` to `Strategic Analysis` and list this file under `Active Instructions` when operating as lead.
-4. Extract the idea, target user, problem, constraints, desired outcome, and known assumptions from the trigger and repository.
-5. If information is missing but not blocking, make a clearly labelled provisional assumption and continue.
+1. Reuse `/AGENTS.md` and applicable guidance already in context. Consult `/INSTRUCTIONS.md` only to resolve routing; `/instructions/LAUNCH.md` applies only to an explicitly invoked launcher. Load `/USER.md`, `/memory/MEMORY.md`, prior plans, and repository evidence only when the strategic question depends on them.
+2. For authorized blueprint materialization, verify the needed output path. Run bootstrap only for required installation/materialization; Ask or Plan Mode returns the proposal without writing. A bounded read-only strategy assignment needs neither bootstrap nor a persistent blueprint.
+3. The lead records this mode in `STATE.md` when persistent resumable work changes; bounded delegates return findings without reading or writing shared state/history.
+4. Extract the idea, target user, problem, constraints, desired outcome, and known assumptions from the task and relevant evidence.
+5. Make clearly labelled reversible assumptions when non-blocking, and keep research/output depth proportionate to the requested strategic question.
 
 ## Sub-agent topology
 
-When sub-agent capability is available and the scope justifies delegation, activate `/instructions/ROLES.md` and use the canonical roles under `/instructions/SUBAGENTS.md`:
+For independent bounded research, follow `/instructions/SUBAGENTS.md` with task packets. For formal multi-role product delivery, activate `/instructions/ROLES.md`; the canonical responsibilities are:
 
 - `product-manager-subagent` owns discovery synthesis, problem evidence, product requirements, scope, acceptance criteria, and the canonical strategy decision.
 - `ui-ux-developer-subagent` is activated when user journeys, interaction architecture, accessibility, visual evidence, or design-system implications are material.
@@ -31,7 +31,7 @@ When sub-agent capability is available and the scope justifies delegation, activ
 - `growth-marketing-subagent` owns cultural GTM, ethical distribution, analytics, experiment design, and launch concepts after consuming verified product evidence.
 - `project-lead-subagent` independently reconciles cross-role readiness when the blueprint is used to authorize a multi-phase delivery.
 
-The workstream manifest records required and skipped roles, ordering, and evidence paths. Prefer read-only specialist reports or separate role handoffs. The lead strategist reconciles evidence, resolves contradictions, and writes the single canonical blueprint. Do not allow parallel agents to edit the same blueprint concurrently.
+An activated formal workstream records required/skipped roles, ordering, and evidence paths; ordinary research delegates return bounded reports without these artifacts. Prefer read-only specialist reports or separate role handoffs. The lead strategist reconciles evidence, resolves contradictions, and writes the single canonical blueprint. Do not allow parallel agents to edit the same blueprint concurrently.
 
 ## Phase 1: discovery and intelligence
 
@@ -139,9 +139,11 @@ Adapt language to the community's observed vernacular and rules.
 
 ## Output
 
-Create:
+For an authorized comprehensive product blueprint, create:
 
 `docs/blueprints/YYYY-MM-DD_<project_slug>.md`
+
+For a bounded strategic question, return only the relevant findings and evidence; do not force the full product or go-to-market template. Ask/Plan Mode presents proposed content without writing it.
 
 Use this structure:
 
@@ -165,7 +167,7 @@ Use this structure:
 
 ## Closure
 
-When operating as lead:
+When operating as lead on a persistent comprehensive blueprint, with writes authorized:
 
 - add a concise memory index entry linking the blueprint
 - update `STATE.md` to `Strategy Complete — Planning Required` or the accurate next state

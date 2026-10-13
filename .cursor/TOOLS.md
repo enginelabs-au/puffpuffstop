@@ -247,41 +247,6 @@ Prefer built-in project scripts and official tooling over improvised alternative
 
 ---
 
-### Tool: Expo (PuffPuffStop app)
-
-**Category**
-
-- runtime / build / mobile
-
-**Purpose**
-
-- Local Expo + Expo Router development for the PuffPuffStop iOS/Android client.
-
-**When to use**
-
-- Phase-0+ application work in this repository: start Metro, typecheck, lint, add Expo modules, or install a local debug build on a connected iPhone.
-
-**How to access**
-
-- From repo root: `npm start`, `npm run ios`, `npm run android`, `npm run web`, `npm run lint`, `npm test`, `npm run typecheck`.
-- Physical iPhone: `npx expo run:ios --device <hardware-udid>` (from `xcrun xctrace list devices`).
-
-**Common operations**
-
-- Add screens under `app/`; keep domain logic in `src/`.
-- Local device install: `/memory/runbooks/ios-device-debug-build.md`.
-
-**Constraints**
-
-- Do not EAS submit or store-publish without explicit owner authorization. Do not commit secret values.
-
-**Related files**
-
-- `package.json`, `app.json`, `app/`, `src/`
-- `/memory/runbooks/ios-device-debug-build.md`
-
----
-
 ### Tool: Product lifecycle launcher
 
 **Category**
@@ -298,7 +263,7 @@ Prefer built-in project scripts and official tooling over improvised alternative
 
 **How to access**
 
-- Invoke `/launch-pipeline` in Cursor Agent, or ask the parent Agent to follow `/instructions/LAUCH.md`.
+- Invoke `/launch-pipeline` in Cursor Agent, or ask the parent Agent to follow `/instructions/LAUNCH.md`.
 
 **Common operations**
 
@@ -313,7 +278,7 @@ Prefer built-in project scripts and official tooling over improvised alternative
 **Related files**
 
 - `/skills/launch-pipeline/SKILL.md`
-- `/instructions/LAUCH.md`
+- `/instructions/LAUNCH.md`
 - `/INSTRUCTIONS.md`
 - `/instructions/ROLES.md`
 - `/STATE.md`
@@ -444,6 +409,45 @@ Prefer built-in project scripts and official tooling over improvised alternative
 
 ---
 
+### Tool: Git safety
+
+**Category**
+
+- security / git / hook / skill
+
+**Purpose**
+
+- Force every agent git write to use the Cursor anonymous email and keep secrets, credentials, and passwords out of git.
+
+**When to use**
+
+- Any commit, merge, rebase, cherry-pick, pull that can create a commit, annotated tag, note, push, or hook install.
+
+**How to access**
+
+- Skill: `/skills/git-safety/SKILL.md`
+- Checker: `node .cursor/skills/git-safety/scripts/git-safety.mjs`
+- Repository hooks: `.githooks/` copied into `.git/hooks/` by bootstrap without changing git config
+
+**Common operations**
+
+- Prefix commit-creating commands with `GIT_AUTHOR_NAME='Cursor Agent' GIT_AUTHOR_EMAIL='cursoragent@noreply.github.com' GIT_COMMITTER_NAME='Cursor Agent' GIT_COMMITTER_EMAIL='cursoragent@noreply.github.com'`
+- Run `node --test .cursor/skills/git-safety/scripts/git-safety.test.mjs`
+
+**Constraints**
+
+- Never use a private inbox. Never run `git config` to set identity. Never use `--no-verify`.
+- Do not print secret values when a scan fails.
+
+**Related files**
+
+- `/skills/git-safety/SKILL.md`
+- `/hooks/policy.mjs`
+- `/rules/git-privacy-and-secrets.mdc`
+- `.githooks/`
+
+---
+
 ### Tool: Agent policy hooks and security review
 
 **Category**
@@ -481,3 +485,37 @@ Prefer built-in project scripts and official tooling over improvised alternative
 - `/instructions/ROLES.md`
 - `docs/handover/agent-governance-operator-setup.md`
 
+### Tool: Expo (PuffPuffStop app)
+
+**Category**
+
+- runtime / build / mobile
+
+**Purpose**
+
+- Local Expo + Expo Router development for the PuffPuffStop iOS/Android client.
+
+**When to use**
+
+- Phase-0+ application work in this repository: start Metro, typecheck, lint, add Expo modules, or install a local debug build on a connected iPhone.
+
+**How to access**
+
+- From repo root: `npm start`, `npm run ios`, `npm run android`, `npm run web`, `npm run lint`, `npm test`, `npm run typecheck`.
+- Physical iPhone: `npx expo run:ios --device <hardware-udid>` (from `xcrun xctrace list devices`).
+
+**Common operations**
+
+- Add screens under `app/`; keep domain logic in `src/`.
+- Local device install: `/memory/runbooks/ios-device-debug-build.md`.
+
+**Constraints**
+
+- Do not EAS submit or store-publish without explicit owner authorization. Do not commit secret values.
+
+**Related files**
+
+- `package.json`, `app.json`, `app/`, `src/`
+- `/memory/runbooks/ios-device-debug-build.md`
+
+---

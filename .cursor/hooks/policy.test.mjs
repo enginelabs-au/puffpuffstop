@@ -8,6 +8,10 @@ import {
   isProtectedPath,
   isSecretPath,
 } from "./policy.mjs";
+import {
+  CURSOR_ANONYMOUS_EMAIL,
+  requiredAnonymousGitPrefix,
+} from "../skills/git-safety/scripts/git-safety.mjs";
 
 const decision = (input) => evaluate(input).permission;
 
@@ -16,6 +20,7 @@ test("recognizes secrets while allowing templates", () => {
   assert.equal(isSecretPath("apps/web/.env.production"), true);
   assert.equal(isSecretPath("/Users/example/.aws/credentials"), true);
   assert.equal(isSecretPath("certs/service.pem"), true);
+  assert.equal(isSecretPath("auth.json"), true);
   assert.equal(isSecretPath(".env.example"), false);
   assert.equal(isSecretPath("id_ed25519.pub"), false);
 });
@@ -25,6 +30,7 @@ test("recognizes protected governance paths", () => {
   assert.equal(isProtectedPath(".cursor/hooks.json"), true);
   assert.equal(isProtectedPath(".cursor/hooks/policy.mjs"), true);
   assert.equal(isProtectedPath(".cursor/instructions/ROLES.md"), true);
+  assert.equal(isProtectedPath(".githooks/pre-commit"), true);
   assert.equal(isProtectedPath(".cursor/STATE.md"), false);
   assert.equal(isProtectedPath("src/app.ts"), false);
 });
@@ -87,6 +93,7 @@ test("blocks destructive Git while allowing inspection and staging", () => {
     "git branch -D old-work",
     "git push --force-with-lease origin main",
     "git filter-repo --path secrets.txt --invert-paths",
+    "git commit --no-verify -m bypass",
   ];
 
   for (const command of blocked) {
@@ -110,6 +117,45 @@ test("blocks destructive Git while allowing inspection and staging", () => {
       command,
     );
   }
+});
+
+test("blocks private-email git writes and allows Cursor anonymous identity", () => {
+  assert.equal(
+    decision({
+      hook_event_name: "beforeShellExecution",
+      command: "git commit -m init",
+    }),
+    "deny",
+  );
+  assert.equal(
+    decision({
+      hook_event_name: "beforeShellExecution",
+      command:
+        "GIT_AUTHOR_EMAIL='person@gmail.com' GIT_COMMITTER_EMAIL='person@gmail.com' git commit -m init",
+    }),
+    "deny",
+  );
+  assert.equal(
+    decision({
+      hook_event_name: "beforeShellExecution",
+      command: "git config user.email person@gmail.com",
+    }),
+    "deny",
+  );
+  assert.equal(
+    decision({
+      hook_event_name: "beforeShellExecution",
+      command: `${requiredAnonymousGitPrefix()} git commit -m init`,
+    }),
+    "allow",
+  );
+  assert.equal(
+    decision({
+      hook_event_name: "beforeShellExecution",
+      command: `git -c user.email=${CURSOR_ANONYMOUS_EMAIL} -c user.name='Cursor Agent' commit -m init`,
+    }),
+    "allow",
+  );
 });
 
 test("blocks production mutations while allowing previews and local files", () => {

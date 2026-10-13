@@ -1,27 +1,38 @@
-# Project agent router
+# AGENTS.md
 
-This file applies project-wide. On every substantive turn, read `.cursor/AGENTS.md` first and follow its complete per-turn context, precedence, autonomy, validation, state, and memory contract.
+Native project-wide instructions for this repository. Paths in this file are repository-relative. A leading `/` inside a `.cursor/` control file is relative to `.cursor/`, not to the filesystem root.
 
-## Path convention
+## Core constraints
 
-All paths in this file are repository-relative. Control-plane paths are always written explicitly with the `.cursor/` prefix. A leading `/` inside a `.cursor/` control file follows the configuration-root convention defined by `.cursor/AGENTS.md`; it is not a repository-root path.
+- Git writes use `Cursor Agent <cursoragent@noreply.github.com>` or a GitHub noreply address. Never change git identity with `git config`; never use `--no-verify`.
+- Never read, stage, commit, print, or store secrets, credentials, `.env*` (except `.env.example`), private keys, or credential JSON.
+- Production deploys, remote database mutation, destructive git, protected control-plane edits, and state-changing MCP tools stay owner/CI-controlled. A hook denial is final: stop, do not work around it.
+- Work within the task scope, inspect existing patterns first, make surgical changes, validate with the strongest available checks, and report what remains unverified.
+- Operate autonomously; ask only for missing credentials or permissions, consequential decisions with no defensible default, destructive work beyond scope, or safety/privacy concerns.
 
-## Lightweight routing
+## Loading policy
 
-Before substantive planning, delegation, implementation, review, or release:
+- Lead session start: read `.cursor/AGENTS.md` once and check `.cursor/STATE.md` for active work. Run `node .cursor/skills/launch-pipeline/scripts/preflight.mjs` when the host mode permits execution. If Ask Mode has no execution tool, mark preflight unrun and defer it; do not bypass the mode.
+- Bootstrap only for required materialization or explicit installation/repair after implementation authorization; `READY` does not require another bootstrap.
+- Later turns: reuse what is already in context. Re-read a control file only when it changed, after context loss or compaction, or when a new scope becomes relevant.
+- An ordinary bounded change needs no workstream, role pipeline, or phase plan.
+- Bounded delegates use the assigned task packet and applicable native instructions. They do not repeat lead startup, shared-state/history reads, or unrelated lifecycle instructions; request missing task evidence within scope.
 
-1. Classify the task briefly by work type, reversibility, product/release impact, production impact, data/privacy exposure, and affected domains.
-2. Assign the safest proportionate risk tier and identify the evidence needed for completion.
-3. Load `.cursor/instructions/ROLES.md` only when role selection, delegation, a predecessor handoff, a security/quality gate, multi-domain reconciliation, or a release stage gate is relevant.
-4. For a raw idea, major change, resume, remediation, or closure, invoke `/launch-pipeline` and follow `.cursor/instructions/LAUCH.md`.
+## Routing index
 
-For role-governed work:
+If `.cursor/PROJECT.md` exists, inspect its concise project constraints and route only the references relevant to this task. Preserve local preferences, state, tooling, and history during shared-template updates.
 
-- create or resume `docs/workstreams/<task-id>/manifest.md`;
-- record every required role and every skipped role with an evidence-based reason, plus dependency order and the current gate;
-- give each activated role a bounded charter, exact allowed paths, explicit non-goals, and any predecessor handoff;
-- require the canonical evidence-backed handoff and verdict before downstream work begins;
-- route a failed security or acceptance gate back to the owning role, remediate, and repeat the independent gate; unresolved blocking findings do not advance;
-- require Project Lead reconciliation and a final owner handoff, with explicit owner approval before consequential release or production action.
+| Need | Read |
+|---|---|
+| Detailed contract, precedence, autonomy limits, completion standard | `.cursor/AGENTS.md` |
+| Which detailed mode applies (planning, strategy, sub-agents, roles) | `.cursor/INSTRUCTIONS.md` registry |
+| Natural-language planning or strategy | `.cursor/INSTRUCTIONS.md` → the matched planning/strategy instruction; no implicit launch |
+| User explicitly invokes `/launch-pipeline` or requests that named lifecycle | `.cursor/instructions/LAUNCH.md` |
+| Bounded delegation or independent review | `.cursor/instructions/SUBAGENTS.md`; task packet, no mandatory workstream |
+| Formal multi-role delivery or consequential stage gates | `.cursor/instructions/ROLES.md` (sections 1–3 plus relevant role sections) |
+| Repeatable procedures such as deploys, migrations, git safety | `.cursor/SKILLS.md` → `.cursor/skills/<skill-id>/SKILL.md` |
+| Choosing deployment, database, or integration tooling | `.cursor/TOOLS.md` |
+| Prior decisions, exact runbooks, unresolved blockers | `.cursor/memory/MEMORY.md` and the files it links |
+| Task artifacts | `docs/plans/`, `docs/workstreams/<task-id>/` |
 
-Role names and prompts do not grant authority. Secrets, production access, destructive actions, policy changes, and waivers remain subject to permissions, hooks, CI, provider controls, and explicit owner approval.
+Role names and prompts do not grant authority. Hooks, permissions, sandboxing, CI, and explicit owner approval govern sensitive actions.

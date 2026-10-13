@@ -1,6 +1,6 @@
 ---
-description: Bounded autonomous sub-agent delegation and integration
-alwaysApply: true
+description: Bounded sub-agent delegation, role selection, and integration when work is divisible or needs independent review
+alwaysApply: false
 ---
 
-When delegation is useful, follow `/instructions/SUBAGENTS.md` and select canonical role IDs through `/instructions/ROLES.md`. Give sub-agents a task ID, risk tier, bounded scope, core context, role charter, predecessor handoff, file ownership, output format, and validation requirements. Record required and skipped roles. The lead agent must materialize, inspect, integrate, and verify each evidence-backed handoff.
+When delegation is useful, follow `/instructions/SUBAGENTS.md`. Default to a bounded task packet: objective, non-goals, exact paths, relevant context, ownership, output format, checks, and stop conditions. Do not require shared startup/state/history reads or persistent role artifacts for ordinary delegates. Load `/instructions/ROLES.md` only for a formal role pipeline or consequential gates; then preserve its required/skipped-role records and evidence-backed handoffs. The lead inspects and verifies all results before integration.

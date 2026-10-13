@@ -1,6 +1,6 @@
 # BOOTSTRAP.md
 
-This file defines the idempotent materialization procedure and cornerstone mutating gate for the repository-level agent system. Every `/launch-pipeline` invocation runs read-only preflight first; bootstrap runs after Build or explicit Agent-mode implementation authorization.
+This file defines the idempotent materialization procedure for the repository-level agent system. An explicitly invoked `/launch-pipeline` checks preflight first when execution is available; bootstrap runs only for required materialization or explicit installation/repair after Build or existing implementation authorization.
 
 ## Path convention
 
@@ -8,13 +8,13 @@ A leading `/` in agent documentation is relative to the **agent configuration ro
 
 ## 1. Preflight and materialization commands
 
-Before planning or mutation, run:
+When checking installation health or entering the explicit launcher, run with an available permitted execution tool:
 
 ```bash
 node .cursor/skills/launch-pipeline/scripts/preflight.mjs
 ```
 
-Preflight is read-only and reports whether materialization is required.
+Preflight is read-only and reports whether materialization is required. Ask Mode may not expose execution: inspect available configuration, mark preflight unrun, and defer it to a capable mode before mutation. Do not claim `READY` from a manual inspection or bypass mode restrictions.
 
 Run the bootstrap through its resolved installation path:
 
@@ -28,7 +28,7 @@ When the shell is already in the agent configuration root, use:
 bash scripts/bootstrap.sh
 ```
 
-In a write-authorized Agent session, the lead agent executes bootstrap before the first repository mutation. Ask and Plan Mode remain read-only and must not run bootstrap. The script is safe to run repeatedly and derives the repository root from its own location.
+In a write-authorized session, the lead executes bootstrap before work that depends on missing generated artifacts when preflight reports `MATERIALIZATION_REQUIRED`, or when installation/repair is explicitly requested. `READY` means no bootstrap is needed. Ask and Plan Mode remain read-only. Re-run only when installation state changes or repair is needed; idempotency is not a reason to execute bootstrap every session.
 
 ## 2. Bootstrap responsibilities
 
@@ -42,8 +42,11 @@ The bootstrap must:
 - materialize the task-workstream root used for role charters and handoffs
 - ensure empty memory directories remain version-controllable
 - repair `/settings.json` as a compatibility symlink to `/config/settings.json` when safe
+- seed repository-root `AGENTS.md`, `.cursorignore`, `.githooks/`, `docs/handover/agent-governance-operator-setup.md`, and `.github/workflows/agent-governance.yml` only when absent
 - validate that required control-plane files exist
 - never create, copy, print, or infer secrets
+- preserve an existing Git hooks path and hook files; never replace another hook framework to install this one
+- handle linked worktrees using Git's resolved metadata paths rather than assuming `.git` is a directory
 
 ## 3. Required structure
 
@@ -51,6 +54,10 @@ The bootstrap must:
 repository-root/
   AGENTS.md
   .cursorignore
+  .githooks/
+    pre-commit
+    commit-msg
+    pre-push
   docs/
     README.md
     blueprints/
@@ -80,7 +87,7 @@ repository-root/
       growth-marketing-subagent.md
       project-lead-subagent.md
     instructions/
-      LAUCH.md
+      LAUNCH.md
       PROJECT_PLANNING.md
       STRATEGY.md
       SUBAGENTS.md
@@ -99,7 +106,10 @@ repository-root/
       blockers-fixed/
       runbooks/
     rules/
-      *.mdc
+      00-core-routing.mdc
+      git-privacy-and-secrets.mdc
+      karpathy-guidelines.mdc
+      <agent-requested>.mdc
     scripts/
       bootstrap.sh
     skills/
@@ -109,8 +119,15 @@ repository-root/
           preflight.mjs
           preflight.test.mjs
           validate-launch.mjs
+      git-safety/
+        SKILL.md
+        scripts/
+          git-safety.mjs
       <other-skill-id>/SKILL.md
     templates/
+      root-agents.md
+      cursorignore
+      agent-governance-operator-setup.md
       docs-readme.md
       plans-readme.md
       phase-plan-template.md
@@ -132,6 +149,7 @@ repository-root/
 - Create missing directories and seed indexes only.
 - Do not overwrite non-empty `AGENTS.md`, `USER.md`, `STATE.md`, `MEMORY.md`, plans, blueprints, runbooks, skills, source files, or project documentation.
 - Do not delete unknown files.
+- Preserve existing `core.hooksPath` and hook implementations. If automatic hook activation would conflict, report the exact unverified integration and retain the existing controls; do not claim newly seeded hooks are active merely because their files exist.
 - A broken compatibility link may be replaced only when `/config/settings.json` exists and the existing `/settings.json` contains no independent JSON configuration.
 - Existing project conventions take precedence when they provide equivalent directories under different documented paths; record the mapping rather than duplicating content.
 
@@ -139,15 +157,15 @@ repository-root/
 
 After authorized bootstrap completes:
 
-1. Read `/AGENTS.md`.
-2. Read every installed file under `/instructions/` and `/rules/` once for the session.
-3. Read the complete core per-turn set defined in `AGENTS.md`.
-4. Resume the `Active Plan` in `STATE.md` when one exists.
-5. Read `/instructions/LAUCH.md` for a raw idea, major change, resume, remediation, or closure; its native entry is `/skills/launch-pipeline/SKILL.md`.
-6. If there is no active project plan and the user has supplied a new project or major feature request, activate `/instructions/PROJECT_PLANNING.md`.
-7. Activate `/instructions/STRATEGY.md` when discovery, market validation, product definition, architecture synthesis, or launch strategy is material.
-8. Activate `/instructions/ROLES.md` and create `docs/workstreams/<task-id>/manifest.md` when specialist routing or stage gates are material.
-9. Create or update `docs/plans/phase_0_foundations_plan.md` before implementing a new multi-phase project.
+1. Read `/AGENTS.md` if it is not already in context; native `/rules/` are injected by the client and are not re-read.
+2. Resume the `Active Plan` in `STATE.md` when one exists.
+3. Read `/instructions/LAUNCH.md` only for an explicit `/launch-pipeline` invocation or explicit request for that named lifecycle; its native entry is `/skills/launch-pipeline/SKILL.md`. Natural-language planning routes directly through `/INSTRUCTIONS.md`.
+4. If there is no active project plan and the user has supplied a new project or major feature request, activate `/instructions/PROJECT_PLANNING.md`.
+5. Activate `/instructions/STRATEGY.md` when discovery, market validation, product definition, architecture synthesis, or launch strategy is material.
+6. Activate `/instructions/ROLES.md` and create `docs/workstreams/<task-id>/manifest.md` when specialist routing or stage gates are material.
+7. Create or update `docs/plans/phase_0_foundations_plan.md` before implementing a new multi-phase project.
+
+Load other instruction bodies only through `/INSTRUCTIONS.md` when their activation conditions match.
 
 ## 6. Phase-zero bootstrap behavior
 
@@ -191,7 +209,7 @@ The bootstrap is valid when:
 - `docs/blueprints`, `docs/plans`, `docs/decisions`, and `docs/handover` exist
 - `docs/workstreams` exists and its index explains the role artifact contract
 - `/settings.json` resolves to valid JSON through `/config/settings.json`
-- every `/rules/*.mdc` file has YAML frontmatter and `alwaysApply: true`
+- every `/rules/*.mdc` file has YAML frontmatter declaring `alwaysApply: true` or `alwaysApply: false` with a `description` or `globs`; `00-core-routing.mdc`, `git-privacy-and-secrets.mdc`, and `karpathy-guidelines.mdc` remain always-on
 - root `AGENTS.md`, `/AGENTS.md`, `/INSTRUCTIONS.md`, role adapters, and active instruction files reference valid paths
 - role, hook, permission, sandbox, and template configuration passes `/scripts/validate-agent-config.mjs`
 - no secrets or environment-specific values were introduced
