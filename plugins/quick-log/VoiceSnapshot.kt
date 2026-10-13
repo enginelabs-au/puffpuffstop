@@ -84,7 +84,7 @@ object VoiceSnapshot {
       } else if (direction == "down") {
         val remove = minOf(added, logged)
         logged = maxOf(0, logged - added)
-        repeat(minOf(remove, times.size)) { times.removeLast() }
+        repeat(minOf(remove, times.size)) { times.removeAt(times.lastIndex) }
       } else {
         logged += added
         repeat(added) { times.add(nowMs) }
