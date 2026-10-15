@@ -17,20 +17,22 @@ function copyPluginFile(fromName, toPath) {
   fs.copyFileSync(path.join(__dirname, "quick-log", fromName), toPath);
 }
 
+function withoutLaunchShortcutUpdate(src) {
+  return src
+    .replace(
+      /\n[ \t]*if #available\(iOS 16\.0, \*\) \{\n[ \t]*PuffPuffStopShortcuts\.updateAppShortcutParameters\(\)\n[ \t]*\}\n/g,
+      "\n",
+    )
+    .replace("import AppIntents\n", "");
+}
+
 function withIosShortcutBootstrap(config) {
   return withAppDelegate(config, (mod) => {
     if (mod.modResults.language !== "swift") return mod;
-    let src = mod.modResults.contents;
-    if (!src.includes("import AppIntents")) {
-      src = src.replace("internal import Expo\n", "internal import Expo\nimport AppIntents\n");
-    }
-    if (!src.includes("updateAppShortcutParameters")) {
-      src = src.replace(
-        "return super.application(application, didFinishLaunchingWithOptions: launchOptions)",
-        "if #available(iOS 16.0, *) {\n      PuffPuffStopShortcuts.updateAppShortcutParameters()\n    }\n\n    return super.application(application, didFinishLaunchingWithOptions: launchOptions)",
-      );
-    }
-    mod.modResults.contents = src;
+    // Static shortcuts are discovered from AppShortcutsProvider. Calling
+    // updateAppShortcutParameters() before launch returns makes a clean
+    // App Store install abort while App Intents validates phrases.
+    mod.modResults.contents = withoutLaunchShortcutUpdate(mod.modResults.contents);
     return mod;
   });
 }
@@ -200,9 +202,12 @@ function withAndroidVoiceLog(config) {
   });
 }
 
-module.exports = function withQuickLog(config) {
+function withQuickLog(config) {
   config = withIosIntents(config);
   config = withIosShortcutBootstrap(config);
   config = withAndroidVoiceLog(config);
   return config;
-};
+}
+
+module.exports = withQuickLog;
+module.exports.withoutLaunchShortcutUpdate = withoutLaunchShortcutUpdate;

@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "lint": "eslint app src --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/theme/*.test.ts src/domain/*.test.ts src/data/*.test.ts src/config/*.test.ts src/ui/*.test.ts",
+    "test": "tsx --test src/theme/*.test.ts src/domain/*.test.ts src/data/*.test.ts src/config/*.test.ts src/ui/*.test.ts && node --test plugins/with-quick-log.test.mjs",
     "postinstall": "patch-package",
     "eas-build-pre-install": "npm config set legacy-peer-deps true"
   },
