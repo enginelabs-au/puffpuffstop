@@ -2,16 +2,11 @@ diff --git a/node_modules/expo-modules-jsi/apple/Package.swift b/node_modules/ex
 index 77b0525..6d6a80d 100644
 --- a/node_modules/expo-modules-jsi/apple/Package.swift
 +++ b/node_modules/expo-modules-jsi/apple/Package.swift
-@@ -86,14 +86,10 @@ let package = Package(
-       swiftSettings: [
-         .interoperabilityMode(.Cxx),
+@@ -91,9 +91,11 @@ let package = Package(
+         .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+         // https://github.com/swiftlang/swift-evolution/blob/main/proposals/0470-isolated-conformances.md
+         .enableUpcomingFeature("InferIsolatedConformances"),
  
--        // Enable some upcoming features that improve ergonomics and reduce executor hoppings
--        // https://github.com/swiftlang/swift-evolution/blob/main/proposals/0461-async-function-isolation.md
--        .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
--        // https://github.com/swiftlang/swift-evolution/blob/main/proposals/0470-isolated-conformances.md
--        .enableUpcomingFeature("InferIsolatedConformances"),
--
          .unsafeFlags([
            "-enable-library-evolution",
 +          "-enable-upcoming-feature",
