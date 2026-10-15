@@ -19,15 +19,6 @@ index 77b0525..6d6a80d 100644
            "-emit-module-interface",
            "-no-verify-emitted-module-interface",
            "-Xfrontend",
-@@ -150,7 +146,7 @@ let package = Package(
-       path: "Benchmarks",
-     ),
-   ] + testFrameworks.binaryTargets,
--  swiftLanguageModes: [.v6],
-+  swiftLanguageModes: [.v5],
-   cxxLanguageStandard: .cxx20
- )
- 
 diff --git a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/Values/JavaScriptPromise.swift b/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/Values/JavaScriptPromise.swift
 index 434c379..1709442 100644
 --- a/node_modules/expo-modules-jsi/apple/Sources/ExpoModulesJSI/Runtime/Values/JavaScriptPromise.swift
