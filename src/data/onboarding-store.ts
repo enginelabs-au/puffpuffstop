@@ -30,11 +30,15 @@ export function replaceDraft(next: OnboardingDraft): OnboardingDraft {
 }
 
 export function updateDraft(partial: Partial<OnboardingDraft>): OnboardingDraft {
-  draft = {
+  const merged = {
     ...draft,
     ...partial,
     triggers: partial.triggers ? [...partial.triggers] : [...draft.triggers],
   };
+  const countsReady = merged.durationCount > 0 && merged.frequencyCount > 0;
+  merged.setupComplete =
+    partial.setupComplete === false ? false : draft.setupComplete || countsReady;
+  draft = merged;
   persistNow();
   notify();
   return getDraft();

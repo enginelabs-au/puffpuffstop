@@ -2,16 +2,16 @@
 
 ## Current Objective
 
-- Phase 13 release preparation is verified; finish owner-controlled EAS/store setup before any submission.
+- Ship the App Store review fix: remove the other-store badge, keep onboarding and settings usable, and submit the next iOS and Play builds.
 
 ## Current Status
 
 - Phase 10 verified locally. Phase 11 pivoted from hardware quick log to native-assistant logging.
-- Do not publish the app. Do not use the owner's personal Gmail.
+- The owner asked for this store build after Apple rejected 0.0.1 (51). Do not use the owner's personal Gmail.
 
 ## Project Phase
 
-- Phases 0–12 are verified locally. Phase 13 release preparation is verified locally; store submission remains unauthorized.
+- Phases 0–12 are verified locally. The owner authorized the review-fix store build on 14 Nov 2026.
 
 ## Active Plan
 

@@ -1,6 +1,6 @@
 import { Redirect, router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
-import { TextInput, View } from "react-native";
+import { Platform, TextInput, View } from "react-native";
 
 import {
   BRAND_CATALOG,
@@ -14,7 +14,7 @@ import { getDraft, updateDraft } from "../../src/data/onboarding-store";
 import { getSettings } from "../../src/data/settings-store";
 import { applyTimeZonePreference } from "../../src/data/time-zone-preference";
 import { timeZoneOptions } from "../../src/domain/timezones";
-import { HEALTH_ONBOARDING_HELPER } from "../../src/domain/health";
+import { healthOnboardingHelper } from "../../src/domain/health";
 import {
   VOICE_EXAMPLE_HINT,
   VOICE_EXAMPLE_LOG,
@@ -49,6 +49,7 @@ import {
 } from "../../src/domain/onboarding";
 import { radius, scaledInput, space, type, type ColorTokens } from "../../src/theme/tokens";
 import { AppText } from "../../src/ui/AppText";
+import { DecimalField } from "../../src/ui/DecimalField";
 import { ChipGroup } from "../../src/ui/ChipGroup";
 import { OnboardingFrame } from "../../src/ui/OnboardingFrame";
 import { GoalField } from "../../src/ui/GoalField";
@@ -319,31 +320,23 @@ export default function OnboardingStepScreen() {
       {step === "device-math" && draft.brandKind === "custom" ? (
         <>
           <AppText style={styles.caption}>ml per puff (estimate)</AppText>
-          <TextInput
+          <DecimalField
             {...scaledInput}
             accessibilityLabel="Millilitres per puff"
-            keyboardType="decimal-pad"
             placeholder="0.05"
             placeholderTextColor={color.inkMuted}
-            value={draft.mlPerPuff === null ? "" : String(draft.mlPerPuff)}
-            onChangeText={(text) => {
-              const parsed = Number(text);
-              patch({ mlPerPuff: text === "" || Number.isNaN(parsed) ? null : parsed });
-            }}
+            value={draft.mlPerPuff}
+            onChange={(mlPerPuff) => patch({ mlPerPuff })}
             style={styles.input}
           />
           <AppText style={styles.caption}>Optional device size (ml)</AppText>
-          <TextInput
+          <DecimalField
             {...scaledInput}
             accessibilityLabel="Device millilitres"
-            keyboardType="decimal-pad"
             placeholder="10"
             placeholderTextColor={color.inkMuted}
-            value={draft.deviceMl === null ? "" : String(draft.deviceMl)}
-            onChangeText={(text) => {
-              const parsed = Number(text);
-              patch({ deviceMl: text === "" || Number.isNaN(parsed) ? null : parsed });
-            }}
+            value={draft.deviceMl}
+            onChange={(deviceMl) => patch({ deviceMl })}
             style={styles.input}
           />
         </>
@@ -395,17 +388,13 @@ export default function OnboardingStepScreen() {
             }))}
             onChange={(currencyCode) => patch({ currencyCode })}
           />
-          <TextInput
+          <DecimalField
             {...scaledInput}
             accessibilityLabel="Typical device cost"
-            keyboardType="decimal-pad"
             placeholder="Skip if you prefer"
             placeholderTextColor={color.inkMuted}
-            value={draft.deviceCost === null ? "" : String(draft.deviceCost)}
-            onChangeText={(text) => {
-              const parsed = Number(text);
-              patch({ deviceCost: text === "" || Number.isNaN(parsed) ? null : parsed });
-            }}
+            value={draft.deviceCost}
+            onChange={(deviceCost) => patch({ deviceCost })}
             style={styles.input}
           />
           <AppText style={styles.caption}>How often do you buy one?</AppText>
@@ -699,7 +688,7 @@ function helperFor(step: OnboardingStep, draft: OnboardingDraft): string | undef
     case "quick-log":
       return `${VOICE_EXAMPLE_HINT} You can read this again in Settings.`;
     case "wearables":
-      return HEALTH_ONBOARDING_HELPER;
+      return healthOnboardingHelper(Platform.OS);
     default:
       return undefined;
   }

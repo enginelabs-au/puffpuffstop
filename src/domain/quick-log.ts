@@ -17,7 +17,7 @@ export const VOICE_EXAMPLE_REMOVE = "Hey (Assistant), Remove 5 puffs from PuffPu
 export const VOICE_EXAMPLE_HINT =
   "Say from, in, or on PuffPuffStop. Remove, undo, reset, subtract, take off, take away, reduce, revert, decrease, and clear all work.";
 export const GEMINI_LOG_HINT =
-  "Ask Gemini or Google Assistant the same phrases as Siri: log a puff, log 5, remove 5 puffs from PuffPuffStop, undo 5, take 5 off, take away, subtract, reduce, revert, decrease, reset in PuffPuffStop, or clear in PuffPuffStop. Say from, in, or on. If it does not know the app yet, add a routine that opens the matching shortcut.";
+  "Ask this phone's assistant: log a puff, log 5, remove 5 puffs from PuffPuffStop, undo 5, take 5 off, take away, subtract, reduce, revert, decrease, reset in PuffPuffStop, or clear in PuffPuffStop. Say from, in, or on. If it does not know the app yet, add a routine that opens the matching shortcut.";
 
 const ADD_TOKENS = new Set([
   "up",

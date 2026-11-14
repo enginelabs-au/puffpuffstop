@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { logPuff, resetDailyLog } from "./daily-log-store";
-import { resetDraft, updateDraft } from "./onboarding-store";
+import { getDraft, resetDraft, updateDraft } from "./onboarding-store";
 import {
   createMemoryPersistDriver,
   hydrateFromDriver,
@@ -180,6 +180,23 @@ describe("snapshot persist", () => {
     });
     assert.ok(parsed);
     assert.equal(parsed.draft.intervalPacingReminders, true);
+  });
+
+  it("keeps a finished setup on home after a goal count is cleared", () => {
+    resetDraft();
+    updateDraft({ durationCount: 8, frequencyCount: 12 });
+    const cleared = updateDraft({ frequencyCount: 0 });
+    assert.equal(cleared.setupComplete, true);
+    assert.equal(cleared.frequencyCount, 0);
+    const parsed = parseSnapshot({
+      ...captureSnapshot(),
+      draft: { ...getDraft(), setupComplete: undefined },
+    });
+    assert.ok(parsed);
+    assert.equal(parsed.draft.setupComplete, false);
+    const remembered = parseSnapshot(captureSnapshot());
+    assert.ok(remembered);
+    assert.equal(remembered.draft.setupComplete, true);
   });
 
   it("keeps interval pacing unanswered on a fresh draft", () => {

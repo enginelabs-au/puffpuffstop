@@ -109,6 +109,7 @@ export type OnboardingDraft = {
   cutDownBase: number | null;
   intervalPacing: boolean | null;
   intervalPacingReminders: boolean | null;
+  setupComplete: boolean;
 };
 
 export function emptyDraft(): OnboardingDraft {
@@ -145,6 +146,7 @@ export function emptyDraft(): OnboardingDraft {
     cutDownBase: null,
     intervalPacing: null,
     intervalPacingReminders: null,
+    setupComplete: false,
   };
 }
 
@@ -162,7 +164,10 @@ export function displayName(draft: OnboardingDraft): string {
 }
 
 export function canShowHome(draft: OnboardingDraft): boolean {
-  return draft.durationCount > 0 && draft.frequencyCount > 0;
+  return (
+    draft.setupComplete ||
+    (draft.durationCount > 0 && draft.frequencyCount > 0)
+  );
 }
 
 export function resumeDestination(

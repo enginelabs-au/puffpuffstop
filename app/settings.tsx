@@ -79,6 +79,7 @@ import {
 } from "../src/theme/tokens";
 import { AppTabs } from "../src/ui/AppTabs";
 import { AppText } from "../src/ui/AppText";
+import { DecimalField } from "../src/ui/DecimalField";
 import { HealthConnectControls } from "../src/ui/HealthConnectControls";
 import { ChipGroup } from "../src/ui/ChipGroup";
 import { SelectField } from "../src/ui/SelectField";
@@ -333,19 +334,13 @@ export default function SettingsScreen() {
           {draft.catalogBrandId ?? (draft.otherBrandName || "Custom / not set")}.
           Change this with Redo setup, or keep estimates here for now.
         </AppText>
-        <TextInput
+        <DecimalField
           {...scaledInput}
           accessibilityLabel="Typical device cost"
-          keyboardType="decimal-pad"
           placeholder="Device cost"
           placeholderTextColor={color.inkMuted}
-          value={draft.deviceCost === null ? "" : String(draft.deviceCost)}
-          onChangeText={(text) => {
-            const parsed = Number(text);
-            patchDraft({
-              deviceCost: text === "" || Number.isNaN(parsed) ? null : parsed,
-            });
-          }}
+          value={draft.deviceCost}
+          onChange={(deviceCost) => patchDraft({ deviceCost })}
           style={styles.input}
         />
         <AppText style={styles.caption}>How often do you buy one?</AppText>
@@ -435,18 +430,12 @@ export default function SettingsScreen() {
         <AppText style={styles.caption}>
           Stake per puff you stay under your cap (estimate).
         </AppText>
-        <TextInput
+        <DecimalField
           {...scaledInput}
           accessibilityLabel="Stake per puff"
-          keyboardType="decimal-pad"
-          value={String(stake)}
-          onChangeText={(text) => {
-            const parsed = Number(text);
-            setSettings(
-              updateSettings({
-                stakePerPuff: text === "" || Number.isNaN(parsed) ? null : parsed,
-              }),
-            );
+          value={stake}
+          onChange={(stakePerPuff) => {
+            setSettings(updateSettings({ stakePerPuff }));
           }}
           style={styles.input}
         />

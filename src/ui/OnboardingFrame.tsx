@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Pressable, ScrollView, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { Gesture, GestureDetector, Pressable } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { color, minTapTarget, radius, space, type, type ColorTokens } from "../theme/tokens";
@@ -38,51 +38,56 @@ export function OnboardingFrame({
     });
 
   return (
-    <GestureDetector gesture={swipeBack}>
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.body}>
-          <View style={styles.top}>
-            {onBack ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Back"
-                onPress={onBack}
-                style={({ pressed }) => [styles.back, pressed ? styles.pressed : null]}
-              >
-                <AppText style={styles.backLabel}>←</AppText>
-              </Pressable>
-            ) : (
-              <View style={styles.backSpacer} />
-            )}
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.body}
+      >
+        <GestureDetector gesture={swipeBack}>
+          <View style={styles.scrollWrap}>
+            <View style={styles.top}>
+              {onBack ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Back"
+                  onPress={onBack}
+                  style={({ pressed }) => [styles.back, pressed ? styles.pressed : null]}
+                >
+                  <AppText style={styles.backLabel}>←</AppText>
+                </Pressable>
+              ) : (
+                <View style={styles.backSpacer} />
+              )}
+            </View>
+            <AppText style={styles.title} accessibilityRole="header">
+              {title}
+            </AppText>
+            {helper ? <AppText style={styles.helper}>{helper}</AppText> : null}
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={styles.content}
+              keyboardShouldPersistTaps="handled"
+            >
+              {children}
+            </ScrollView>
           </View>
-          <AppText style={styles.title} accessibilityRole="header">
-            {title}
-          </AppText>
-          {helper ? <AppText style={styles.helper}>{helper}</AppText> : null}
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps="handled"
-          >
-            {children}
-          </ScrollView>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={continueLabel}
-            accessibilityState={{ disabled: continueDisabled }}
-            disabled={continueDisabled}
-            onPress={onContinue}
-            style={({ pressed }) => [
-              styles.primary,
-              continueDisabled ? styles.disabled : null,
-              pressed && !continueDisabled ? styles.pressed : null,
-            ]}
-          >
-            <AppText style={styles.primaryLabel}>{continueLabel}</AppText>
-          </Pressable>
-        </View>
-      </SafeAreaView>
-    </GestureDetector>
+        </GestureDetector>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={continueLabel}
+          accessibilityState={{ disabled: continueDisabled }}
+          disabled={continueDisabled}
+          onPress={onContinue}
+          style={({ pressed }) => [
+            styles.primary,
+            continueDisabled ? styles.disabled : null,
+            pressed && !continueDisabled ? styles.pressed : null,
+          ]}
+        >
+          <AppText style={styles.primaryLabel}>{continueLabel}</AppText>
+        </Pressable>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -97,6 +102,10 @@ function frameStyles(palette: ColorTokens = color) {
       paddingHorizontal: space.lg,
       paddingTop: space.sm,
       paddingBottom: space.lg,
+      gap: space.md,
+    },
+    scrollWrap: {
+      flex: 1,
       gap: space.md,
     },
     top: {

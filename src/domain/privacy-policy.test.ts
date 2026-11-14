@@ -11,7 +11,8 @@ describe("privacy policy copy", () => {
     assert.match(text, /not a kids app/i);
     assert.match(text, /this device/i);
     assert.match(text, /do not show ads/i);
-    assert.match(text, /Apple Health/i);
-    assert.match(text, /Fitbit/i);
+    assert.match(text, /health app on this phone/i);
+    assert.match(text, /watch/i);
+    assert.doesNotMatch(text, /Health Connect|Google Play|App Store/);
   });
 });

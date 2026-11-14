@@ -16,6 +16,7 @@ import {
   visibleLogEffects,
   formatHealthDelta,
   healthRefreshUrl,
+  healthOnboardingHelper,
   healthWatchPathHelper,
   isWatchLiveWindow,
   HEALTH_GOOGLE_VIA_APPLE,
@@ -108,7 +109,13 @@ describe("health context", () => {
     assert.equal(healthRefreshUrl(), "puffpuffstop://health-refresh");
     assert.match(healthWatchPathHelper("android"), /Health Connect/);
     assert.match(HEALTH_GOOGLE_VIA_CONNECT, /Wear/);
+    assert.doesNotMatch(HEALTH_GOOGLE_VIA_CONNECT, /Apple Health|App Store|iPhone/);
     assert.match(healthWatchPathHelper("ios"), /Apple Health/);
+    assert.doesNotMatch(healthWatchPathHelper("ios"), /Health Connect|Google Play|Android/);
+    assert.match(healthOnboardingHelper("ios"), /Apple Health/);
+    assert.doesNotMatch(healthOnboardingHelper("ios"), /Health Connect|Google/);
+    assert.match(healthOnboardingHelper("android"), /Health Connect/);
+    assert.doesNotMatch(healthOnboardingHelper("android"), /Apple Health|App Store/);
     const authorize = fitbitAuthorizeUrl({
       clientId: "abc",
       redirectUri: "puffpuffstop://fitbit",
@@ -133,7 +140,7 @@ describe("health context", () => {
     });
     assert.equal(redacted.fitbitAccessToken, null);
     assert.equal(redacted.fitbitRefreshToken, null);
-    assert.match(HEALTH_GOOGLE_VIA_APPLE, /Google Health/);
     assert.match(HEALTH_GOOGLE_VIA_APPLE, /Apple Health/);
+    assert.doesNotMatch(HEALTH_GOOGLE_VIA_APPLE, /Google Health|Google Play|Android/);
   });
 });

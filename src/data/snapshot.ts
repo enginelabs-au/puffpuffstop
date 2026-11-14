@@ -155,6 +155,11 @@ function parseDraft(raw: unknown): OnboardingDraft | null {
       asFiniteNumber(value.durationCount, base.durationCount),
       asFiniteNumber(value.frequencyCount, base.frequencyCount),
     ),
+    setupComplete:
+      value.setupComplete === true ||
+      (value.setupComplete !== false &&
+        asFiniteNumber(value.durationCount, base.durationCount) > 0 &&
+        asFiniteNumber(value.frequencyCount, base.frequencyCount) > 0),
   };
 }
 

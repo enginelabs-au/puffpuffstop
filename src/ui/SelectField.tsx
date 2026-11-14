@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Pressable as GesturePressable } from "react-native-gesture-handler";
 
 import { minTapTarget, radius, scaledInput, space, type, type ColorTokens } from "../theme/tokens";
 import { AppText } from "./AppText";
@@ -53,7 +54,7 @@ export function SelectField<T extends string>({
   return (
     <View style={styles.wrap}>
       <AppText style={styles.caption}>{label}</AppText>
-      <Pressable
+      <GesturePressable
         accessibilityRole="button"
         accessibilityLabel={label}
         onPress={() => setOpen(true)}
@@ -62,7 +63,7 @@ export function SelectField<T extends string>({
         <AppText style={styles.fieldLabel}>
           {selected?.label ?? placeholder}
         </AppText>
-      </Pressable>
+      </GesturePressable>
       <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
         <View style={styles.modal}>
           <AppText style={styles.title}>{label}</AppText>
@@ -70,6 +71,7 @@ export function SelectField<T extends string>({
             <TextInput
               {...scaledInput}
               accessibilityLabel={`Search ${label}`}
+              autoCorrect={false}
               placeholder="Search"
               placeholderTextColor={color.inkMuted}
               value={query}

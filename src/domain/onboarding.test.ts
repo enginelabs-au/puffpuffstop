@@ -135,6 +135,20 @@ describe("onboarding", () => {
     );
   });
 
+  it("stays on home after setup when one goal count is cleared", () => {
+    const ready = {
+      ...emptyDraft(),
+      durationCount: 8,
+      frequencyCount: 12,
+      setupComplete: true,
+    };
+    assert.equal(canShowHome({ ...ready, frequencyCount: 0 }), true);
+    assert.equal(
+      canShowHome({ ...emptyDraft(), durationCount: 8, frequencyCount: 0 }),
+      false,
+    );
+  });
+
   it("formats and validates Australian day-month-year dates", () => {
     assert.equal(formatAuDateInput("1908"), "19-08");
     assert.equal(formatAuDateInput("19082026"), "19-08-2026");

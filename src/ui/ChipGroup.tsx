@@ -1,4 +1,5 @@
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
 
 import { color, minTapTarget, radius, space, type, type ColorTokens } from "../theme/tokens";
 import { AppText } from "./AppText";

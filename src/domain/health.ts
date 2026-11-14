@@ -86,8 +86,12 @@ export type HealthState = {
 export const HEALTH_DISCLAIMER =
   "Around a log, from the watch. Not a diagnosis, and not proof a puff caused it.";
 
-export const HEALTH_ONBOARDING_HELPER =
-  "Apple Watch, Fitbit (via Google Health), and most Wear watches reach this app through Apple Health or Health Connect. We only look at heart rate, HRV, oxygen, and breathing around a puff log. You can skip and do this in Settings.";
+export function healthOnboardingHelper(os: "ios" | "android" | "web" | string): string {
+  if (os === "android") {
+    return "A Wear or Fitbit watch can share heart rate, HRV, oxygen, and breathing through Health Connect. You can skip this and connect it in Settings.";
+  }
+  return "Apple Watch can share heart rate, HRV, oxygen, and breathing through Apple Health. You can skip this and connect it in Settings.";
+}
 
 export const HEALTH_READ_LIST =
   "Heart rate, heart-rate variability, blood oxygen, and breathing rate around a puff log, when the watch shares them.";
@@ -96,10 +100,10 @@ export const HEALTH_WAITING_AROUND_LOG =
   "Watch has not shown a heart, oxygen, or breathing shift around that log yet.";
 
 export const HEALTH_GOOGLE_VIA_APPLE =
-  "Being logged into Google Health or Fitbit is not a login to this app. On iPhone, open Google Health → profile → Partner apps → Apple Health, and allow heart rate, blood oxygen, and breathing. Then tap Sync Apple Health here and log a puff.";
+  "Open Apple Health and allow heart rate, blood oxygen, and breathing for this app. Then tap Sync Apple Health here and log a puff.";
 
 export const HEALTH_GOOGLE_VIA_CONNECT =
-  "A Pixel Watch, Wear watch, or Fitbit reaches this app through Health Connect. In Google Health or Fitbit, share heart rate, blood oxygen, and breathing to Health Connect. Then tap Connect Health Connect here and log a puff.";
+  "A Pixel Watch, Wear watch, or Fitbit reaches this app through Health Connect. Share heart rate, blood oxygen, and breathing to Health Connect. Then tap Connect Health Connect here and log a puff.";
 
 export const HEALTH_SHIFT_HEADLINE = "Around that log";
 export const HEALTH_WATCHING_HEADLINE = "Watching this log";

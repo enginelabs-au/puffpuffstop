@@ -36,7 +36,7 @@ function statusLine(health: HealthState): string {
   if (health.healthEnabled) {
     return Platform.OS === "android"
       ? `${phone} connected. A Wear or Fitbit watch still needs to share heart rate into Health Connect.`
-      : `${phone} connected. A Fitbit still needs Google Health to share heart rate into Apple Health.`;
+      : `${phone} connected. Apple Watch shares heart rate through Apple Health.`;
   }
   if (health.fitbitEnabled) return "Fitbit connected.";
   if (health.healthStatus === "denied") return `${phone} permission was denied.`;
@@ -50,7 +50,7 @@ function statusLine(health: HealthState): string {
   }
   return Platform.OS === "android"
     ? `Connect ${phone} so a Wear, Pixel, or Fitbit watch can share heart rate through Health Connect.`
-    : `Connect ${phone} so a Fitbit in Google Health can share heart rate through Apple Health.`;
+    : `Connect ${phone} so Apple Watch can share heart rate.`;
 }
 
 export function HealthConnectControls({ showReadings = true }: Props) {
