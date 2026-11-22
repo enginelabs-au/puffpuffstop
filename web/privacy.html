@@ -4,26 +4,81 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PuffPuffStop Privacy</title>
+  <meta name="description" content="What PuffPuffStop keeps on your phone, what it does not upload, and how to export or delete it." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/site.css" />
 </head>
 <body>
-  <h1>PuffPuffStop Privacy</h1>
-  <h2>Who this app is for</h2>
-<p>PuffPuffStop is a 16+ wellness habit coach. It is not a kids app, not for anyone under 16, and not a medical device. Organ scores are motivational estimates, not diagnoses.</p>
-<h2>What we store</h2>
-<p>Your nickname, plan answers, daily puff log (counts and local log times), goal-day history, settings, and estimated puff savings stay on this device as a local snapshot. If you connect the health app on this phone, we keep heart rate, HRV, breathing rate, and blood oxygen around a puff log when a watch shares them. This build does not upload that data.</p>
-<h2>Health and watches</h2>
-<p>Watch data is optional wellness context, not a diagnosis. We only read Health types you approve. We do not write vape events into Health. A direct Fitbit login stays on this device and is removed from exports.</p>
-<h2>What we do not do</h2>
-<p>We do not show ads, process cards, hold money, or create an account in this version. Cloud sync stays off unless a later owner-approved build connects it.</p>
-<h2>Your choices</h2>
-<p>You can export a JSON copy of your local data or delete everything from Settings. Optional local reminders (daily check-in or unused-puff interval lapses) stay on this device. We do not send remote or marketing push. Choosing under 16 at the age gate also clears local data and does not start a profile.</p>
+  <header class="nav">
+    <a class="brand" href="/">PuffPuffStop</a>
+    <nav>
+      <a href="/support">Support</a>
+      <a href="/privacy" aria-current="page">Privacy</a>
+      <a class="cta" href="/#get">Get the app</a>
+    </nav>
+  </header>
+  <main>
+    <p class="kicker">Privacy</p>
+    <h1>Your log stays<br /><span>on your phone.</span></h1>
+    <p class="lede">This policy explains what PuffPuffStop keeps, where it stays, and the choices you have. It covers the app and this website.</p>
+    <p class="meta">Effective 22 November 2026</p>
+    <div class="sections">
+      <section>
+        <h2>Who this app is for</h2>
+        <p>PuffPuffStop is a 16+ wellness habit coach. It is not a kids app, not for anyone under 16, and not a medical device. Organ scores are motivational estimates, not diagnoses.</p>
+      </section>
+      <section>
+        <h2>Who operates it</h2>
+        <p>PuffPuffStop is published by Engine Labs in Australia. This policy is the public privacy notice for the app and for puffpuffstop.com.</p>
+      </section>
+      <section>
+        <h2>What stays on this device</h2>
+        <p>Your nickname, plan answers, daily puff log (counts and local log times), goal-day history, settings, and estimated puff savings stay on this device as a local snapshot. This build does not upload that data.</p>
+        <p>The snapshot is there so the app can show your goal, your log, pacing, and the savings estimate after you close it. Deleting the app, or using Delete in Settings, removes that local copy.</p>
+      </section>
+      <section>
+        <h2>Health and watches</h2>
+        <p>Connecting the health app on this phone is optional. If you allow it, and a watch shares them, we keep heart rate, heart rate variability, breathing rate, and blood oxygen around a puff log. That context stays on this device.</p>
+        <p>Watch data is optional wellness context, not a diagnosis. We only read Health types you approve. We do not write vape events into Health. A direct Fitbit login stays on this device and is removed from exports.</p>
+      </section>
+      <section>
+        <h2>What this version does not do</h2>
+        <p>We do not show ads, process cards, hold money, or create an account in this version. Cloud sync stays off unless a later owner-approved build connects it. We do not sell your log, and we do not use it for advertising.</p>
+        <p>Optional local reminders (a daily check-in, or a notice when a pacing window still has unused puffs) stay on this device. We do not send remote or marketing push.</p>
+      </section>
+      <section>
+        <h2>This website</h2>
+        <p>puffpuffstop.com is a static site. It does not ask you to create an account, and it does not collect your puff log. The host may keep ordinary connection logs, such as an IP address and the page requested, to run and protect the site.</p>
+        <p>If you contact us by opening a GitHub issue, the message you write is handled by GitHub under GitHub’s own terms.</p>
+      </section>
+      <section>
+        <h2>Your choices</h2>
+        <p>You can export a JSON copy of your local data or delete everything from Settings. Deleting clears the plan, logs, and settings stored on the phone. An export is a file you control. It can include the local snapshot, and a direct Fitbit login is left out of that file.</p>
+        <p>The app is not for anyone under 16. Choosing under 16 at the age gate also clears local data and does not start a profile.</p>
+      </section>
+      <section>
+        <h2>How long it is kept</h2>
+        <p>The snapshot remains on the phone until you delete it in Settings, delete the app, or the phone removes the app’s storage. We do not keep a separate server copy of that snapshot in this version.</p>
+      </section>
+      <section>
+        <h2>Changes</h2>
+        <p>If this policy changes, the new version is published on this page with a new effective date. The app’s in-product privacy screen describes the same local-only practices in shorter form.</p>
+      </section>
+      <section>
+        <h2>Contact</h2>
+        <p>Questions about this policy can go to <a class="inline" href="https://github.com/enginelabs-au/puffpuffstop/issues">github.com/enginelabs-au/puffpuffstop/issues</a>. Help using the app is on <a class="inline" href="/support">Support</a>. The rules for using the app are in the <a class="inline" href="/terms">terms</a>.</p>
+      </section>
+    </div>
+  </main>
   <footer>
     <nav>
-      <a href="/">Home</a>
-      <a href="/privacy">Privacy</a>
+      <a href="/privacy" aria-current="page">Privacy</a>
       <a href="/terms">Terms</a>
       <a href="/support">Support</a>
     </nav>
+    <span>© 2026 PuffPuffStop</span>
   </footer>
 </body>
 </html>
