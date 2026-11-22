@@ -127,9 +127,30 @@ footer a { text-decoration: none; color: #a9b7c8; }
 footer a:hover { color: #fff; }
 a:focus-visible { outline: 2px solid var(--sky); outline-offset: 3px; }
 
+.mail { margin-top: 14px; border-top: 1px solid var(--line); }
+.mail a {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr);
+  gap: 8px 16px;
+  align-items: baseline;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+.mail span {
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7f8ea3;
+}
+.mail b { font-weight: 600; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.mail a:hover b { color: var(--sky); }
+
 @media (max-width: 720px) {
-  .nav nav a:not(.cta):not([aria-current="page"]) { display: none; }
+  .nav { flex-wrap: wrap; }
   main { padding-top: 48px; }
   section { padding: 18px 16px; }
   footer { flex-direction: column; align-items: flex-start; }
+  .mail { grid-template-columns: 1fr; }
+  .mail a { grid-template-columns: 1fr; }
 }
